@@ -3,14 +3,18 @@ import type { Database } from "@/types/database";
 
 /**
  * Integration-test helpers against the local Supabase stack.
- * Requires `npm run db:start`. These tests are skipped when the API is down.
+ * Requires `npm run db:start`. Keys come from `.env.local` (loaded in
+ * `src/test/setup.ts`). Tests are skipped when the API is unreachable.
  */
 
-export const SUPABASE_URL = process.env.SUPABASE_TEST_URL ?? "http://127.0.0.1:54421";
+export const SUPABASE_URL =
+  process.env.SUPABASE_TEST_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54421";
 export const SERVICE_KEY =
-  process.env.SUPABASE_TEST_SERVICE_KEY ?? "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz";
+  process.env.SUPABASE_TEST_SERVICE_KEY ?? process.env.SUPABASE_SECRET_KEY ?? "";
 export const PUBLISHABLE_KEY =
-  process.env.SUPABASE_TEST_PUBLISHABLE_KEY ?? "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
+  process.env.SUPABASE_TEST_PUBLISHABLE_KEY ??
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+  "";
 
 export function admin(): SupabaseClient<Database> {
   return createClient<Database>(SUPABASE_URL, SERVICE_KEY, {
@@ -23,6 +27,7 @@ export function admin(): SupabaseClient<Database> {
 }
 
 export async function supabaseUp(): Promise<boolean> {
+  if (!SERVICE_KEY || !PUBLISHABLE_KEY) return false;
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/`, {
       headers: { apikey: PUBLISHABLE_KEY },

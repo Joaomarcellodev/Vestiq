@@ -6,10 +6,21 @@
  *   node scripts/seed.mjs
  */
 import { createClient } from "@supabase/supabase-js";
+import { loadEnvLocal } from "./load-env.mjs";
+
+loadEnvLocal();
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54421";
-const SECRET =
-  process.env.SUPABASE_SECRET_KEY ?? "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz";
+const SECRET = process.env.SUPABASE_SECRET_KEY;
+const PUBLISHABLE = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+if (!SECRET || !PUBLISHABLE) {
+  console.error(
+    "Chaves do Supabase ausentes. Rode `npx supabase start` e copie as chaves para .env.local\n" +
+      "(NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY e SUPABASE_SECRET_KEY).",
+  );
+  process.exit(1);
+}
 
 const db = createClient(URL, SECRET, { auth: { persistSession: false } });
 
@@ -127,7 +138,7 @@ async function main() {
   );
 
   // give it stock via the RPC as the reseller
-  const asA = createClient(URL, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH", {
+  const asA = createClient(URL, PUBLISHABLE, {
     auth: { persistSession: false },
   });
   await asA.auth.signInWithPassword({ email: "revenda@vestiq.dev", password: "vestiq123" });
