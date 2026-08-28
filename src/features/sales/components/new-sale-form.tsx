@@ -96,7 +96,7 @@ export function NewSaleForm({
       )}
 
       <section className="space-y-sm rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
-        <label className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
+        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
           Cliente
         </label>
         <select
@@ -114,7 +114,7 @@ export function NewSaleForm({
       </section>
 
       <section className="space-y-sm rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
-        <label className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
+        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
           Produtos
         </label>
         <div className="relative">
@@ -192,7 +192,7 @@ export function NewSaleForm({
       </section>
 
       <section className="space-y-sm rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
-        <label className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
+        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
           Método de pagamento
         </label>
         <div className="grid grid-cols-3 gap-2">

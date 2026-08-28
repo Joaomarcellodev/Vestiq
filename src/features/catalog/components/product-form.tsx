@@ -70,7 +70,7 @@ export function ProductForm({ categories }: { categories: { id: string; name: st
         <TextField label="SKU (código interno)" name="internalSku" placeholder="VST-001" />
         <TextField label="Marca" name="brand" placeholder="Ex: Chanel" />
         <div>
-          <label className="mb-xs block font-label-md text-label-md uppercase tracking-wider text-on-surface">
+          <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
             Categoria
           </label>
           <select
@@ -86,7 +86,7 @@ export function ProductForm({ categories }: { categories: { id: string; name: st
           </select>
         </div>
         <div>
-          <label className="mb-xs block font-label-md text-label-md uppercase tracking-wider text-on-surface">
+          <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
             Descrição
           </label>
           <textarea

@@ -29,7 +29,7 @@ export function InviteResellerForm({ networks }: { networks: { id: string; name:
         <p className="font-body-md text-body-md text-on-success-container">Convite enviado.</p>
       )}
       <div>
-        <label className="mb-xs block font-label-md text-label-md uppercase tracking-wider text-on-surface">
+        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
           Rede
         </label>
         <select

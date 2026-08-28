@@ -22,7 +22,7 @@ export function CustomerForm() {
       <TextField label="Telefone" name="phone" />
       <TextField label="CPF" name="document" placeholder="000.000.000-00" />
       <div>
-        <label className="mb-xs block font-label-md text-label-md uppercase tracking-wider text-on-surface">
+        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
           Notas internas
         </label>
         <textarea

@@ -39,7 +39,7 @@ export function PublishOfferForm({
         </p>
       )}
       <div>
-        <label className="mb-xs block font-label-md text-label-md uppercase tracking-wider text-on-surface">
+        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
           Produto / variação
         </label>
         <select
@@ -55,7 +55,7 @@ export function PublishOfferForm({
         </select>
       </div>
       <div>
-        <label className="mb-xs block font-label-md text-label-md uppercase tracking-wider text-on-surface">
+        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
           Rede
         </label>
         <select
