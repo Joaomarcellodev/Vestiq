@@ -13,15 +13,17 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const base =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-semibold leading-none transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-container focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.99]";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-semibold leading-none transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-container focus-visible:ring-offset-2 disabled:cursor-not-allowed active:scale-[0.99]";
 
 const variants: Record<Variant, string> = {
   // DESIGN.md §Buttons — primary-container fill (see ADR-0006)
-  primary: "bg-primary-container text-on-primary shadow-primary hover:bg-primary",
+  primary:
+    "bg-primary-container text-on-primary shadow-primary hover:bg-primary disabled:bg-surface-container-high disabled:text-outline disabled:shadow-none",
   secondary:
-    "border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-low",
-  ghost: "text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface",
-  danger: "bg-error text-on-error hover:brightness-95",
+    "border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-low disabled:text-outline",
+  ghost:
+    "text-on-surface hover:bg-surface-container-low disabled:text-outline disabled:hover:bg-transparent",
+  danger: "bg-error text-on-error hover:brightness-95 disabled:opacity-60",
 };
 
 const sizes: Record<Size, string> = {
