@@ -13,7 +13,7 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
           <p className="mt-1 font-body-md text-body-md text-on-surface-variant">{description}</p>
         )}
       </div>
-      {action && <div className="shrink-0 [&_a]:inline-block">{action}</div>}
+      {action && <div className="shrink-0">{action}</div>}
     </header>
   );
 }

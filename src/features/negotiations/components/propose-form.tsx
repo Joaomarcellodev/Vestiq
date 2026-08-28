@@ -32,9 +32,11 @@ export function ProposeForm({ offerId, remaining }: { offerId: string; remaining
       />
       <TextField label="Valor proposto (R$)" name="amount" type="number" step="0.01" required />
       <TextField label="Mensagem" name="message" placeholder="Apresente sua proposta" />
-      <Button type="submit" size="lg" fullWidth loading={pending}>
-        Enviar proposta
-      </Button>
+      <div className="flex justify-end">
+        <Button type="submit" size="lg" loading={pending} className="w-full sm:w-auto sm:px-10">
+          Enviar proposta
+        </Button>
+      </div>
     </form>
   );
 }

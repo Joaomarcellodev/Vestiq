@@ -236,16 +236,19 @@ export function NewSaleForm({
         </div>
       </section>
 
-      <Button
-        type="submit"
-        size="lg"
-        fullWidth
-        loading={pending}
-        disabled={cart.length === 0 || !!discountError}
-      >
-        <Icon name="check_circle" size={20} />
-        Confirmar venda
-      </Button>
+      <div className="sticky bottom-24 z-10 lg:static lg:bottom-auto">
+        <Button
+          type="submit"
+          size="lg"
+          fullWidth
+          loading={pending}
+          disabled={cart.length === 0 || !!discountError}
+          className="shadow-overlay lg:shadow-primary"
+        >
+          <Icon name="check_circle" size={20} />
+          Confirmar venda
+        </Button>
+      </div>
     </form>
   );
 }

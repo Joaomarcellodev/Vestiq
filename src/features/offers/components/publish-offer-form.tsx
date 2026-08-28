@@ -79,9 +79,11 @@ export function PublishOfferForm({
         required
       />
       <TextField label="Observação" name="note" placeholder="Estado da peça, condições..." />
-      <Button type="submit" size="lg" fullWidth loading={pending}>
-        Publicar na rede
-      </Button>
+      <div className="flex justify-end">
+        <Button type="submit" size="lg" loading={pending} className="w-full sm:w-auto sm:px-10">
+          Publicar na rede
+        </Button>
+      </div>
     </form>
   );
 }
