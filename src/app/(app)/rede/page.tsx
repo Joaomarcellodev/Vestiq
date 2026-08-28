@@ -17,8 +17,8 @@ export default async function NetworkPage() {
         title="Rede de oportunidades"
         description="Ofertas de peças disponíveis na sua rede."
         action={
-          <Link href="/rede/publicar">
-            <Button size="sm">
+          <Link href="/rede/publicar" className="block">
+            <Button size="md" className="w-full sm:w-auto">
               <Icon name="add" size={18} />
               Publicar oferta
             </Button>

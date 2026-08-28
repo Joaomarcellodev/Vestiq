@@ -21,8 +21,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-lg">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <h1 className="font-headline-lg text-headline-lg text-on-surface">
             Bom dia{name ? `, ${name}` : ""}.
           </h1>
@@ -30,8 +30,8 @@ export default async function DashboardPage() {
             Resumo de {data.orgName} — {new Date().toLocaleDateString("pt-BR", { month: "long" })}.
           </p>
         </div>
-        <Link href="/vendas/nova" className="shrink-0">
-          <Button size="md">
+        <Link href="/vendas/nova" className="block shrink-0">
+          <Button size="md" className="w-full sm:w-auto">
             <Icon name="add_circle" size={18} />
             Registrar venda
           </Button>
