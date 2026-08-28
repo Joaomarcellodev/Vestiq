@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getProduct } from "@/features/catalog/queries";
-import { archiveProduct } from "@/features/catalog/actions";
+import { archiveProduct, unarchiveProduct } from "@/features/catalog/actions";
 import { BackButton } from "@/components/molecules/back-button";
 import { classifyStock, DEFAULT_LOW_STOCK_THRESHOLD } from "@/features/inventory/classify";
 import { StockControls } from "@/features/inventory/components/stock-controls";
@@ -19,6 +19,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   if (!product) notFound();
 
   const variants = product.product_variants ?? [];
+  const archived = product.archived_at !== null;
 
   return (
     <div className="space-y-lg">
@@ -27,23 +28,40 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         title={product.name}
         description={[product.brand, product.categories?.name].filter(Boolean).join(" · ")}
         action={
-          <div className="flex gap-2">
-            <Link href={`/produtos/${id}/editar`}>
-              <Button variant="secondary" size="sm">
-                <Icon name="edit" size={16} />
-                Editar
-              </Button>
-            </Link>
-            <form action={archiveProduct}>
-              <input type="hidden" name="id" value={id} />
-              <Button variant="ghost" size="sm" type="submit">
-                <Icon name="archive" size={16} />
-                Arquivar
-              </Button>
-            </form>
+          <div className="flex flex-wrap gap-2">
+            {!archived && (
+              <Link href={`/produtos/${id}/editar`}>
+                <Button variant="secondary" size="sm">
+                  <Icon name="edit" size={16} />
+                  Editar
+                </Button>
+              </Link>
+            )}
+            {archived ? (
+              <form action={unarchiveProduct}>
+                <input type="hidden" name="id" value={id} />
+                <Button variant="secondary" size="sm" type="submit">
+                  <Icon name="archive" size={16} />
+                  Desarquivar
+                </Button>
+              </form>
+            ) : (
+              <form action={archiveProduct}>
+                <input type="hidden" name="id" value={id} />
+                <Button variant="ghost" size="sm" type="submit">
+                  <Icon name="archive" size={16} />
+                  Arquivar
+                </Button>
+              </form>
+            )}
           </div>
         }
       />
+      {archived && (
+        <p className="rounded-lg bg-warning-container px-4 py-3 font-body-md text-body-md text-on-warning-container">
+          Este produto está arquivado — não aparece nas vendas nem pode ser ofertado.
+        </p>
+      )}
       {product.description && (
         <p className="font-body-md text-body-md text-on-surface-variant">{product.description}</p>
       )}

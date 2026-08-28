@@ -68,9 +68,11 @@ export function EditProductForm({
           className="field-focus-ring w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3 font-body-md text-body-md"
         />
       </div>
-      <Button type="submit" size="lg" fullWidth loading={pending}>
-        Salvar alterações
-      </Button>
+      <div className="flex justify-end">
+        <Button type="submit" size="lg" loading={pending} className="w-full sm:w-auto sm:px-10">
+          Salvar alterações
+        </Button>
+      </div>
     </form>
   );
 }

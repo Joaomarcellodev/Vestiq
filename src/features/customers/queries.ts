@@ -3,14 +3,15 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 
-export async function listCustomers(search?: string) {
+export async function listCustomers(search?: string, scope: "active" | "archived" = "active") {
   await requireActiveOrganization();
   const supabase = await createClient();
   let query = supabase
     .from("customers")
     .select("id, name, email, phone, document, archived_at")
-    .is("archived_at", null)
     .order("name");
+  query =
+    scope === "archived" ? query.not("archived_at", "is", null) : query.is("archived_at", null);
   if (search?.trim()) {
     query = query.or(`name.ilike.%${search.trim()}%,email.ilike.%${search.trim()}%`);
   }

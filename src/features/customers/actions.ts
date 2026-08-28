@@ -79,3 +79,13 @@ export async function archiveCustomer(formData: FormData): Promise<void> {
   revalidatePath("/clientes");
   redirect("/clientes");
 }
+
+export async function unarchiveCustomer(formData: FormData): Promise<void> {
+  await requireActiveOrganization();
+  const id = formData.get("id") as string;
+  const supabase = await createClient();
+  await supabase.from("customers").update({ archived_at: null }).eq("id", id);
+  revalidatePath("/clientes");
+  revalidatePath(`/clientes/${id}`);
+  redirect(`/clientes/${id}`);
+}

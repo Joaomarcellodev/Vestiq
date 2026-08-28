@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/molecules/page-header";
 import { StatCard } from "@/components/molecules/stat-card";
 import { EmptyState } from "@/components/molecules/empty-state";
 import { Badge, Button, Icon } from "@/components/atoms";
-import { archiveCustomer } from "@/features/customers/actions";
+import { archiveCustomer, unarchiveCustomer } from "@/features/customers/actions";
 import { formatBRL } from "@/lib/utils/currency";
 
 export const metadata: Metadata = { title: "Cliente" };
@@ -17,6 +17,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
   const result = await getCustomerWithHistory(id).catch(() => null);
   if (!result?.customer) notFound();
   const { customer, sales, stats } = result;
+  const archived = customer.archived_at !== null;
 
   return (
     <div className="space-y-lg">
@@ -25,23 +26,40 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
         title={customer.name}
         description={[customer.email, customer.phone].filter(Boolean).join(" · ")}
         action={
-          <div className="flex gap-2">
-            <Link href={`/clientes/${id}/editar`}>
-              <Button variant="secondary" size="sm">
-                <Icon name="edit" size={16} />
-                Editar
-              </Button>
-            </Link>
-            <form action={archiveCustomer}>
-              <input type="hidden" name="id" value={id} />
-              <Button variant="ghost" size="sm" type="submit">
-                <Icon name="archive" size={16} />
-                Arquivar
-              </Button>
-            </form>
+          <div className="flex flex-wrap gap-2">
+            {!archived && (
+              <Link href={`/clientes/${id}/editar`}>
+                <Button variant="secondary" size="sm">
+                  <Icon name="edit" size={16} />
+                  Editar
+                </Button>
+              </Link>
+            )}
+            {archived ? (
+              <form action={unarchiveCustomer}>
+                <input type="hidden" name="id" value={id} />
+                <Button variant="secondary" size="sm" type="submit">
+                  <Icon name="archive" size={16} />
+                  Desarquivar
+                </Button>
+              </form>
+            ) : (
+              <form action={archiveCustomer}>
+                <input type="hidden" name="id" value={id} />
+                <Button variant="ghost" size="sm" type="submit">
+                  <Icon name="archive" size={16} />
+                  Arquivar
+                </Button>
+              </form>
+            )}
           </div>
         }
       />
+      {archived && (
+        <p className="rounded-lg bg-warning-container px-4 py-3 font-body-md text-body-md text-on-warning-container">
+          Cliente arquivado — não aparece ao registrar uma venda. O histórico é preservado.
+        </p>
+      )}
 
       <div className="grid gap-md sm:grid-cols-3">
         <StatCard label="Total gasto" value={formatBRL(stats.totalSpent)} />

@@ -116,7 +116,7 @@ export function ProductForm({ categories }: { categories: { id: string; name: st
           const margin = estimatedMargin(Number(v.costPrice) || 0, Number(v.retailPrice) || 0);
           return (
             <div key={i} className="space-y-sm rounded-lg border border-outline-variant p-4">
-              <div className="grid grid-cols-2 gap-sm">
+              <div className="grid grid-cols-1 gap-sm sm:grid-cols-2">
                 <TextField
                   label="Tamanho"
                   value={v.size}
@@ -173,8 +173,8 @@ export function ProductForm({ categories }: { categories: { id: string; name: st
         })}
       </section>
 
-      <div className="flex gap-2">
-        <Button type="submit" size="lg" fullWidth loading={pending}>
+      <div className="flex justify-end">
+        <Button type="submit" size="lg" loading={pending} className="w-full sm:w-auto sm:px-10">
           Salvar produto
         </Button>
       </div>

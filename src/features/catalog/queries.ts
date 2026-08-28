@@ -12,19 +12,25 @@ export interface ProductListItem {
   variantCount: number;
   totalStock: number;
   minPrice: number | null;
+  archived: boolean;
 }
 
-export async function listProducts(search?: string): Promise<ProductListItem[]> {
+export async function listProducts(
+  search?: string,
+  scope: "active" | "archived" = "active",
+): Promise<ProductListItem[]> {
   await requireActiveOrganization();
   const supabase = await createClient();
 
   let query = supabase
     .from("products")
     .select(
-      "id, name, brand, internal_sku, image_urls, product_variants(retail_price, stock_on_hand, archived_at)",
+      "id, name, brand, internal_sku, image_urls, archived_at, product_variants(retail_price, stock_on_hand, archived_at)",
     )
-    .is("archived_at", null)
     .order("created_at", { ascending: false });
+
+  query =
+    scope === "archived" ? query.not("archived_at", "is", null) : query.is("archived_at", null);
 
   if (search && search.trim()) {
     query = query.ilike("name", `%${search.trim()}%`);
@@ -34,7 +40,7 @@ export async function listProducts(search?: string): Promise<ProductListItem[]> 
   if (error) throw error;
 
   return (data ?? []).map((p) => {
-    const variants = (p.product_variants ?? []).filter((v) => !v.archived_at);
+    const variants = p.product_variants ?? [];
     const prices = variants.map((v) => Number(v.retail_price)).filter((n) => n > 0);
     return {
       id: p.id,
@@ -45,6 +51,7 @@ export async function listProducts(search?: string): Promise<ProductListItem[]> 
       variantCount: variants.length,
       totalStock: variants.reduce((a, v) => a + v.stock_on_hand, 0),
       minPrice: prices.length ? Math.min(...prices) : null,
+      archived: p.archived_at !== null,
     };
   });
 }

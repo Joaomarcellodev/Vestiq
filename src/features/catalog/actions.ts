@@ -145,11 +145,20 @@ export async function archiveProduct(formData: FormData): Promise<void> {
   await requireActiveOrganization();
   const id = formData.get("id") as string;
   const supabase = await createClient();
-  await supabase.from("products").update({ archived_at: new Date().toISOString() }).eq("id", id);
-  await supabase
-    .from("product_variants")
-    .update({ archived_at: new Date().toISOString() })
-    .eq("product_id", id);
+  const now = new Date().toISOString();
+  await supabase.from("products").update({ archived_at: now }).eq("id", id);
+  await supabase.from("product_variants").update({ archived_at: now }).eq("product_id", id);
   revalidatePath("/produtos");
   redirect("/produtos");
+}
+
+export async function unarchiveProduct(formData: FormData): Promise<void> {
+  await requireActiveOrganization();
+  const id = formData.get("id") as string;
+  const supabase = await createClient();
+  await supabase.from("products").update({ archived_at: null }).eq("id", id);
+  await supabase.from("product_variants").update({ archived_at: null }).eq("product_id", id);
+  revalidatePath("/produtos");
+  revalidatePath(`/produtos/${id}`);
+  redirect(`/produtos/${id}`);
 }
