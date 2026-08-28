@@ -906,8 +906,8 @@ export type Database = {
       }
       confirm_sale: {
         Args: {
-          p_customer_id: string
-          p_discount: number
+          p_customer_id?: string
+          p_discount?: number
           p_items: Json
           p_payment_method: Database["public"]["Enums"]["payment_method"]
         }

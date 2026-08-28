@@ -257,10 +257,10 @@ begin
   -- Update the offer.
   update public.offers
   set quantity_remaining = quantity_remaining - v_neg.quantity,
-      status = case
+      status = (case
         when quantity_remaining - v_neg.quantity <= 0 then 'FULFILLED'
         else 'PARTIALLY_NEGOTIATED'
-      end
+      end)::public.offer_status
   where id = v_offer.id;
 
   update public.negotiations

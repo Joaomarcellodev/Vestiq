@@ -48,10 +48,10 @@ create policy sale_items_select on public.sale_items
 -- p_items: jsonb array of { variant_id, quantity }
 -- ---------------------------------------------------------------------------
 create or replace function public.confirm_sale(
-  p_customer_id uuid,
   p_payment_method public.payment_method,
-  p_discount numeric,
-  p_items jsonb
+  p_items jsonb,
+  p_discount numeric default 0,
+  p_customer_id uuid default null
 )
 returns public.sales
 language plpgsql
