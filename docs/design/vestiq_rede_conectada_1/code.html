@@ -1,0 +1,260 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Vestiq - Rede de Revendedoras</title>
+<!-- Google Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#1b1a28",
+                        "on-tertiary-fixed": "#1b192f",
+                        "primary-container": "#7027b8",
+                        "on-background": "#1b1a28",
+                        "tertiary-fixed-dim": "#c8c3e1",
+                        "surface-container": "#f0ebff",
+                        "secondary-container": "#fe4cca",
+                        "on-surface-variant": "#4c4453",
+                        "outline": "#7d7384",
+                        "secondary-fixed-dim": "#ffaedd",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#e4e0f4",
+                        "on-secondary-container": "#5d0047",
+                        "primary-fixed-dim": "#dbb8ff",
+                        "primary": "#56009a",
+                        "surface": "#fcf8ff",
+                        "secondary": "#b1008a",
+                        "outline-variant": "#cec2d5",
+                        "inverse-on-surface": "#f3eeff",
+                        "on-primary-fixed": "#2b0052",
+                        "secondary-fixed": "#ffd8eb",
+                        "on-secondary-fixed": "#3b002c",
+                        "surface-variant": "#e4e0f4",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#dbd7ec",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#524f68",
+                        "surface-container-high": "#eae6fa",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#fcf8ff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed-variant": "#47445d",
+                        "background": "#fcf8ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#880069",
+                        "on-tertiary-container": "#c6c2e0",
+                        "inverse-primary": "#dbb8ff",
+                        "tertiary": "#3b3850",
+                        "tertiary-fixed": "#e4dffe",
+                        "surface-tint": "#7e38c6",
+                        "on-primary-container": "#dab6ff",
+                        "inverse-surface": "#302f3e",
+                        "surface-container-low": "#f6f2ff",
+                        "on-primary-fixed-variant": "#6415ac",
+                        "primary-fixed": "#efdbff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "gutter": "24px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "40px",
+                        "unit": "4px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "title-lg": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for horizontal lists */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background min-h-screen text-on-surface antialiased flex flex-col md:hidden">
+<!-- TopAppBar (Shared Component) -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface border-b border-outline-variant flex justify-between items-center px-margin-mobile h-16 shadow-sm transition-all duration-300">
+<!-- Leading: Avatar -->
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant cursor-pointer hover:opacity-80 transition-opacity">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A professional headshot of a stylish fashion reseller in a bright, modern studio. The lighting is crisp and even, highlighting a polished, corporate-modern aesthetic. The background is a clean, neutral white space, reflecting a premium B2B SaaS environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiiOMbzxsGvc4ay_82Gxm0nBT1aOu5sLxIDY6AdahsZpSSosqrpJxKoT_K_Wkch0NygpQo1PS5cGefEFcbAKW_57m-7OaXPY8MFNG5FNAiijYBg_ylXLwRwIOfvhK9Cdx6z-jHD9_pIB81D2-sJ4bRDE3RHGRDPtY4B-x6jIjn6zLfPpYJ0_ILyDyLEVqYr9U7-pIGlqk4Rp3sYg2d4eMEE--JIcwnef7yX3VbHSnc_vcvbehH3GB1sA">
+</div>
+<!-- Headline -->
+<h1 class="font-display-lg text-display-lg font-bold tracking-tighter text-primary !text-[24px] !leading-[32px]">VESTIQ</h1>
+<!-- Trailing: Icon -->
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-primary hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 pt-24 pb-28 px-margin-mobile flex flex-col gap-lg">
+<!-- Page Header & Intent -->
+<div class="flex flex-col gap-sm">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Rede de Revendedoras</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Discover high-value inventory available for immediate transfer within the network.</p>
+</div>
+<!-- Segmented Control (Tabs) -->
+<div class="bg-surface-container-highest p-1 rounded-full flex items-center">
+<button class="flex-1 py-2 px-4 rounded-full bg-primary text-on-primary font-label-md text-label-md text-center shadow-sm transition-all">Available Offers</button>
+<button class="flex-1 py-2 px-4 rounded-full text-on-surface-variant hover:text-primary font-label-md text-label-md text-center transition-all">My Requests</button>
+</div>
+<!-- Discovery Feed (Cards) -->
+<div class="grid grid-cols-1 gap-md">
+<!-- Product Card 1 -->
+<article class="bg-surface rounded-xl border border-outline-variant overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<!-- Image Header -->
+<div class="relative h-48 w-full bg-surface-variant">
+<img alt="Luxury Handbag" class="w-full h-full object-cover" data-alt="A highly detailed, professional product shot of a luxury black leather handbag sitting on a pristine white marble block. The lighting is dramatic yet soft, creating elegant highlights on the textured leather. The environment is minimalist and high-end, perfectly suited for a premium B2B fashion resale platform. The overall tone is sophisticated, structured, and authoritative." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBacUa-2gHSA6AhhtAlWm7wHwSuKwpYzYS2Bj6g24b4RnUM05iCPKhvnlK-na9rnr9k0MLE3snIVNwaLBP9W5-FerEQW2osFDDy35qi8h-qnQ5frx3jGKkXUDQTRGVQKbf7w6Yid7L1X6xMGolZ3sK0kHWlOr6Br0QVoBIbkZME1em14-0jPktcBgP2w08dvoF_ZVzJuAggutQ8lupl6jQuehOML1X2jsU_K3bfzyvfV58n4UjEbxWohw">
+<!-- Status Chip overlay -->
+<div class="absolute top-sm left-sm bg-surface-container-low text-primary-container px-3 py-1 rounded-full font-label-sm text-label-sm border border-primary-fixed flex items-center gap-1 backdrop-blur-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+                        Ready to Ship
+                    </div>
+</div>
+<!-- Content Body -->
+<div class="p-md flex flex-col gap-md">
+<!-- Reseller & Location Row -->
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A minimalist, high-contrast avatar image of a fashion entrepreneur. The subject is wearing a tailored blazer against a crisp, light grey background. The lighting is bright and professional, emphasizing a clean, corporate-modern visual style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqA-ISjLclRQtCzCxhZc9Vlxm_7_KY_jfy1qY6JDGk0GCsl05lElsT1dL6zRn9Wz8ZXCi4vWkb3vc4Fe3FvjVhya8GPKRfOYWinkH8LbNeWLAbTBJBQ1N6nmTL4HzzQUGDXhPLNAMlN0IF8Uuu_8_FStEh9V2AhqrcILzGV8n3-w6asA3klWIw8isioRjHsRUOK1GCN-ablNFHGtpu0kjsxBqRwvanS5zuDQHwSk5YLJo6VMnLzr1xVQ">
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Boutique Elevate</span>
+</div>
+<div class="flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span class="font-label-sm text-label-sm">São Paulo • 2.4km</span>
+</div>
+</div>
+<!-- Product Details -->
+<div class="flex flex-col gap-xs">
+<h3 class="font-title-lg text-title-lg text-on-surface">Prada Cleo Shoulder Bag</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-1">Black brushed leather, pristine condition with original dustbag.</p>
+</div>
+<!-- Action Row -->
+<div class="flex items-center justify-between pt-sm border-t border-outline-variant">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Transfer Price</span>
+<span class="font-title-lg text-title-lg text-primary-container">R$ 8.500</span>
+</div>
+<button class="bg-primary hover:bg-surface-tint text-on-primary rounded-lg px-4 py-2 font-label-md text-label-md transition-colors flex items-center gap-2">
+                            Negotiate
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Product Card 2 -->
+<article class="bg-surface rounded-xl border border-outline-variant overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="relative h-48 w-full bg-surface-variant">
+<img alt="Designer Sneakers" class="w-full h-full object-cover" data-alt="A crisp, editorial-style photograph of a pair of high-end designer sneakers in a neutral, minimalist setting. The sneakers rest on a sleek, matte grey pedestal, illuminated by clean, studio lighting that accentuates their modern silhouette and premium materials. The composition reflects an efficient, professional B2B marketplace aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3iJLN32Y6Y61H1koFHDSo6Y3W-o_SuOAPlpghvdftvDDcxQFUVwyl4V-8PvXUbKidj_B2m46Sx3wVbiNrBGjlIT8HmkJfWe4jh2ioDzcwTg7AWPmHn9Hu7YpVpZrV2QZpCzCt7LWY4bJtjf6JxyBORKZ7u5gZLvOYuMO1QGed4YqFj_6djmYLtOd08rOigaUQBLCCjiPO5x9VAoUETmz5RXLK9lILwFyNv4Zl8P8pvqbv79mGCK16gg">
+</div>
+<div class="p-md flex flex-col gap-md">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A refined, modern portrait of a female business owner in the fashion sector, set against a stark white background. The image has a cool, authoritative tone, utilizing soft shadows and high-key lighting to project efficiency and sophistication." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgxYc9YoNd-lk0g25kNU0IFLP2FGKvCIVFWABjawXg8diWj3vx-y5AEET2VfkX-8T4n4QZP64phQyM8CTEL3K3DG-e7hatB0WmddA3Q4xd-U6iu2CdBA8ydIxOtp-J7ZmRnJEn1yLdGfa3A9DVZFEZaUw-MYWxi2AFQEfFank9A2aroP3LaZz6mWTsiKPbSnrCAwzsBYanTO8QJZLHkACUhQJUCT2KLV3PuZg3R3fEmjndXg5qmc3rbA">
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Lumière Curation</span>
+</div>
+<div class="flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span class="font-label-sm text-label-sm">Rio de Janeiro • Shipping</span>
+</div>
+</div>
+<div class="flex flex-col gap-xs">
+<h3 class="font-title-lg text-title-lg text-on-surface">Balenciaga Track Sneakers</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-1">Size 39 EU, White/Orange colorway. Box included.</p>
+</div>
+<div class="flex items-center justify-between pt-sm border-t border-outline-variant">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Transfer Price</span>
+<span class="font-title-lg text-title-lg text-primary-container">R$ 4.200</span>
+</div>
+<button class="bg-primary hover:bg-surface-tint text-on-primary rounded-lg px-4 py-2 font-label-md text-label-md transition-colors flex items-center gap-2">
+                            Negotiate
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+</main>
+<!-- BottomNavBar (Shared Component) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-surface border-t border-outline-variant rounded-t-xl shadow-[0px_-4px_20px_rgba(23,21,43,0.04)]">
+<!-- Item 1: Dashboard (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors min-w-[64px]" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm mt-1">Dashboard</span>
+</a>
+<!-- Item 2: Products (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors min-w-[64px]" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-sm text-label-sm mt-1">Products</span>
+</a>
+<!-- Item 3: Network (Active Intent) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-95 transition-transform duration-150 min-w-[64px]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">hub</span>
+<span class="font-label-sm text-label-sm mt-1">Network</span>
+</a>
+<!-- Item 4: Sales (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors min-w-[64px]" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-label-sm text-label-sm mt-1">Sales</span>
+</a>
+<!-- Item 5: More (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors min-w-[64px]" href="#">
+<span class="material-symbols-outlined">more_horiz</span>
+<span class="font-label-sm text-label-sm mt-1">More</span>
+</a>
+</nav>
+</body></html>

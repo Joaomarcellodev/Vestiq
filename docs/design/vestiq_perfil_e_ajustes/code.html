@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings - VESTIQ</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#5d0047",
+                        "secondary-fixed": "#ffd8eb",
+                        "surface-variant": "#e4e0f4",
+                        "secondary": "#b1008a",
+                        "on-background": "#1b1a28",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#e4dffe",
+                        "on-tertiary-fixed-variant": "#47445d",
+                        "on-secondary-fixed-variant": "#880069",
+                        "on-primary-container": "#dab6ff",
+                        "surface": "#fcf8ff",
+                        "surface-bright": "#fcf8ff",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#eae6fa",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#cec2d5",
+                        "inverse-on-surface": "#f3eeff",
+                        "outline": "#7d7384",
+                        "on-tertiary-fixed": "#1b192f",
+                        "on-primary-fixed-variant": "#6415ac",
+                        "on-surface-variant": "#4c4453",
+                        "inverse-primary": "#dbb8ff",
+                        "on-primary-fixed": "#2b0052",
+                        "primary-fixed-dim": "#dbb8ff",
+                        "tertiary-fixed-dim": "#c8c3e1",
+                        "secondary-fixed-dim": "#ffaedd",
+                        "on-secondary-fixed": "#3b002c",
+                        "secondary-container": "#fe4cca",
+                        "tertiary-container": "#524f68",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#7e38c6",
+                        "surface-container": "#f0ebff",
+                        "on-tertiary-container": "#c6c2e0",
+                        "surface-dim": "#dbd7ec",
+                        "primary": "#56009a",
+                        "surface-container-lowest": "#ffffff",
+                        "background": "#fcf8ff",
+                        "tertiary": "#3b3850",
+                        "surface-container-highest": "#e4e0f4",
+                        "primary-fixed": "#efdbff",
+                        "surface-container-low": "#f6f2ff",
+                        "on-secondary": "#ffffff",
+                        "on-surface": "#1b1a28",
+                        "inverse-surface": "#302f3e",
+                        "primary-container": "#7027b8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "xs": "4px",
+                        "md": "16px",
+                        "gutter": "24px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "title-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline flat no shadows flex justify-between items-center w-full px-margin-mobile h-16 docked full-width top-0 sticky z-40">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A close-up, professional portrait of a stylish reseller in a modern, well-lit studio. The lighting is soft and flattering, creating a premium light-mode aesthetic. The subject exudes confidence, aligning with the authoritative brand personality. The overall tone is crisp and sophisticated." src="https://lh3.googleusercontent.com/aida-public/AB6AXuClV1CPncAfYydovyt7uwLykO8blFT3e0D2pf644qcDqt_qFYWaErE803a-LIMlKjQ4iAXmzfYmAsnm_r2f_QmDPWqZ1eNeycKNH4qm8NnSxVUDIItnRD-FtXDWAZr-lBJOfN6VARxetV37AVYk2u1LYX7_osr5w7uTNtPpQHkBFRxzWsQ4cG5tfXeazq2y-Ct8F2x2gL7Q1DXCgFq7AgzOm4mIFduMvwEuePzHHFfq6fXAzlovq2xlgw"/>
+</div>
+<span class="font-display-lg text-display-lg font-bold tracking-tighter text-primary dark:text-primary-fixed" style="font-size: 24px; line-height: 32px;">VESTIQ</span>
+</div>
+<!-- Desktop Nav (Hidden on Mobile) -->
+<nav class="hidden md:flex gap-8">
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors px-3 py-2 rounded-md" href="#">Dashboard</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors px-3 py-2 rounded-md" href="#">Products</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors px-3 py-2 rounded-md" href="#">Network</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors px-3 py-2 rounded-md" href="#">Sales</a>
+<a class="font-label-md text-label-md text-primary dark:text-primary-fixed font-semibold px-3 py-2 rounded-md opacity-80 scale-95 transition-all" href="#">More</a>
+</nav>
+<button class="text-primary dark:text-primary-fixed hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors p-2 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+</header>
+<main class="max-w-4xl mx-auto px-margin-mobile md:px-margin-desktop py-lg">
+<div class="mb-xl">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-2">Settings</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage your boutique profile and platform preferences.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Sidebar Nav for Settings (Desktop) -->
+<div class="hidden md:block col-span-1">
+<nav class="sticky top-24 flex flex-col gap-2">
+<a class="font-title-lg text-title-lg text-primary bg-surface-container rounded-lg px-4 py-3 flex items-center gap-3" href="#profile">
+<span class="material-symbols-outlined">storefront</span>
+                        Boutique Profile
+                    </a>
+<a class="font-title-lg text-title-lg text-on-surface-variant hover:bg-surface-container-low rounded-lg px-4 py-3 flex items-center gap-3 transition-colors" href="#notifications">
+<span class="material-symbols-outlined">notifications</span>
+                        Notification Settings
+                    </a>
+<a class="font-title-lg text-title-lg text-on-surface-variant hover:bg-surface-container-low rounded-lg px-4 py-3 flex items-center gap-3 transition-colors" href="#support">
+<span class="material-symbols-outlined">help</span>
+                        Help &amp; Support
+                    </a>
+</nav>
+</div>
+<!-- Main Content Area -->
+<div class="col-span-1 md:col-span-2 flex flex-col gap-xl">
+<!-- Boutique Profile Section -->
+<section class="bg-surface rounded-[12px] border border-[#E5E2EA] shadow-[0px_4px_20px_rgba(23,21,43,0.04)] p-lg relative overflow-hidden" id="profile">
+<h2 class="font-headline-md text-headline-md mb-lg">Boutique Profile</h2>
+<div class="flex flex-col sm:flex-row gap-lg mb-lg">
+<div class="flex flex-col items-center gap-sm">
+<div class="w-24 h-24 rounded-full bg-surface-container-high border-2 border-outline-variant flex items-center justify-center overflow-hidden relative group cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="A minimalist, high-contrast flat lay of luxury fashion accessories on a pristine white marble surface. The composition includes a designer leather bag, sunglasses, and a delicate watch. The lighting is bright and even, casting soft shadows, perfectly aligning with a premium light-mode corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuaW9pQhizp4KrVwguX37OFoMwbBOddDIN-lQfazbwTab-C18ovnkXeUcFq5XVA0POdcAEDLmwSSkhGghN4Z_HS-3w_z0lgO_CSHdpia_5ij7J1FsDeOMzhfEVFfLNMQrEiXXqfjcpofCS-04AzoSAgNBlKXL6n_aGivDYf3vPCf3LAAOI6gFICewuNaft-D22OMP7A_gus6ltUG3c3Lsj5nA_uBdMXNLgel1wla-YPPB4I_lo9d7sKA"/>
+<div class="absolute inset-0 bg-on-background/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-on-primary">photo_camera</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Update Logo</span>
+</div>
+<div class="flex-1 flex flex-col gap-md">
+<div>
+<label class="font-label-md text-label-md text-on-surface-variant block mb-sm">Boutique Name</label>
+<input class="w-full bg-surface-lowest border border-[#E5E2EA] rounded-lg px-4 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" type="text" value="Luxe Archive Collective"/>
+</div>
+<div>
+<label class="font-label-md text-label-md text-on-surface-variant block mb-sm">Description</label>
+<textarea class="w-full bg-surface-lowest border border-[#E5E2EA] rounded-lg px-4 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all resize-none" rows="3">Curated selection of archival designer pieces. Authenticity guaranteed.</textarea>
+</div>
+</div>
+</div>
+<div class="mb-lg">
+<label class="font-label-md text-label-md text-on-surface-variant block mb-sm">Business Address</label>
+<input class="w-full bg-surface-lowest border border-[#E5E2EA] rounded-lg px-4 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all mb-md" type="text" value="120 Fashion Ave, Suite 400, New York, NY 10001"/>
+</div>
+<div class="flex justify-end mt-lg pt-md border-t border-outline-variant">
+<button class="bg-primary-container text-on-primary rounded-lg px-6 py-2 font-label-md text-label-md hover:opacity-90 transition-opacity">Save Changes</button>
+</div>
+</section>
+<!-- Notification Settings Section -->
+<section class="bg-surface rounded-[12px] border border-[#E5E2EA] shadow-[0px_4px_20px_rgba(23,21,43,0.04)] p-lg" id="notifications">
+<h2 class="font-headline-md text-headline-md mb-lg">Notification Settings</h2>
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between py-2 border-b border-outline-variant/50">
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface">New Order Alerts</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Get notified instantly when a sale is made.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between py-2 border-b border-outline-variant/50">
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface">Inventory Low Warning</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Alerts when items fall below threshold.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between py-2">
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface">Platform Updates</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">News, features, and policy changes.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Help & Support Section -->
+<section class="bg-surface rounded-[12px] border border-[#E5E2EA] shadow-[0px_4px_20px_rgba(23,21,43,0.04)] p-lg flex flex-col sm:flex-row items-center justify-between gap-md" id="support">
+<div>
+<h2 class="font-headline-md text-headline-md mb-xs">Help &amp; Support</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Need assistance with your account or inventory?</p>
+</div>
+<button class="border border-[#E5E2EA] text-[#17152B] rounded-lg px-6 py-2 font-label-md text-label-md hover:bg-surface-container transition-colors whitespace-nowrap">Contact Support</button>
+</section>
+<!-- Logout Section -->
+<section class="pt-lg flex justify-center sm:justify-end">
+<button class="text-error font-label-md text-label-md flex items-center gap-2 hover:bg-error-container/20 px-4 py-2 rounded-lg transition-colors">
+<span class="material-symbols-outlined">logout</span>
+                        Logout
+                    </button>
+</section>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden bg-surface dark:bg-surface-dim shadow-lg border-t border-outline-variant shadow-[0px_-4px_20px_rgba(23,21,43,0.04)] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 docked full-width rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-primary-fixed w-[72px]" href="#">
+<span class="material-symbols-outlined mb-1">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-primary-fixed w-[72px]" href="#">
+<span class="material-symbols-outlined mb-1">inventory_2</span>
+<span class="font-label-sm text-label-sm">Products</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-primary-fixed w-[72px]" href="#">
+<span class="material-symbols-outlined mb-1">hub</span>
+<span class="font-label-sm text-label-sm">Network</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-primary-fixed w-[72px]" href="#">
+<span class="material-symbols-outlined mb-1">payments</span>
+<span class="font-label-sm text-label-sm">Sales</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90 transition-transform duration-150 w-[72px]" href="#">
+<span class="material-symbols-outlined mb-1">more_horiz</span>
+<span class="font-label-sm text-label-sm">More</span>
+</a>
+</nav>
+</body></html>

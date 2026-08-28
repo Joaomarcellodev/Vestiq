@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vestiq - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#fe4cca",
+                        "outline-variant": "#cec2d5",
+                        "on-secondary-fixed-variant": "#880069",
+                        "primary-fixed": "#efdbff",
+                        "on-surface": "#1b1a28",
+                        "on-primary-fixed": "#2b0052",
+                        "on-surface-variant": "#4c4453",
+                        "inverse-surface": "#302f3e",
+                        "tertiary": "#3b3850",
+                        "surface-container-low": "#f6f2ff",
+                        "surface-container": "#f0ebff",
+                        "background": "#fcf8ff",
+                        "on-primary-container": "#dab6ff",
+                        "surface-container-highest": "#e4e0f4",
+                        "inverse-on-surface": "#f3eeff",
+                        "secondary-fixed": "#ffd8eb",
+                        "surface-bright": "#fcf8ff",
+                        "tertiary-fixed-dim": "#c8c3e1",
+                        "on-tertiary-container": "#c6c2e0",
+                        "surface-tint": "#7e38c6",
+                        "surface-dim": "#dbd7ec",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#5d0047",
+                        "surface-variant": "#e4e0f4",
+                        "surface": "#fcf8ff",
+                        "secondary": "#b1008a",
+                        "on-secondary-fixed": "#3b002c",
+                        "tertiary-fixed": "#e4dffe",
+                        "on-error-container": "#93000a",
+                        "on-background": "#1b1a28",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#524f68",
+                        "primary-fixed-dim": "#dbb8ff",
+                        "on-tertiary-fixed-variant": "#47445d",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#dbb8ff",
+                        "on-tertiary-fixed": "#1b192f",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#eae6fa",
+                        "primary-container": "#7027b8",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#6415ac",
+                        "outline": "#7d7384",
+                        "secondary-fixed-dim": "#ffaedd",
+                        "error-container": "#ffdad6",
+                        "primary": "#56009a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "unit": "4px",
+                        "sm": "8px",
+                        "margin-desktop": "40px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "title-lg": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        
+        /* Subtle glowing border for focus state as per Style Guidance */
+        .input-field:focus {
+            outline: none;
+            border-color: #7027B8;
+            box-shadow: 0 0 0 4px rgba(112, 39, 184, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row antialiased selection:bg-primary-container selection:text-white">
+<!-- Hero Image / Brand Section (Hidden on small screens, takes half width on medium up) -->
+<div class="hidden md:flex flex-1 relative bg-surface-container-high overflow-hidden" data-alt="A sophisticated, high-end conceptual rendering of a modern fashion logistics network. Elegant abstract glowing lines connecting minimalist garments or supply chain nodes. The scene is illuminated in a very bright, pristine light mode aesthetic. Dominant colors are crisp whites and subtle, vibrant purples (#7027B8) signaling high-end B2B fashion tech. The lighting is diffused, casting soft ambient shadows, conveying authoritative efficiency and premium quality." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAb_N65Jp1hnfd8wD-hKYhn42zwr3LzI5pZ9WIxOQLD5jYNLjV0-CGSndUX4UAUnLDTXOktt9gJ1YTz16uZzwvC4V6qPOFVfd9wogrOfzbj8r3-yR2Pn1oqYmmiQkLFTjOplILoe3FAhRWcSzE62PtQG8yO-_O64PBqrcNyvyrAucvh0U0StQ6NufKFRrbDO3zWO2c4ke1o8uKubQiKWAl3mz2WnS1cV2H1zb2H-Ns6Kun-31ejyXxNsw')">
+<!-- Gradient Overlay for readability if image has complex areas -->
+<div class="absolute inset-0 bg-gradient-to-tr from-surface/80 via-surface/40 to-transparent"></div>
+<!-- Animated visual element (subtle floating shapes for 'modern SaaS feel') -->
+<div class="absolute inset-0 pointer-events-none opacity-30">
+<svg class="w-full h-full preserve-3d" viewbox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<circle class="animate-[pulse_8s_ease-in-out_infinite]" cx="20" cy="80" fill="url(#grad1)" r="15"></circle>
+<circle class="animate-[pulse_12s_ease-in-out_infinite_reverse]" cx="80" cy="20" fill="url(#grad2)" r="25"></circle>
+<defs>
+<radialgradient cx="50%" cy="50%" id="grad1" r="50%">
+<stop offset="0%" stop-color="#7027B8" stop-opacity="0.8"></stop>
+<stop offset="100%" stop-color="#7027B8" stop-opacity="0"></stop>
+</radialgradient>
+<radialgradient cx="50%" cy="50%" id="grad2" r="50%">
+<stop offset="0%" stop-color="#fe4cca" stop-opacity="0.6"></stop>
+<stop offset="100%" stop-color="#fe4cca" stop-opacity="0"></stop>
+</radialgradient>
+</defs>
+</svg>
+</div>
+<div class="relative z-10 p-margin-desktop flex flex-col justify-end h-full max-w-xl">
+<h2 class="font-display-lg text-display-lg text-on-surface mb-lg">Sua rede vende melhor conectada.</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                O Vestiq é a plataforma de gestão definitiva para o mercado de revenda de moda B2B. Conecte seu estoque ao mundo.
+            </p>
+</div>
+</div>
+<!-- Login Form Section -->
+<div class="flex-1 flex flex-col justify-center px-margin-mobile md:px-margin-desktop py-12 md:py-0 bg-surface z-10 relative shadow-[-20px_0_40px_rgba(23,21,43,0.03)]">
+<div class="w-full max-w-md mx-auto">
+<!-- Brand Logo -->
+<div class="mb-xl flex items-center justify-center md:justify-start">
+<img alt="Vestiq Logo" class="h-16 w-16 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVTA0y3OIZ7QiNSXm6k34g5TZrr2rLV60EDcfL4z_gicGycJ9EJT1yijqO_TE01ynzFZgsb3XWSLRVf-Avzsjetu2-AHbaVztJgCqw2cmnnTooDadhqAWwaIirERrSh9tC3tWuNoPqfUA4fb_8LV0fBQ1tOY1_6z-Z438cITt7bPIdPmlg9L_aIOZegVFBOcqQou0ZGIXfU6uDfP3tbCjdwz-CKVGTRymJBdjEduwhlvaCz2m0peAMCxUlqh1hhyAfXKY"/>
+<span class="ml-4 font-display-lg text-headline-lg text-on-surface tracking-tight">VESTIQ</span>
+</div>
+<!-- Header -->
+<div class="mb-lg text-center md:text-left">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-sm">Bem-vindo de volta</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Acesse sua conta para gerenciar seu estoque.</p>
+</div>
+<!-- Form -->
+<form action="#" class="space-y-md" method="POST">
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-xs uppercase tracking-wider" for="email">Email Profissional</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">mail</span>
+</div>
+<input class="input-field block w-full pl-10 pr-3 py-3 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface placeholder-outline font-body-md text-body-md transition-all duration-200" id="email" name="email" placeholder="nome@empresa.com.br" required="" type="email"/>
+</div>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-xs uppercase tracking-wider" for="password">Senha</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">lock</span>
+</div>
+<input class="input-field block w-full pl-10 pr-3 py-3 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface placeholder-outline font-body-md text-body-md transition-all duration-200" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">
+<span class="material-symbols-outlined text-outline hover:text-primary transition-colors">visibility</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-sm">
+<div class="flex items-center">
+<input class="h-4 w-4 text-primary focus:ring-primary border-outline-variant rounded bg-surface-container-lowest cursor-pointer" id="remember-me" name="remember-me" type="checkbox"/>
+<label class="ml-2 block font-body-md text-body-md text-on-surface-variant cursor-pointer" for="remember-me">
+                            Lembrar-me
+                        </label>
+</div>
+<div class="text-sm">
+<a class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors uppercase tracking-wider" href="#">
+                            Esqueci minha senha
+                        </a>
+</div>
+</div>
+<div class="pt-sm">
+<button class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-[0_4px_12px_rgba(112,39,184,0.15)] text-on-primary bg-primary-container hover:bg-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary font-label-md text-label-md uppercase tracking-wider transition-all duration-200 active:scale-[0.98]" type="submit">
+                        Entrar na Plataforma
+                    </button>
+</div>
+</form>
+<!-- Divider -->
+<div class="mt-lg mb-lg">
+<div class="relative">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-outline-variant"></div>
+</div>
+<div class="relative flex justify-center text-sm">
+<span class="px-2 bg-surface font-label-sm text-label-sm text-outline uppercase tracking-widest">ou acesse com</span>
+</div>
+</div>
+</div>
+<!-- Social Logins (Secondary Buttons per Style Guidance) -->
+<div class="grid grid-cols-2 gap-4">
+<button class="flex justify-center items-center py-2 px-4 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors duration-200" type="button">
+<img alt="Google logo" class="h-5 w-5 mr-2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3wGwVpNU1tZ5JtqJxVjxizotJViOa4DZaAWFIJVBAhYJKegg9NXUHNznQC2XY9-eMEBqgy3UM_DHK2NExvUVe2qfVjkfhCVJG50XDiSfIGs2Gg-2jezN9LlXq4eh3Plx3qnpRzSn7DRFw8dYdqsJ5Sr0761Um7JKir1ONpLhQmRAaasX1_M35M3fnrP4HrCRDZNDjN7O53tNy6DJaoml_d2-49GO_F1X3BkR873jEWbft9sUY6ZQaHQ"/>
+                    Google
+                </button>
+<button class="flex justify-center items-center py-2 px-4 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors duration-200" type="button">
+<span class="material-symbols-outlined mr-2" style="font-variation-settings: 'FILL' 1;">file_download</span>
+                    Apple
+                </button>
+</div>
+<div class="mt-xl text-center">
+<p class="font-body-md text-body-md text-on-surface-variant">
+                    Novo por aqui? 
+                    <a class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors uppercase tracking-wider ml-1" href="#">
+                        Criar conta
+                    </a>
+</p>
+</div>
+</div>
+</div>
+</body></html>

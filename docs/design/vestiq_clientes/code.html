@@ -1,0 +1,396 @@
+<!DOCTYPE html><html class="light" lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Gestão de Clientes - VESTIQ</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container-low": "#f6f2ff",
+                      "on-surface-variant": "#4c4453",
+                      "surface-dim": "#dbd7ec",
+                      "surface": "#fcf8ff",
+                      "tertiary-fixed-dim": "#c8c3e1",
+                      "error-container": "#ffdad6",
+                      "on-background": "#1b1a28",
+                      "secondary-fixed-dim": "#ffaedd",
+                      "primary-container": "#7027b8",
+                      "on-primary-fixed": "#2b0052",
+                      "inverse-surface": "#302f3e",
+                      "secondary": "#b1008a",
+                      "tertiary-fixed": "#e4dffe",
+                      "on-secondary-fixed": "#3b002c",
+                      "on-primary-fixed-variant": "#6415ac",
+                      "on-surface": "#1b1a28",
+                      "tertiary-container": "#524f68",
+                      "on-error": "#ffffff",
+                      "primary-fixed-dim": "#dbb8ff",
+                      "tertiary": "#3b3850",
+                      "on-tertiary-fixed": "#1b192f",
+                      "primary": "#56009a",
+                      "on-secondary-fixed-variant": "#880069",
+                      "on-tertiary": "#ffffff",
+                      "secondary-fixed": "#ffd8eb",
+                      "inverse-on-surface": "#f3eeff",
+                      "surface-container": "#f0ebff",
+                      "secondary-container": "#fe4cca",
+                      "inverse-primary": "#dbb8ff",
+                      "background": "#fcf8ff",
+                      "on-tertiary-container": "#c6c2e0",
+                      "on-primary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "surface-container-high": "#eae6fa",
+                      "surface-bright": "#fcf8ff",
+                      "surface-tint": "#7e38c6",
+                      "on-secondary-container": "#5d0047",
+                      "on-primary-container": "#dab6ff",
+                      "surface-variant": "#e4e0f4",
+                      "on-error-container": "#93000a",
+                      "on-secondary": "#ffffff",
+                      "surface-container-highest": "#e4e0f4",
+                      "primary-fixed": "#efdbff",
+                      "on-tertiary-fixed-variant": "#47445d",
+                      "outline-variant": "#cec2d5",
+                      "outline": "#7d7384"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "unit": "4px",
+                      "md": "16px",
+                      "margin-desktop": "40px",
+                      "xs": "4px",
+                      "sm": "8px",
+                      "gutter": "24px",
+                      "margin-mobile": "16px",
+                      "xl": "32px"
+              },
+              "fontFamily": {
+                      "title-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "display-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "title-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "60px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: #F8F7FA; /* Fallback */
+            @apply bg-background;
+        }
+      </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-24 md:pb-0 font-body-md">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 bg-surface border-b border-outline-variant sticky top-0 z-40">
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-variant flex items-center justify-center">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A professional headshot of a female business user, smiling subtly, soft office lighting, high resolution, minimalist background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXSsmqW_7IVHLdbxCT9xQhGBJ3cv5lRKhdJd8Sqec-YI-XrQ5c1wEXVkKOh6SXkLAibQK78dpFJK1P7vtfW9VZI3DXSCAAypKRKmxv6pl20C7QKI6ON_Q521YgT9ciZe5IgYBx7NX3uv7t3_Rr9FjQcS7TsYykyvjZ4gjcGazlVaAGDIfImaTHNiGx2aLeJl8Dg9dtLbAXTtL7xEP4m7G7QZmAmu7AdMjVlqPFRaq8PxIqjO7LtgAXzQ">
+</div>
+<h1 class="font-display-lg text-title-lg font-bold tracking-tighter text-primary">VESTIQ</h1>
+</div>
+<!-- Desktop Nav -->
+<nav class="hidden md:flex gap-lg h-full items-center">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors h-full px-4 gap-1" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors h-full px-4 gap-1" href="#">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="font-label-sm text-label-sm">Products</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-semibold relative h-full px-4 gap-1 opacity-80 scale-95 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">hub</span>
+<span class="font-label-sm text-label-sm">Network</span>
+<div class="absolute bottom-0 left-0 w-full h-1 bg-primary rounded-t-full"></div>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors h-full px-4 gap-1" href="#">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+<span class="font-label-sm text-label-sm">Sales</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors h-full px-4 gap-1" href="#">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+<span class="font-label-sm text-label-sm">More</span>
+</a>
+</nav>
+<button class="text-on-surface-variant hover:bg-surface-container p-2 rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="w-full max-w-5xl mx-auto px-margin-mobile md:px-margin-desktop py-lg">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-lg gap-md">
+<div>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background">Gestão de Clientes</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Gerencie sua base de clientes revendedores.</p>
+</div>
+<!-- Search Bar -->
+<div class="w-full md:w-auto flex-grow max-w-md relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-body-md text-on-background placeholder-on-surface-variant transition-all" placeholder="Buscar por nome, email..." type="text">
+</div>
+</div>
+<!-- Filters & Actions (Optional enhancement based on B2B context) -->
+<div class="flex gap-sm mb-md overflow-x-auto pb-2 scrollbar-hide">
+<button class="px-4 py-1.5 rounded-full bg-surface-variant text-on-background font-label-md text-label-md border border-outline-variant whitespace-nowrap">Todos (124)</button>
+<button class="px-4 py-1.5 rounded-full bg-surface-container-lowest text-on-surface-variant hover:bg-surface-variant font-label-md text-label-md border border-outline-variant whitespace-nowrap transition-colors">Ativos</button>
+<button class="px-4 py-1.5 rounded-full bg-surface-container-lowest text-on-surface-variant hover:bg-surface-variant font-label-md text-label-md border border-outline-variant whitespace-nowrap transition-colors">Inativos</button>
+<button class="px-4 py-1.5 rounded-full bg-surface-container-lowest text-on-surface-variant hover:bg-surface-variant font-label-md text-label-md border border-outline-variant whitespace-nowrap transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">filter_list</span> Filtros
+            </button>
+</div>
+<!-- Customer List (Table-like List) -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-[0px_4px_20px_rgba(23,21,43,0.04)]">
+<!-- List Header (Desktop Only) -->
+<div class="hidden md:grid grid-cols-12 gap-4 px-lg py-3 border-b border-outline-variant bg-surface-container-low font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
+<div class="col-span-5">Cliente</div>
+<div class="col-span-3">Última Compra</div>
+<div class="col-span-3 text-right">Total Gasto</div>
+<div class="col-span-1 text-center">Ação</div>
+</div>
+<!-- List Items -->
+<div class="flex flex-col">
+<!-- Item 1 -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 px-md md:px-lg py-md border-b border-outline-variant hover:bg-surface-container-low transition-colors items-center">
+<div class="col-span-1 md:col-span-5 flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-title-lg text-title-lg font-bold shrink-0">
+                            MR
+                        </div>
+<div>
+<div class="font-title-lg text-[16px] leading-[24px] text-on-background font-semibold">Maria Rodrigues</div>
+<div class="font-body-md text-[12px] text-on-surface-variant">maria.rodrigues@email.com</div>
+</div>
+</div>
+<div class="col-span-1 md:col-span-3 flex justify-between md:block font-body-md text-body-md text-on-surface-variant">
+<span class="md:hidden font-label-md text-label-md text-on-surface-variant uppercase">Última Compra:</span>
+                        12/10/2023
+                    </div>
+<div class="col-span-1 md:col-span-3 flex justify-between md:block md:text-right font-title-lg text-[16px] text-on-background font-semibold">
+<span class="md:hidden font-label-md text-label-md text-on-surface-variant uppercase font-normal">Total Gasto:</span>
+                        R$ 4.500,00
+                    </div>
+<div class="col-span-1 md:col-span-1 flex justify-end md:justify-center">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-2">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 px-md md:px-lg py-md border-b border-outline-variant hover:bg-surface-container-low transition-colors items-center">
+<div class="col-span-1 md:col-span-5 flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center overflow-hidden shrink-0">
+<img alt="João Silva" class="w-full h-full object-cover" data-alt="Professional profile picture of a young male entrepreneur, modern casual look, bright studio lighting, neutral background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhw6yzRt0WVePWYHWLQSo9apHbf1mkQiSVlV_2sIHbtUbrJwynR7ncC-FzrkzFKx1hCy9Ewio7uT8_NFfo5qPYYPp7ywds58tHsL5Qzv_6tj84AVcTnc-LWuk5abKr6kPhD5TomePEo-twQE0_YbCBe1Ti6yg4yd1KMobrg222GSlyLRgvLUskabjlGjHmWbb4lJtZdl73L_mgPBsjIkAmd9AViP2e1y95Nf9ztNl6tZOplA24SYfeMA">
+</div>
+<div>
+<div class="font-title-lg text-[16px] leading-[24px] text-on-background font-semibold">João Silva Boutique</div>
+<div class="font-body-md text-[12px] text-on-surface-variant">contato@joaosilva.com.br</div>
+</div>
+</div>
+<div class="col-span-1 md:col-span-3 flex justify-between md:block font-body-md text-body-md text-on-surface-variant">
+<span class="md:hidden font-label-md text-label-md text-on-surface-variant uppercase">Última Compra:</span>
+                        05/10/2023
+                    </div>
+<div class="col-span-1 md:col-span-3 flex justify-between md:block md:text-right font-title-lg text-[16px] text-on-background font-semibold">
+<span class="md:hidden font-label-md text-label-md text-on-surface-variant uppercase font-normal">Total Gasto:</span>
+                        R$ 12.350,00
+                    </div>
+<div class="col-span-1 md:col-span-1 flex justify-end md:justify-center">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-2">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 px-md md:px-lg py-md border-b border-outline-variant hover:bg-surface-container-low transition-colors items-center">
+<div class="col-span-1 md:col-span-5 flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-title-lg text-title-lg font-bold shrink-0">
+                            AM
+                        </div>
+<div>
+<div class="font-title-lg text-[16px] leading-[24px] text-on-background font-semibold">Ana Maria Costa</div>
+<div class="font-body-md text-[12px] text-on-surface-variant">anam.costa@exemplo.com</div>
+</div>
+</div>
+<div class="col-span-1 md:col-span-3 flex justify-between md:block font-body-md text-body-md text-on-surface-variant">
+<span class="md:hidden font-label-md text-label-md text-on-surface-variant uppercase">Última Compra:</span>
+                        28/09/2023
+                    </div>
+<div class="col-span-1 md:col-span-3 flex justify-between md:block md:text-right font-title-lg text-[16px] text-on-background font-semibold">
+<span class="md:hidden font-label-md text-label-md text-on-surface-variant uppercase font-normal">Total Gasto:</span>
+                        R$ 2.100,00
+                    </div>
+<div class="col-span-1 md:col-span-1 flex justify-end md:justify-center">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-2">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 px-md md:px-lg py-md hover:bg-surface-container-low transition-colors items-center">
+<div class="col-span-1 md:col-span-5 flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center font-title-lg text-title-lg font-bold shrink-0">
+                            CC
+                        </div>
+<div>
+<div class="font-title-lg text-[16px] leading-[24px] text-on-background font-semibold">Carlos Concept</div>
+<div class="font-body-md text-[12px] text-on-surface-variant">vendas@carlosconcept.com</div>
+</div>
+</div>
+<div class="col-span-1 md:col-span-3 flex justify-between md:block font-body-md text-body-md text-on-surface-variant">
+<span class="md:hidden font-label-md text-label-md text-on-surface-variant uppercase">Última Compra:</span>
+                        15/09/2023
+                    </div>
+<div class="col-span-1 md:col-span-3 flex justify-between md:block md:text-right font-title-lg text-[16px] text-on-background font-semibold">
+<span class="md:hidden font-label-md text-label-md text-on-surface-variant uppercase font-normal">Total Gasto:</span>
+                        R$ 8.900,00
+                    </div>
+<div class="col-span-1 md:col-span-1 flex justify-end md:justify-center">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-2">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Pagination (Simple) -->
+<div class="flex justify-between items-center px-lg py-4 border-t border-outline-variant bg-surface-container-lowest">
+<span class="font-label-md text-label-md text-on-surface-variant">Mostrando 1-4 de 124</span>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-variant disabled:opacity-50"><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>
+<button class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-variant"><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button (FAB) -->
+<button class="fixed bottom-[80px] md:bottom-lg right-lg w-14 h-14 bg-primary text-on-primary rounded-full shadow-[0px_12px_32px_rgba(23,21,43,0.15)] flex items-center justify-center hover:bg-surface-tint transition-all hover:scale-105 active:scale-95 z-40 group" title="Adicionar Cliente">
+<span class="material-symbols-outlined text-[24px] group-hover:rotate-90 transition-transform duration-300">add</span>
+</button>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-surface border-t border-outline-variant shadow-[0px_-4px_20px_rgba(23,21,43,0.04)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-sm text-label-sm mt-1">Products</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">hub</span>
+<span class="font-label-sm text-label-sm mt-1">Network</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-label-sm text-label-sm mt-1">Sales</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">more_horiz</span>
+<span class="font-label-sm text-label-sm mt-1">More</span>
+</a>
+</nav>
+</body></html>

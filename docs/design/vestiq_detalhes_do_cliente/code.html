@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background dark:bg-background" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Customer Profile - VESTIQ</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#5d0047",
+                    "secondary-fixed": "#ffd8eb",
+                    "surface-variant": "#e4e0f4",
+                    "secondary": "#b1008a",
+                    "on-background": "#1b1a28",
+                    "error-container": "#ffdad6",
+                    "tertiary-fixed": "#e4dffe",
+                    "on-tertiary-fixed-variant": "#47445d",
+                    "on-secondary-fixed-variant": "#880069",
+                    "on-primary-container": "#dab6ff",
+                    "surface": "#fcf8ff",
+                    "surface-bright": "#fcf8ff",
+                    "on-primary": "#ffffff",
+                    "surface-container-high": "#eae6fa",
+                    "on-error-container": "#93000a",
+                    "outline-variant": "#cec2d5",
+                    "inverse-on-surface": "#f3eeff",
+                    "outline": "#7d7384",
+                    "on-tertiary-fixed": "#1b192f",
+                    "on-primary-fixed-variant": "#6415ac",
+                    "on-surface-variant": "#4c4453",
+                    "inverse-primary": "#dbb8ff",
+                    "on-primary-fixed": "#2b0052",
+                    "primary-fixed-dim": "#dbb8ff",
+                    "tertiary-fixed-dim": "#c8c3e1",
+                    "secondary-fixed-dim": "#ffaedd",
+                    "on-secondary-fixed": "#3b002c",
+                    "secondary-container": "#fe4cca",
+                    "tertiary-container": "#524f68",
+                    "on-error": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-tint": "#7e38c6",
+                    "surface-container": "#f0ebff",
+                    "on-tertiary-container": "#c6c2e0",
+                    "surface-dim": "#dbd7ec",
+                    "primary": "#56009a",
+                    "surface-container-lowest": "#ffffff",
+                    "background": "#fcf8ff",
+                    "tertiary": "#3b3850",
+                    "surface-container-highest": "#e4e0f4",
+                    "primary-fixed": "#efdbff",
+                    "surface-container-low": "#f6f2ff",
+                    "on-secondary": "#ffffff",
+                    "on-surface": "#1b1a28",
+                    "inverse-surface": "#302f3e",
+                    "primary-container": "#7027b8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "32px",
+                    "xs": "4px",
+                    "md": "16px",
+                    "gutter": "24px",
+                    "sm": "8px",
+                    "lg": "24px",
+                    "margin-mobile": "16px",
+                    "unit": "4px",
+                    "margin-desktop": "40px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "title-lg": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "label-sm": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-full bg-background text-on-background font-body-md">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim docked full-width top-0 border-b border-outline-variant dark:border-outline flat no shadows flex justify-between items-center w-full px-margin-mobile h-16 sticky z-50 hidden md:flex">
+<div class="flex items-center gap-md">
+<span class="font-display-lg text-display-lg font-bold tracking-tighter text-primary dark:text-primary-fixed">VESTIQ</span>
+</div>
+<nav class="flex gap-lg">
+<a class="text-on-surface-variant dark:text-on-tertiary-container font-label-md text-label-md hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors px-md py-sm rounded-lg flex flex-col items-center justify-center" href="#">Dashboard</a>
+<a class="text-on-surface-variant dark:text-on-tertiary-container font-label-md text-label-md hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors px-md py-sm rounded-lg flex flex-col items-center justify-center" href="#">Products</a>
+<a class="text-primary dark:text-primary-fixed font-semibold font-label-md text-label-md hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors px-md py-sm rounded-lg flex flex-col items-center justify-center" href="#">Network</a>
+<a class="text-on-surface-variant dark:text-on-tertiary-container font-label-md text-label-md hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors px-md py-sm rounded-lg flex flex-col items-center justify-center" href="#">Sales</a>
+</nav>
+<div class="flex items-center gap-md">
+<button class="text-primary dark:text-primary-fixed hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors p-sm rounded-full">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A detailed headshot portrait of a professional woman with dark hair in a sleek minimal office setting. Bright, clear lighting highlights her features. The background is a soft, muted gradient of whites and grays, fitting a premium SaaS aesthetic. Shot in high resolution with sharp focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIf_O3IcN0528mz958JPks19tltYhR6CJB0jx7GR3LVv8X6sKEj_bsi5NucOlrc4N_Wi5Ixv3B0G3tsdUzch8TSg_3UplGlJ-ETEh0eqOu1kGgZaHIpmMDPG9IsJi0nW_bE771op_yqPlgWSKvTCe98EeOru0HarCqVG-4A8Iz0VjYhsgHzkDdGOwB_grP8-VFyRyJEnYqLw615GWQfnMxFAwI3HkYs3sIfMYGqltYalfldWhaWpD0jA"/>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-lg pb-32 md:pb-lg">
+<!-- Breadcrumbs & Header -->
+<div class="mb-lg">
+<div class="flex items-center gap-sm text-on-surface-variant font-label-md text-label-md mb-sm">
+<a class="hover:text-primary transition-colors" href="#">Network</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-on-background">Customer Profile</span>
+</div>
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-md">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-background">Eleanor Vance</h1>
+<div class="flex gap-sm">
+<button class="px-md py-sm rounded-lg border border-outline-variant text-on-background font-label-md text-label-md hover:bg-surface-container-highest transition-colors flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+                        Edit Profile
+                    </button>
+<button class="px-md py-sm rounded-lg bg-primary-container text-on-primary font-label-md text-label-md hover:opacity-90 transition-opacity flex items-center gap-xs shadow-md">
+<span class="material-symbols-outlined text-[18px]">mail</span>
+                        Message
+                    </button>
+</div>
+</div>
+</div>
+<!-- Main Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Left Column: Profile & Contact -->
+<div class="lg:col-span-4 flex flex-col gap-gutter">
+<!-- Profile Card -->
+<div class="bg-surface rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] p-lg flex flex-col items-center text-center relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-primary-container/20 to-secondary-container/20"></div>
+<div class="w-24 h-24 rounded-full overflow-hidden border-4 border-surface shadow-sm relative z-10 mb-md">
+<img class="w-full h-full object-cover" data-alt="A vibrant professional portrait of a stylish woman in her 30s. She is wearing a chic tailored blazer. The lighting is crisp and modern, with soft shadows. The background is a clean, minimal white space that aligns with a high-end corporate or fashion SaaS platform aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxFMaRfhn52gzMwwSp2XLJyw2BpSul-YUrrt09GLFev3W9hJ-f7tssQkXzl-VHPtrp_alcycBL_QxI-c7LPHREzidmf_B6Q21Ic1IzBsVYN9sBl2FqHq42iMmq24XTRw5B3WeynVRlSrk7qm8zZoTJH5B_azUPRw1I6nz9ciMKxpG2-nVSILonscktevuaeYYRE7c6HebZ2ZakvoSeTSYcr14x1CebjKHSheMeaPvN4n3-y84rUyXytw"/>
+</div>
+<h2 class="font-title-lg text-title-lg text-on-background mb-xs relative z-10">Eleanor Vance</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md relative z-10">VIP Client · Member since 2021</p>
+<div class="flex gap-sm mb-lg relative z-10">
+<span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full font-label-sm text-label-sm">High Value</span>
+<span class="px-3 py-1 bg-surface-container-high text-on-surface-variant rounded-full font-label-sm text-label-sm">Frequent Buyer</span>
+</div>
+<div class="w-full border-t border-outline-variant pt-md flex flex-col gap-sm text-left">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-xs">Contact Information</h3>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-outline text-[20px]">mail</span>
+<span class="font-body-md text-body-md text-on-background truncate">eleanor.vance@example.com</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-outline text-[20px]">phone_iphone</span>
+<span class="font-body-md text-body-md text-on-background">+1 (555) 019-2834</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-outline text-[20px]">location_on</span>
+<span class="font-body-md text-body-md text-on-background">New York, NY</span>
+</div>
+</div>
+</div>
+<!-- Notes Card -->
+<div class="bg-surface rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] p-lg">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-title-lg text-title-lg text-on-background">Internal Notes</h3>
+<button class="text-primary hover:text-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md text-sm text-on-surface-variant">
+                        Prefers silk fabrics and tailored fits. Interested in upcoming vintage Chanel arrivals. Ensure expedited shipping for all future orders.
+                    </div>
+</div>
+</div>
+<!-- Right Column: Metrics & History -->
+<div class="lg:col-span-8 flex flex-col gap-gutter">
+<!-- Metrics Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<div class="bg-surface rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] p-md flex flex-col justify-between">
+<div class="flex items-center gap-sm mb-md text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Total Spent</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-on-background">$14,250.00</div>
+<div class="font-label-sm text-label-sm text-primary mt-sm flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +12% this year
+                        </div>
+</div>
+<div class="bg-surface rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] p-md flex flex-col justify-between">
+<div class="flex items-center gap-sm mb-md text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Total Orders</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-on-background">28</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-sm">Avg. $508/order</div>
+</div>
+<div class="bg-surface rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] p-md flex flex-col justify-between">
+<div class="flex items-center gap-sm mb-md text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">calendar_today</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Last Purchase</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-background">Oct 24, 2023</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-sm">14 days ago</div>
+</div>
+</div>
+<!-- Purchase History Table -->
+<div class="bg-surface rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] overflow-hidden flex flex-col">
+<div class="p-lg border-b border-outline-variant flex justify-between items-center bg-surface">
+<h3 class="font-title-lg text-title-lg text-on-background">Purchase History</h3>
+<div class="flex gap-sm">
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+<input class="pl-10 pr-4 py-2 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all w-64 bg-surface-container-lowest" placeholder="Search orders..." type="text"/>
+</div>
+<button class="p-sm rounded-lg border border-outline-variant text-on-background hover:bg-surface-container transition-colors md:hidden">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</button>
+<button class="p-sm rounded-lg border border-outline-variant text-on-background hover:bg-surface-container transition-colors flex items-center gap-xs">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+<span class="hidden md:inline font-label-md text-label-md">Filter</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-lowest border-b border-outline-variant">
+<th class="p-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Order ID</th>
+<th class="p-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Date</th>
+<th class="p-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Items</th>
+<th class="p-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Status</th>
+<th class="p-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-right">Total</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant bg-surface">
+<tr class="hover:bg-surface-container-lowest transition-colors group cursor-pointer">
+<td class="p-md font-body-md text-body-md text-primary font-medium">#ORD-9024</td>
+<td class="p-md font-body-md text-body-md text-on-surface-variant">Oct 24, 2023</td>
+<td class="p-md font-body-md text-body-md text-on-background flex items-center gap-sm">
+<div class="w-8 h-8 rounded bg-surface-container border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A detailed product shot of a sleek black designer leather handbag with minimal gold hardware. Shot against a pure white background in a studio setting, soft shadows beneath. High resolution, crisp focus, representing a luxury e-commerce item." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4q_JTaObri1aXBQ6wxeQ0Kj-dPhPyT_xVHhiIyLaQkZUDYJazNI5h0gL6Onft8dABz7Xpki0s98ty_a5pZcc6XjPaS0cphyEIBQJPMl0E9KvZ5NVNOak647TpGch-QA0KjpwHUwRzSFtXIE-432BZ-vTYWX52GWAyuHPvWSWy9VpM3AyW0cGVqxJ6j1e6ZMtRROE05Y5to1nZFsa81nNij0Go8yGnx6FOJsTT6lw5O5RoOhDbR5RfhQ"/>
+</div>
+<span>Vintage Chanel Flap Bag + 1</span>
+</td>
+<td class="p-md">
+<span class="px-2 py-1 bg-[#e6f4ea] text-[#137333] rounded-full font-label-sm text-label-sm border border-[#ceead6]">Delivered</span>
+</td>
+<td class="p-md font-body-md text-body-md text-on-background font-medium text-right">$4,250.00</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors group cursor-pointer">
+<td class="p-md font-body-md text-body-md text-primary font-medium">#ORD-8851</td>
+<td class="p-md font-body-md text-body-md text-on-surface-variant">Sep 12, 2023</td>
+<td class="p-md font-body-md text-body-md text-on-background flex items-center gap-sm">
+<div class="w-8 h-8 rounded bg-surface-container border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A studio photograph of a pair of pristine white designer sneakers with a subtle cream sole and minimal branding. Bright, even lighting. White background. Professional fashion e-commerce photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzoHFOLNEJlEQrC2-5c6qRJk3-EXdqcW9DWQdMcwYXIRtGFNdAWIUYZ60kGtDmGyaiQlr2IYKSkxfkc76WK0peWxOhpEYlUkbx98SNGte2xPKywYAJid-IsD06zj1L21G17DRGApiNGep9MYqO6fB7XvRQTuyHm1xIKibVS-E2SdDz_adomL01teYPbnJ3Wk0-pcZEuTsBmCHSJ4MrQlMlAoo5lv_kNhFVbugzxirKsVpgs96XE0ArGA"/>
+</div>
+<span>Margiela Replica Sneakers</span>
+</td>
+<td class="p-md">
+<span class="px-2 py-1 bg-[#e6f4ea] text-[#137333] rounded-full font-label-sm text-label-sm border border-[#ceead6]">Delivered</span>
+</td>
+<td class="p-md font-body-md text-body-md text-on-background font-medium text-right">$650.00</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors group cursor-pointer">
+<td class="p-md font-body-md text-body-md text-primary font-medium">#ORD-8102</td>
+<td class="p-md font-body-md text-body-md text-on-surface-variant">Jul 05, 2023</td>
+<td class="p-md font-body-md text-body-md text-on-background flex items-center gap-sm">
+<div class="w-8 h-8 rounded bg-surface-container border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A close-up product shot of a tailored navy blue blazer in high-quality wool. The image focuses on the texture of the fabric and the precision of the stitching. Pure white background, soft professional lighting suitable for luxury SaaS catalog." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmG1CVEYGy0WMmS2JYiBVbqrWAunGmR2Lsa7v_9XewtZYRWDo8IbgFvISgNr4RDSa3pUhE9e-snqGj3MllQp1nprwMzClHgWtO2aUjaWJiEIEMZS-8JoTmrsBiR2gn2idRIFQSIgesUnwWuk90QsLBqWHsZZuIK2TRNeU_mAeqNMLC17KT6RguSm1fousxehpniwn-EO5SfFYV6bUsGVE65JaxdTr9iHLNOuxGafQuc_XVl659ktaWKw"/>
+</div>
+<span>Acne Studios Blazer</span>
+</td>
+<td class="p-md">
+<span class="px-2 py-1 bg-[#fef7e0] text-[#b06000] rounded-full font-label-sm text-label-sm border border-[#feefc3]">Returned</span>
+</td>
+<td class="p-md font-body-md text-body-md text-on-background font-medium text-right">$890.00</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors group cursor-pointer">
+<td class="p-md font-body-md text-body-md text-primary font-medium">#ORD-7994</td>
+<td class="p-md font-body-md text-body-md text-on-surface-variant">Jun 20, 2023</td>
+<td class="p-md font-body-md text-body-md text-on-background flex items-center gap-sm">
+<div class="w-8 h-8 rounded bg-surface-container border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A delicate silver chain necklace with a minimalist geometric pendant, laid flat on a pristine white surface. Brilliant lighting catches the metallic shine. Corporate modern aesthetic, crisp and clean." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_PGYggHkvW6q7mMiTlhxYkOODu5Z94wUWvoCjOPy5OCeRxWgcjiLF9Li_Fz54WZ2GNdkMz0_bVBZkRDF6z80mCEhWHbPv_ggJELXyTphwWvGSu1tPwTMQdrg4Dv_iEDilOMgBAsmCD2ye0t9J4cCAhnwXyFQh-sqHxEroBUIuUJWsZKEhFfEAYEXC9Heeg5uIT6B47FvT7hrP3uYYFlMTKyCM--Rwh8q9J9szTX695nRwZBG9ZXBiog"/>
+</div>
+<span>Sophie Buhai Necklace</span>
+</td>
+<td class="p-md">
+<span class="px-2 py-1 bg-[#e6f4ea] text-[#137333] rounded-full font-label-sm text-label-sm border border-[#ceead6]">Delivered</span>
+</td>
+<td class="p-md font-body-md text-body-md text-on-background font-medium text-right">$425.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-md border-t border-outline-variant bg-surface flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Showing 4 of 28 orders</span>
+<div class="flex gap-sm">
+<button class="p-xs text-on-surface-variant hover:text-primary disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-surface dark:bg-surface-dim shadow-[0px_-4px_20px_rgba(23,21,43,0.04)] border-t border-outline-variant docked full-width rounded-t-xl md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-primary-fixed" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="dashboard">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-primary-fixed" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-sm text-label-sm">Products</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-container text-on-primary-container rounded-full px-4 py-1 Active: scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="hub">hub</span>
+<span class="font-label-sm text-label-sm">Network</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-primary-fixed" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="payments">payments</span>
+<span class="font-label-sm text-label-sm">Sales</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-primary-fixed" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="more_horiz">more_horiz</span>
+<span class="font-label-sm text-label-sm">More</span>
+</a>
+</nav>
+</body></html>

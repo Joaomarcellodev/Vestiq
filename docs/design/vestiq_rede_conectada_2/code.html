@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VESTIQ - Network</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-container": "#5d0047",
+                      "secondary-fixed": "#ffd8eb",
+                      "surface-variant": "#e4e0f4",
+                      "secondary": "#b1008a",
+                      "on-background": "#1b1a28",
+                      "error-container": "#ffdad6",
+                      "tertiary-fixed": "#e4dffe",
+                      "on-tertiary-fixed-variant": "#47445d",
+                      "on-secondary-fixed-variant": "#880069",
+                      "on-primary-container": "#dab6ff",
+                      "surface": "#fcf8ff",
+                      "surface-bright": "#fcf8ff",
+                      "on-primary": "#ffffff",
+                      "surface-container-high": "#eae6fa",
+                      "on-error-container": "#93000a",
+                      "outline-variant": "#cec2d5",
+                      "inverse-on-surface": "#f3eeff",
+                      "outline": "#7d7384",
+                      "on-tertiary-fixed": "#1b192f",
+                      "on-primary-fixed-variant": "#6415ac",
+                      "on-surface-variant": "#4c4453",
+                      "inverse-primary": "#dbb8ff",
+                      "on-primary-fixed": "#2b0052",
+                      "primary-fixed-dim": "#dbb8ff",
+                      "tertiary-fixed-dim": "#c8c3e1",
+                      "secondary-fixed-dim": "#ffaedd",
+                      "on-secondary-fixed": "#3b002c",
+                      "secondary-container": "#fe4cca",
+                      "tertiary-container": "#524f68",
+                      "on-error": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "surface-tint": "#7e38c6",
+                      "surface-container": "#f0ebff",
+                      "on-tertiary-container": "#c6c2e0",
+                      "surface-dim": "#dbd7ec",
+                      "primary": "#56009a",
+                      "surface-container-lowest": "#ffffff",
+                      "background": "#fcf8ff",
+                      "tertiary": "#3b3850",
+                      "surface-container-highest": "#e4e0f4",
+                      "primary-fixed": "#efdbff",
+                      "surface-container-low": "#f6f2ff",
+                      "on-secondary": "#ffffff",
+                      "on-surface": "#1b1a28",
+                      "inverse-surface": "#302f3e",
+                      "primary-container": "#7027b8"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xl": "32px",
+                      "xs": "4px",
+                      "md": "16px",
+                      "gutter": "24px",
+                      "sm": "8px",
+                      "lg": "24px",
+                      "margin-mobile": "16px",
+                      "unit": "4px",
+                      "margin-desktop": "40px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "title-lg": ["Plus Jakarta Sans"],
+                      "body-lg": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "label-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "label-sm": ["Plus Jakarta Sans"],
+                      "headline-lg-mobile": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+              }
+            }
+          }
+        }
+      </script>
+<style>
+          body {
+              background-color: #F8F7FA;
+          }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface antialiased pb-24 md:pb-0 pt-16 md:pt-0 flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="hidden md:flex flex justify-between items-center w-full px-margin-desktop h-16 bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline fixed top-0 left-0 z-50">
+<div class="flex items-center gap-4">
+<h1 class="font-display-lg text-display-lg font-bold tracking-tighter text-primary dark:text-primary-fixed">VESTIQ</h1>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors font-label-md text-label-md px-4 py-2 rounded-lg" href="#">Dashboard</a>
+<a class="text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors font-label-md text-label-md px-4 py-2 rounded-lg" href="#">Products</a>
+<a class="text-primary dark:text-primary-fixed font-semibold hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors font-label-md text-label-md px-4 py-2 rounded-lg opacity-80 scale-95 transition-all" href="#">Network</a>
+<a class="text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors font-label-md text-label-md px-4 py-2 rounded-lg" href="#">Sales</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:bg-surface-container rounded-full p-2">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-outline-variant">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A professional headshot of a business executive in a well-lit modern office environment. The lighting is soft and flattering, creating a premium corporate aesthetic with a slight purple hue in the background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlxVbfLv4pAv5NeOFSpoxuSoh40sItfv5XiCaCkjqG-bASREElcDifzwmkkT69tUvHia8UgrNxV8AqnF0Gx1jq10BRip0c2mMl_R85iIhrDDxZNn9nSD5vqoPhtvhN5QPqog0Lt3KwjkAnUcVaHV5l0Dnaa_NQR79SxSOczqyfjQuQIOMPOYhNzMQxV22bMaGc-sbPwK5eKjtdlk5zf6cGLU4gygLkbG4UtgTrEIjA7PpoiP710Qn6zQ"/>
+</div>
+</div>
+</header>
+<!-- Mobile Top Header -->
+<header class="md:hidden flex justify-between items-center w-full px-margin-mobile h-16 bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline fixed top-0 left-0 z-50">
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-outline-variant">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A professional headshot of a business executive in a well-lit modern office environment. The lighting is soft and flattering, creating a premium corporate aesthetic with a slight purple hue in the background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoPpDWz5btNMGzrsc4O7e3j8G7GKLYJdprOcNZwG-SGZMhVZMC-vklQXO3DWNgt8ZxKfCauy9ozNEkiyp9wRMAVyb1oQOFUBs_4P82X60g2qZKHVEV6zIGY5yuK-THaxpBWPbeSFmUJi8TE4Z1Pg9yTPvjl0Cjfm0oQiSgd2KKKQKN09RIxIPP76b1A0_zp2zrj8PUEcZjfzjax3umn_IoB3pDG3tE1Ye9q_nrZ1Xa_7kN8S_hHwSljQ"/>
+</div>
+<h1 class="font-display-lg text-[24px] font-bold tracking-tighter text-primary dark:text-primary-fixed">VESTIQ</h1>
+<button class="text-on-surface-variant hover:bg-surface-container rounded-full p-2">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-8 md:pt-24 px-margin-mobile md:px-margin-desktop max-w-7xl mx-auto w-full">
+<div class="flex flex-col gap-8 mb-8">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+<div>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">Reseller Network</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Connect and collaborate with verified partners in the private ecosystem.</p>
+</div>
+</div>
+<!-- Search and Filter Bar -->
+<div class="bg-surface border border-outline-variant p-2 rounded-lg flex flex-col md:flex-row gap-4 shadow-[0px_4px_20px_rgba(23,21,43,0.04)]">
+<div class="relative flex-grow">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-10 pr-4 py-3 bg-surface border-none rounded-md focus:ring-2 focus:ring-primary focus:outline-none font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant" placeholder="Search resellers by name, boutique, or location..." type="text"/>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-md text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" style="font-size: 18px;">filter_list</span>
+                        Filter
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-md text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" style="font-size: 18px;">sort</span>
+                        Sort
+                    </button>
+</div>
+</div>
+</div>
+<!-- Network List View -->
+<div class="flex flex-col gap-4">
+<!-- Reseller Item 1 -->
+<div class="bg-surface border border-outline-variant rounded-xl p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-[0px_4px_20px_rgba(23,21,43,0.04)] hover:shadow-[0px_12px_32px_rgba(23,21,43,0.08)] transition-shadow">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-lg bg-surface-variant border border-outline-variant overflow-hidden flex-shrink-0">
+<img alt="Boutique profile" class="w-full h-full object-cover" data-alt="A modern luxury boutique storefront with elegant minimalist signage reading 'Maison Luma'. The exterior is a clean white stone with sophisticated lighting, reflecting a premium retail environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJBWegBZkcVV79zUt1yjQVERokyzLpRJ6Dd1jJAFffY5KhzmGwUp0pgGb0o3AYPZLUrf8D6xL2OjCLtWOLer94Ay6jp_NXoAPUXPD2-YejDj1_Ws5leRdQLVywNuSzhH4816OxN0PttJfwBX-UrMWaVp749awBPErcVPPODiUToHx7w-JcUWdEroi3Qf8onE0qY3StgDF0ROqcoP-qCeGEeNKV22kOtzE1ZfIzIKf-4fNSA62lSOI1gw"/>
+</div>
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface">Maison Luma</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-1">Eleanor Vance</p>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined" style="font-size: 14px;">location_on</span>
+<span>Paris, France</span>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap md:flex-nowrap items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
+<div class="flex gap-2">
+<span class="bg-surface-container-high text-on-surface px-3 py-1 rounded-full font-label-sm text-label-sm border border-outline-variant">High Volume</span>
+<span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-label-sm text-label-sm">Verified</span>
+</div>
+<button class="ml-auto md:ml-0 bg-transparent border border-outline-variant text-[#17152B] font-label-md text-label-md px-6 py-2 rounded-lg hover:border-primary hover:text-primary transition-colors whitespace-nowrap">
+                        View Profile
+                    </button>
+</div>
+</div>
+<!-- Reseller Item 2 -->
+<div class="bg-surface border border-outline-variant rounded-xl p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-[0px_4px_20px_rgba(23,21,43,0.04)] hover:shadow-[0px_12px_32px_rgba(23,21,43,0.08)] transition-shadow">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-lg bg-surface-variant border border-outline-variant overflow-hidden flex-shrink-0">
+<img alt="Boutique profile" class="w-full h-full object-cover" data-alt="A sleek, minimalist retail space in Milan displaying high-end leather goods. The interior features polished concrete floors, brushed steel accents, and bright, high-key lighting for a modern B2B feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgsvyuBAeNt30eeuClZZdVLikQcA5KVcHYEogTpmnGYmVgYUw8UNQq1mTgFeq2peeqmLXuYCZVhfH-xwiLVQ1_eywu-QIB39quVuCUU2byNgIyCuzX0R30nwsKu4rwNAAA3P3dvfqm5II4rKUj3dex-K5rpotES81DAAfiIKkq7MvI2a2tag6fpqoVBH1o3kO07rDAUQeZPu2etswGuOugQKsN15uCiBgH1FrT4UfG8vEK9MN6y7PIKw"/>
+</div>
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface">Atelier Rosso</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-1">Marco Bianchi</p>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined" style="font-size: 14px;">location_on</span>
+<span>Milan, Italy</span>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap md:flex-nowrap items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
+<div class="flex gap-2">
+<span class="bg-surface-container-high text-on-surface px-3 py-1 rounded-full font-label-sm text-label-sm border border-outline-variant">Specialist</span>
+</div>
+<button class="ml-auto md:ml-0 bg-transparent border border-outline-variant text-[#17152B] font-label-md text-label-md px-6 py-2 rounded-lg hover:border-primary hover:text-primary transition-colors whitespace-nowrap">
+                        View Profile
+                    </button>
+</div>
+</div>
+<!-- Reseller Item 3 -->
+<div class="bg-surface border border-outline-variant rounded-xl p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-[0px_4px_20px_rgba(23,21,43,0.04)] hover:shadow-[0px_12px_32px_rgba(23,21,43,0.08)] transition-shadow">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-lg bg-surface-variant border border-outline-variant overflow-hidden flex-shrink-0">
+<img alt="Boutique profile" class="w-full h-full object-cover" data-alt="A high-end contemporary fashion showroom in New York. The image shows racks of curated garments against a stark white background with subtle purple accent lighting, conveying premium exclusivity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSimRkbtquFEAzm2C8jQAmJoj1yUIYaX2ZGQJi-GfEn67tVCUC4_UiK6urGwjT9zR7NkcDR-0Ravfc3UY2McYxhnCD8nUFAbYZpk1EBcisivXeIeBCBYjZzfdI1kGGSPrjU49SdY6sNsnX_O-CIJQmWi-OnVkBUMVlyxYwWarVnVaAq0DnnxOhKk6IySHd94H2jfvUm493__k7TkIUo77M53glZd0KemDCe25A2O9CIxxzoE_qGp7twg"/>
+</div>
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface">The Vault Collective</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-1">Sarah Chen</p>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined" style="font-size: 14px;">location_on</span>
+<span>New York, USA</span>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap md:flex-nowrap items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
+<div class="flex gap-2">
+<span class="bg-surface-container-high text-on-surface px-3 py-1 rounded-full font-label-sm text-label-sm border border-outline-variant">New Partner</span>
+<span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-label-sm text-label-sm">Verified</span>
+</div>
+<button class="ml-auto md:ml-0 bg-transparent border border-outline-variant text-[#17152B] font-label-md text-label-md px-6 py-2 rounded-lg hover:border-primary hover:text-primary transition-colors whitespace-nowrap">
+                        View Profile
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-surface dark:bg-surface-dim shadow-[0px_-4px_20px_rgba(23,21,43,0.04)] border-t border-outline-variant docked full-width rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-primary-fixed w-16" href="#">
+<span class="material-symbols-outlined mb-1">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-primary-fixed w-16" href="#">
+<span class="material-symbols-outlined mb-1">inventory_2</span>
+<span class="font-label-sm text-label-sm">Products</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90 transition-transform duration-150 w-16" href="#">
+<span class="material-symbols-outlined mb-1">hub</span>
+<span class="font-label-sm text-label-sm">Network</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-primary-fixed w-16" href="#">
+<span class="material-symbols-outlined mb-1">payments</span>
+<span class="font-label-sm text-label-sm">Sales</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-primary-fixed w-16" href="#">
+<span class="material-symbols-outlined mb-1">more_horiz</span>
+<span class="font-label-sm text-label-sm">More</span>
+</a>
+</nav>
+</body></html>

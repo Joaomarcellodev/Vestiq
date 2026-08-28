@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Perfil da Loja - VESTIQ</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#fe4cca",
+                        "outline-variant": "#cec2d5",
+                        "on-secondary-fixed-variant": "#880069",
+                        "primary-fixed": "#efdbff",
+                        "on-surface": "#1b1a28",
+                        "on-primary-fixed": "#2b0052",
+                        "on-surface-variant": "#4c4453",
+                        "inverse-surface": "#302f3e",
+                        "tertiary": "#3b3850",
+                        "surface-container-low": "#f6f2ff",
+                        "surface-container": "#f0ebff",
+                        "background": "#fcf8ff",
+                        "on-primary-container": "#dab6ff",
+                        "surface-container-highest": "#e4e0f4",
+                        "inverse-on-surface": "#f3eeff",
+                        "secondary-fixed": "#ffd8eb",
+                        "surface-bright": "#fcf8ff",
+                        "tertiary-fixed-dim": "#c8c3e1",
+                        "on-tertiary-container": "#c6c2e0",
+                        "surface-tint": "#7e38c6",
+                        "surface-dim": "#dbd7ec",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#5d0047",
+                        "surface-variant": "#e4e0f4",
+                        "surface": "#fcf8ff",
+                        "secondary": "#b1008a",
+                        "on-secondary-fixed": "#3b002c",
+                        "tertiary-fixed": "#e4dffe",
+                        "on-error-container": "#93000a",
+                        "on-background": "#1b1a28",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#524f68",
+                        "primary-fixed-dim": "#dbb8ff",
+                        "on-tertiary-fixed-variant": "#47445d",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#dbb8ff",
+                        "on-tertiary-fixed": "#1b192f",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#eae6fa",
+                        "primary-container": "#7027b8",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#6415ac",
+                        "outline": "#7d7384",
+                        "secondary-fixed-dim": "#ffaedd",
+                        "error-container": "#ffdad6",
+                        "primary": "#56009a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "unit": "4px",
+                        "sm": "8px",
+                        "margin-desktop": "40px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "title-lg": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased min-h-screen flex flex-col font-body-md">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-50 bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16">
+<div class="flex items-center gap-sm cursor-pointer active:opacity-70 text-primary dark:text-primary-fixed-dim hover:bg-surface-container-high transition-colors p-sm rounded-full">
+<span class="material-symbols-outlined text-[24px]" data-icon="arrow_back">arrow_back</span>
+</div>
+<div class="font-display-lg text-headline-md tracking-tight font-bold text-primary dark:text-primary-fixed-dim">
+            VESTIQ
+        </div>
+<div class="flex items-center gap-sm cursor-pointer active:opacity-70 text-on-surface-variant hover:bg-surface-container-high transition-colors p-sm rounded-full">
+<span class="material-symbols-outlined text-[24px]" data-icon="more_vert">more_vert</span>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow w-full max-w-7xl mx-auto pb-24 md:pb-lg pt-lg px-margin-mobile md:px-margin-desktop">
+<!-- Store Header Profile -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(23,21,43,0.04)] border border-outline-variant/30 p-lg md:p-xl mb-xl flex flex-col md:flex-row gap-lg md:gap-xl items-start relative overflow-hidden">
+<!-- Decorative subtle gradient bg -->
+<div class="absolute inset-0 bg-gradient-to-tr from-surface-container-low to-transparent opacity-50 pointer-events-none"></div>
+<div class="relative z-10 w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-2 border-surface-container-lowest shadow-sm flex-shrink-0 bg-surface-variant">
+<img class="w-full h-full object-cover" data-alt="A high-end, minimalist store logo for a luxury fashion resale boutique. The logo features elegant, stark serif typography reading 'MB' against a soft, very light grey background. The lighting is subtle and professional, conveying trust, premium quality, and corporate sophistication typical of a modern B2B SaaS platform for fashion." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBu9q_E6LpM7arh2cNOS07e0kjRLyRI0wcXTjB5hvYCZp-SSK9ZM8fkoy26UDYD9as85_LlfYkCSndsyEc1ILWmYQ8_15D_NjnID4L7v3Di3Un-PDSPuQLFKzSFYBMCGpAHflrGSmvrOk3S01CeZfcOeE6qFBbAOl8ePTxnJ14jsBxrenQVNvn6Q3CZX2PhQkN01s87m-cSa0CueGT0eFRM6p5HJ8MccOuUOmEhzZaNg48fpA3F1BiKQ"/>
+</div>
+<div class="relative z-10 flex-grow flex flex-col justify-center w-full">
+<div class="flex flex-col md:flex-row md:justify-between md:items-start w-full gap-md">
+<div>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-xs">Maison Boutique SP</h1>
+<div class="flex items-center gap-sm text-on-surface-variant font-body-md text-body-md mb-md">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span>São Paulo, SP</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant mx-1"></span>
+<span class="flex items-center text-primary-container font-semibold">
+<span class="material-symbols-outlined text-[16px] mr-1" data-weight="fill">star</span>
+                                4.9 (128 avaliações)
+                            </span>
+</div>
+</div>
+<div class="flex gap-sm w-full md:w-auto">
+<button class="flex-1 md:flex-none flex items-center justify-center gap-xs px-lg py-sm bg-primary-container text-on-primary font-label-md text-label-md rounded-lg hover:opacity-90 transition-opacity whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">chat</span>
+                            Enviar Mensagem
+                        </button>
+<button class="flex-1 md:flex-none flex items-center justify-center gap-xs px-lg py-sm bg-surface-container-lowest border border-outline-variant text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-low transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+                            Seguir
+                        </button>
+</div>
+</div>
+<!-- Stats -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-md mt-lg border-t border-outline-variant/30 pt-lg w-full">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-xs">Negócios de Sucesso</span>
+<span class="font-title-lg text-title-lg text-on-background font-semibold">452</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-xs">Ofertas Ativas</span>
+<span class="font-title-lg text-title-lg text-on-background font-semibold">84</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-xs">Taxa de Resposta</span>
+<span class="font-title-lg text-title-lg text-on-background font-semibold text-emerald-600">98%</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-xs">Membro Desde</span>
+<span class="font-title-lg text-title-lg text-on-background font-semibold">Jan 2022</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Tabs/Filter (Simulated) -->
+<div class="flex border-b border-outline-variant/30 mb-lg">
+<button class="px-md py-sm border-b-2 border-primary text-primary font-label-md text-label-md mr-md">Vitrine</button>
+<button class="px-md py-sm border-b-2 border-transparent text-on-surface-variant hover:text-on-surface font-label-md text-label-md mr-md transition-colors">Sobre</button>
+<button class="px-md py-sm border-b-2 border-transparent text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors">Avaliações</button>
+</div>
+<!-- Showcase Grid -->
+<section>
+<div class="flex justify-between items-center mb-lg">
+<h2 class="font-title-lg text-title-lg text-on-background font-semibold">Vitrine Atual</h2>
+<div class="flex gap-sm">
+<button class="p-xs rounded hover:bg-surface-container-high transition-colors text-on-surface-variant"><span class="material-symbols-outlined">filter_list</span></button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Product Card 1 -->
+<article class="bg-surface-container-lowest rounded-[12px] border border-outline-variant/30 shadow-[0px_4px_20px_rgba(23,21,43,0.04)] overflow-hidden group flex flex-col h-full cursor-pointer hover:shadow-[0px_12px_32px_rgba(23,21,43,0.08)] transition-shadow">
+<div class="relative h-48 w-full bg-surface-variant">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A professional, flat-lay photograph of a pristine, high-end designer handbag. The bag is sleek, black leather with minimalistic gold hardware. It is presented on a clean, stark white background. The lighting is bright, even, and creates a sophisticated, clinical modern look suitable for a premium fashion resale catalog." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUM7XYu_UaeffWJZ8Fk1BHTqHCVCxMsebjxYA0KCED6dZyYglLxgOe_Vz0Xrsqs3_bYIeDV-wsb1W7eAQYfQRha4CeaBM-UCZvfq-wks1UvlnkuvYvgG7F2jx-yBjiNOrAW8zcVRZHFnctymniS7jc0_aqvx4LFT9brnL_gsofymGkfdYiOe2hA1nG88Pa5GZgL2BDp6OMP1HoAjsgCQ57pT6vGGJTZpoCti5u5p1mpGXGXRfY_V7BSg"/>
+<div class="absolute top-sm right-sm bg-primary-container text-on-primary px-sm py-xs rounded-full font-label-sm text-label-sm uppercase tracking-wider">Lote Disponível</div>
+</div>
+<div class="p-md flex flex-col flex-grow">
+<h3 class="font-title-lg text-title-lg text-on-background font-semibold mb-xs line-clamp-2">Lote Premium Bolsas Couro - SS24</h3>
+<p class="font-body-sm text-body-md text-on-surface-variant mb-md flex-grow line-clamp-2">Lote de 15 peças em excelente estado. Certificação de autenticidade inclusa para todos os itens.</p>
+<div class="flex justify-between items-end border-t border-outline-variant/20 pt-sm mt-auto">
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant mb-xs">Valor Estimado</span>
+<span class="font-title-lg text-title-lg text-primary-container font-bold">R$ 45.000</span>
+</div>
+<button class="text-primary-container hover:text-primary transition-colors flex items-center gap-xs font-label-md text-label-md">
+                                Ver Detalhes <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Product Card 2 -->
+<article class="bg-surface-container-lowest rounded-[12px] border border-outline-variant/30 shadow-[0px_4px_20px_rgba(23,21,43,0.04)] overflow-hidden group flex flex-col h-full cursor-pointer hover:shadow-[0px_12px_32px_rgba(23,21,43,0.08)] transition-shadow">
+<div class="relative h-48 w-full bg-surface-variant">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A meticulously styled, highly detailed product shot of a pair of luxury stiletto heels. The shoes are a subtle nude tone, placed elegantly on a geometric, light grey pedestal against a white background. The studio lighting highlights the premium materials and sharp lines, perfectly aligning with a sophisticated, B2B fashion wholesale aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAljHlG-G717rhNcsabG-ggi4NEW2Lj8b3XuYy9LdTf0BfIYjL-e9GlDSvHT8FEdkXLzP76r5cVpSRrxPN99US2ii-rh4II4r-ohaQE2p5mll2SBelmX6TW_NbHwFlExsbqHa9nmKoOiWELJBNxy2AdpEQTOSyF9tqWfdOhtuMBGzwWDWlrghG1Lg5oIcYkiLiFzExfmYBl2rW7vmzqtqeWEDQVeo32ml7zxFt_4RaiMiI6KXXKMyuaAw"/>
+</div>
+<div class="p-md flex flex-col flex-grow">
+<h3 class="font-title-lg text-title-lg text-on-background font-semibold mb-xs line-clamp-2">Calçados Festa - Grade Completa</h3>
+<p class="font-body-sm text-body-md text-on-surface-variant mb-md flex-grow line-clamp-2">Coleção festa nunca usada. Grade do 35 ao 39. Cores neutras.</p>
+<div class="flex justify-between items-end border-t border-outline-variant/20 pt-sm mt-auto">
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant mb-xs">Valor Estimado</span>
+<span class="font-title-lg text-title-lg text-primary-container font-bold">R$ 12.500</span>
+</div>
+<button class="text-primary-container hover:text-primary transition-colors flex items-center gap-xs font-label-md text-label-md">
+                                Ver Detalhes <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Product Card 3 -->
+<article class="bg-surface-container-lowest rounded-[12px] border border-outline-variant/30 shadow-[0px_4px_20px_rgba(23,21,43,0.04)] overflow-hidden group flex flex-col h-full cursor-pointer hover:shadow-[0px_12px_32px_rgba(23,21,43,0.08)] transition-shadow">
+<div class="relative h-48 w-full bg-surface-variant">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A clean, minimalist presentation of folded luxury cashmere sweaters stacked neatly. The colors are muted earth tones: beige, soft grey, and camel. They are set against a pristine, bright studio background, emphasizing texture and high quality in a professional, wholesale catalog format." src="https://lh3.googleusercontent.com/aida-public/AB6AXuByxtSJpLNzgGTC0b8640cxYshNXyp5v09aHD9EKhSHU-SIPA8Vyibz_dkmCM8T7S97DH7dlpwErHRoiIGjPUdJsFLEcoRkNNOlM5s5mf3FvBvQgVRvg9bHs7K-dTAaSkM8cTWF-tGgHNk9ktcVfCVJXJDuhhe_QQ8tSh1xbe7n_JGBBbTzh2QEO6rfPfu1TQDuHJfS_4Yhma9a2n3wqV7AYmI3chuam3i5wg6lK1JR_JJEsfF0hIyM3g"/>
+<div class="absolute top-sm right-sm bg-surface-container-lowest/80 backdrop-blur text-on-surface px-sm py-xs rounded-full font-label-sm text-label-sm border border-outline-variant/50">Negociação Iniciada</div>
+</div>
+<div class="p-md flex flex-col flex-grow">
+<h3 class="font-title-lg text-title-lg text-on-background font-semibold mb-xs line-clamp-2">Tricot Inverno - Marcas Mistas</h3>
+<p class="font-body-sm text-body-md text-on-surface-variant mb-md flex-grow line-clamp-2">Peças de meia-estação e inverno. Casacos, cardigans e suéteres de lã.</p>
+<div class="flex justify-between items-end border-t border-outline-variant/20 pt-sm mt-auto">
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant mb-xs">Valor Estimado</span>
+<span class="font-title-lg text-title-lg text-primary-container font-bold">R$ 8.200</span>
+</div>
+<button class="text-primary-container hover:text-primary transition-colors flex items-center gap-xs font-label-md text-label-md">
+                                Ver Detalhes <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile only) -->
+<nav class="flex justify-around items-center w-full py-sm bg-surface dark:bg-surface-dim border-t border-outline-variant pb-safe fixed bottom-0 z-50 md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:text-primary transition-all active:scale-95 duration-100" href="#">
+<span class="material-symbols-outlined text-[24px]">dashboard</span>
+<span class="font-label-md text-label-md mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:text-primary transition-all active:scale-95 duration-100" href="#">
+<span class="material-symbols-outlined text-[24px]">inventory_2</span>
+<span class="font-label-md text-label-md mt-1">Products</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim bg-primary-fixed dark:bg-primary-container rounded-xl px-3 py-1 hover:text-primary transition-all active:scale-95 duration-100" href="#">
+<span class="material-symbols-outlined text-[24px]" data-weight="fill">hub</span>
+<span class="font-label-md text-label-md mt-1">Network</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:text-primary transition-all active:scale-95 duration-100" href="#">
+<span class="material-symbols-outlined text-[24px]">payments</span>
+<span class="font-label-md text-label-md mt-1">Sales</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:text-primary transition-all active:scale-95 duration-100" href="#">
+<span class="material-symbols-outlined text-[24px]">more_horiz</span>
+<span class="font-label-md text-label-md mt-1">More</span>
+</a>
+</nav>
+</body></html>

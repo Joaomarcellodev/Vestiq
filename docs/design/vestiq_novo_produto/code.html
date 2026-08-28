@@ -1,0 +1,295 @@
+<!DOCTYPE html><html lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Novo Produto - Vestiq</title>
+<!-- Google Fonts: Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Design System Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#f6f2ff",
+                    "on-surface-variant": "#4c4453",
+                    "surface-dim": "#dbd7ec",
+                    "surface": "#fcf8ff",
+                    "tertiary-fixed-dim": "#c8c3e1",
+                    "error-container": "#ffdad6",
+                    "on-background": "#1b1a28",
+                    "secondary-fixed-dim": "#ffaedd",
+                    "primary-container": "#7027b8",
+                    "on-primary-fixed": "#2b0052",
+                    "inverse-surface": "#302f3e",
+                    "secondary": "#b1008a",
+                    "tertiary-fixed": "#e4dffe",
+                    "on-secondary-fixed": "#3b002c",
+                    "on-primary-fixed-variant": "#6415ac",
+                    "on-surface": "#1b1a28",
+                    "tertiary-container": "#524f68",
+                    "on-error": "#ffffff",
+                    "primary-fixed-dim": "#dbb8ff",
+                    "tertiary": "#3b3850",
+                    "on-tertiary-fixed": "#1b192f",
+                    "primary": "#56009a",
+                    "on-secondary-fixed-variant": "#880069",
+                    "on-tertiary": "#ffffff",
+                    "secondary-fixed": "#ffd8eb",
+                    "inverse-on-surface": "#f3eeff",
+                    "surface-container": "#f0ebff",
+                    "secondary-container": "#fe4cca",
+                    "inverse-primary": "#dbb8ff",
+                    "background": "#fcf8ff",
+                    "on-tertiary-container": "#c6c2e0",
+                    "on-primary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-container-high": "#eae6fa",
+                    "surface-bright": "#fcf8ff",
+                    "surface-tint": "#7e38c6",
+                    "on-secondary-container": "#5d0047",
+                    "on-primary-container": "#dab6ff",
+                    "surface-variant": "#e4e0f4",
+                    "on-error-container": "#93000a",
+                    "on-secondary": "#ffffff",
+                    "surface-container-highest": "#e4e0f4",
+                    "primary-fixed": "#efdbff",
+                    "on-tertiary-fixed-variant": "#47445d",
+                    "outline-variant": "#cec2d5",
+                    "outline": "#7d7384"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "24px",
+                    "unit": "4px",
+                    "md": "16px",
+                    "margin-desktop": "40px",
+                    "xs": "4px",
+                    "sm": "8px",
+                    "gutter": "24px",
+                    "margin-mobile": "16px",
+                    "xl": "32px"
+            },
+            "fontFamily": {
+                    "title-lg": ["Plus Jakarta Sans"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "label-sm": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom Scrollbar for a premium feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: theme('colors.background');
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.outline-variant');
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.outline');
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex flex-col">
+<!-- Transactional Header (Suppressed global nav logic) -->
+<header class="bg-surface border-b border-outline-variant sticky top-0 z-40">
+<div class="max-w-4xl mx-auto px-margin-mobile md:px-margin-desktop h-16 flex items-center justify-between">
+<div class="flex items-center gap-md">
+<button class="p-2 -ml-2 rounded-full hover:bg-surface-container transition-colors text-on-surface-variant group">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-title-lg text-title-lg text-on-surface">Novo Produto</h1>
+</div>
+<div class="flex items-center gap-sm">
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-primary px-4 py-2 rounded-lg transition-colors">
+                    Rascunhos
+                </button>
+</div>
+</div>
+</header>
+<!-- Main Form Content -->
+<main class="flex-grow py-8 px-margin-mobile md:px-margin-desktop">
+<div class="max-w-4xl mx-auto">
+<form action="#" class="space-y-8" method="POST">
+<!-- Section: Product Photo Upload -->
+<section class="bg-surface rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] p-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-md">Mídia do Produto</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-lg">Adicione imagens de alta qualidade para destacar seu produto no catálogo.</p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<!-- Primary Dropzone -->
+<div class="md:col-span-2 border-2 border-dashed border-outline-variant rounded-xl bg-surface-container-lowest hover:bg-surface-container transition-colors flex flex-col items-center justify-center p-xl cursor-pointer group min-h-[240px]">
+<div class="bg-primary-container/10 p-4 rounded-full mb-4 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary text-4xl" data-icon="add_photo_alternate">add_photo_alternate</span>
+</div>
+<span class="font-label-md text-label-md text-primary mb-1">Clique para fazer upload</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-center">ou arraste e solte<br>PNG, JPG até 10MB</span>
+</div>
+<!-- Secondary Slots (Placeholders) -->
+<div class="grid grid-cols-2 md:grid-cols-1 gap-md">
+<div class="border border-outline-variant rounded-xl bg-surface-container-lowest flex items-center justify-center h-28 cursor-pointer hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-outline-variant" data-icon="add">add</span>
+</div>
+<div class="border border-outline-variant rounded-xl bg-surface-container-lowest flex items-center justify-center h-28 cursor-pointer hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-outline-variant" data-icon="add">add</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Basic Info -->
+<section class="bg-surface rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] p-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-lg">Informações Básicas</h2>
+<div class="space-y-md">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm" for="product-name">Nome do Produto *</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary-container/50 transition-all placeholder:text-outline" id="product-name" name="product-name" placeholder="Ex: Jaqueta de Couro Vintage" type="text">
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm" for="sku">SKU (Código Interno)</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary-container/50 transition-all placeholder:text-outline" id="sku" name="sku" placeholder="VST-001" type="text">
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm" for="category">Categoria *</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-lg text-on-surface appearance-none focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary-container/50 transition-all" id="category" name="category">
+<option disabled="" selected="" value="">Selecione uma categoria</option>
+<option value="outerwear">Agasalhos &amp; Jaquetas</option>
+<option value="tops">Tops &amp; Camisetas</option>
+<option value="bottoms">Calças &amp; Saias</option>
+<option value="accessories">Acessórios</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm" for="description">Descrição Detalhada</label>
+<textarea class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary-container/50 transition-all placeholder:text-outline resize-y" id="description" name="description" placeholder="Descreva o material, estado de conservação e detalhes únicos da peça..." rows="4"></textarea>
+</div>
+</div>
+</section>
+<!-- Section: Pricing & Stock (Bento Grid Style) -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Pricing -->
+<section class="bg-surface rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] p-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="payments">payments</span>
+                            Precificação
+                        </h2>
+<div class="space-y-md">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm" for="cost-price">Custo de Aquisição</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 font-body-lg text-outline-variant">R$</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg pl-12 pr-4 py-3 font-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary-container/50 transition-all placeholder:text-outline" id="cost-price" name="cost-price" placeholder="0,00" type="number">
+</div>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm" for="sale-price">Preço de Venda *</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 font-body-lg text-primary">R$</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg pl-12 pr-4 py-3 font-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary-container/50 transition-all placeholder:text-outline" id="sale-price" name="sale-price" placeholder="0,00" type="number">
+</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant/50 flex justify-between items-center mt-4">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Margem Estimada</span>
+<span class="font-title-lg text-title-lg text-primary">-- %</span>
+</div>
+</div>
+</section>
+<!-- Stock -->
+<section class="bg-surface rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] p-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="inventory_2">inventory_2</span>
+                            Estoque &amp; Variantes
+                        </h2>
+<div class="space-y-md">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm" for="quantity">Quantidade em Estoque *</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary-container/50 transition-all" id="quantity" min="0" name="quantity" type="number" value="1">
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm">Tamanho (Opcional)</label>
+<div class="flex flex-wrap gap-2">
+<label class="cursor-pointer">
+<input class="peer sr-only" name="size" type="radio" value="P">
+<div class="px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-md peer-checked:bg-primary peer-checked:text-on-primary peer-checked:border-primary transition-colors">P</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="size" type="radio" value="M">
+<div class="px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-md peer-checked:bg-primary peer-checked:text-on-primary peer-checked:border-primary transition-colors">M</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="size" type="radio" value="G">
+<div class="px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-md peer-checked:bg-primary peer-checked:text-on-primary peer-checked:border-primary transition-colors">G</div>
+</label>
+<label class="cursor-pointer">
+<input checked="" class="peer sr-only" name="size" type="radio" value="U">
+<div class="px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-md peer-checked:bg-primary peer-checked:text-on-primary peer-checked:border-primary transition-colors">Único</div>
+</label>
+</div>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm" for="color">Cor Predominante</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary-container/50 transition-all placeholder:text-outline" id="color" name="color" placeholder="Ex: Preto, Azul Marinho..." type="text">
+</div>
+</div>
+</section>
+</div>
+<!-- Spacer for sticky footer -->
+<div class="h-24"></div>
+</form>
+</div>
+</main>
+<!-- Sticky Bottom Action Bar -->
+<div class="fixed bottom-0 left-0 w-full bg-surface border-t border-outline-variant p-4 md:p-6 z-50 shadow-[0px_-4px_20px_rgba(23,21,43,0.04)]">
+<div class="max-w-4xl mx-auto flex flex-col-reverse md:flex-row justify-end items-center gap-4">
+<button class="w-full md:w-auto px-6 py-3 rounded-lg font-label-md text-label-md text-on-surface border border-outline-variant hover:bg-surface-container transition-colors focus:outline-none focus:ring-4 focus:ring-outline-variant/30" type="button">
+                Cancelar
+            </button>
+<button class="w-full md:w-auto px-8 py-3 rounded-lg font-label-md text-label-md bg-[#7027b8] text-white hover:bg-primary transition-colors shadow-md focus:outline-none focus:ring-4 focus:ring-primary-container/50 flex items-center justify-center gap-2" type="submit">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span>
+                Salvar Produto
+            </button>
+</div>
+</div>
+</body></html>
