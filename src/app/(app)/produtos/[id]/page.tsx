@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { getProduct } from "@/features/catalog/queries";
+import { BackButton } from "@/components/molecules/back-button";
 import { classifyStock, DEFAULT_LOW_STOCK_THRESHOLD } from "@/features/inventory/classify";
 import { StockControls } from "@/features/inventory/components/stock-controls";
 import { PageHeader } from "@/components/molecules/page-header";
@@ -19,12 +19,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-lg">
-      <Link
-        href="/produtos"
-        className="font-label-md text-label-md uppercase tracking-wider text-primary-container"
-      >
-        ← Inventário
-      </Link>
+      <BackButton fallback="/produtos" label="Inventário" />
       <PageHeader
         title={product.name}
         description={[product.brand, product.categories?.name].filter(Boolean).join(" · ")}

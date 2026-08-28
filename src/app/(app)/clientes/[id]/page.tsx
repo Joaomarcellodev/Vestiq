@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { BackButton } from "@/components/molecules/back-button";
 import Link from "next/link";
 import { getCustomerWithHistory } from "@/features/customers/queries";
 import { PageHeader } from "@/components/molecules/page-header";
@@ -18,12 +19,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
 
   return (
     <div className="space-y-lg">
-      <Link
-        href="/clientes"
-        className="font-label-md text-label-md uppercase tracking-wider text-primary-container"
-      >
-        ← Clientes
-      </Link>
+      <BackButton fallback="/clientes" label="Clientes" />
       <PageHeader
         title={customer.name}
         description={[customer.email, customer.phone].filter(Boolean).join(" · ")}

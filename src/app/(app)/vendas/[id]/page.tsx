@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import { BackButton } from "@/components/molecules/back-button";
 import { getSale } from "@/features/sales/queries";
 import { cancelSale } from "@/features/sales/actions";
 import { PageHeader } from "@/components/molecules/page-header";
@@ -18,12 +18,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="space-y-lg">
-      <Link
-        href="/vendas"
-        className="font-label-md text-label-md uppercase tracking-wider text-primary-container"
-      >
-        ← Vendas
-      </Link>
+      <BackButton fallback="/vendas" label="Vendas" />
       <PageHeader
         title={formatBRL(Number(sale.total))}
         description={`${sale.customers?.name ?? "Venda avulsa"} · ${new Date(sale.created_at).toLocaleString("pt-BR")}`}

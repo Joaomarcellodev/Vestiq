@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import { BackButton } from "@/components/molecules/back-button";
 import { getNegotiation } from "@/features/negotiations/queries";
 import { negotiationAction } from "@/features/negotiations/actions";
 import { transition } from "@/features/negotiations/state-machine";
@@ -43,12 +43,7 @@ export default async function NegotiationDetailPage({
 
   return (
     <div className="space-y-lg">
-      <Link
-        href="/negociacoes"
-        className="font-label-md text-label-md uppercase tracking-wider text-primary-container"
-      >
-        ← Negociações
-      </Link>
+      <BackButton fallback="/negociacoes" label="Negociações" />
       <PageHeader
         title={variant?.products?.name ?? "Negociação"}
         description={`${n.seller?.name} → ${n.buyer?.name}`}

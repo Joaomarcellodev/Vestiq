@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import { BackButton } from "@/components/molecules/back-button";
 import { getOffer } from "@/features/offers/queries";
 import { cancelOffer } from "@/features/offers/actions";
 import { ProposeForm } from "@/features/negotiations/components/propose-form";
@@ -19,12 +19,7 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
 
   return (
     <div className="space-y-lg">
-      <Link
-        href="/rede"
-        className="font-label-md text-label-md uppercase tracking-wider text-primary-container"
-      >
-        ← Rede
-      </Link>
+      <BackButton fallback="/rede" label="Rede" />
       <PageHeader
         title={variant?.products?.name ?? "Oferta"}
         description={[
