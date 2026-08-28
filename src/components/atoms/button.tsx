@@ -13,21 +13,21 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const base =
-  "inline-flex items-center justify-center gap-sm rounded-lg font-label-md text-label-md uppercase tracking-wider transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-container focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-semibold leading-none transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-container focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.99]";
 
 const variants: Record<Variant, string> = {
-  // DESIGN.md §Buttons — buttons use the primary-container fill (see ADR-0006)
+  // DESIGN.md §Buttons — primary-container fill (see ADR-0006)
   primary: "bg-primary-container text-on-primary shadow-primary hover:bg-primary",
   secondary:
-    "border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container",
-  ghost: "text-on-surface-variant hover:bg-surface-container hover:text-primary-container",
+    "border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-low",
+  ghost: "text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface",
   danger: "bg-error text-on-error hover:brightness-95",
 };
 
 const sizes: Record<Size, string> = {
-  sm: "h-9 px-3",
-  md: "h-11 px-4",
-  lg: "h-12 px-6",
+  sm: "h-9 px-3.5 text-body-md",
+  md: "h-11 px-5 text-body-md",
+  lg: "h-12 px-6 text-body-lg",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(

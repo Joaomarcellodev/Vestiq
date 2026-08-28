@@ -28,7 +28,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
     <div className="w-full">
       <label
         htmlFor={inputId}
-        className="mb-xs block font-label-md text-label-md uppercase tracking-wider text-on-surface"
+        className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface"
       >
         {label}
       </label>

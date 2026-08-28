@@ -10,7 +10,7 @@ export interface LogoProps {
 
 export function Logo({ size = 40, withWordmark = true, className }: LogoProps) {
   return (
-    <span className={cn("inline-flex items-center gap-3", className)}>
+    <span className={cn("inline-flex items-center gap-2.5", className)}>
       <Image
         src="/logo02.jpeg"
         alt="Vestiq"
@@ -20,7 +20,10 @@ export function Logo({ size = 40, withWordmark = true, className }: LogoProps) {
         className="rounded-md object-contain"
       />
       {withWordmark && (
-        <span className="font-display-lg text-headline-lg tracking-tight text-on-surface">
+        <span
+          className="font-display-lg tracking-tight"
+          style={{ fontSize: size * 0.62, fontWeight: 700 }}
+        >
           VESTIQ
         </span>
       )}

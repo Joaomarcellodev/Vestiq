@@ -50,7 +50,7 @@ export function LoginForm({ next, oauthError }: { next: string; oauthError?: boo
           <Checkbox label="Lembrar-me" name="remember" value="true" />
           <Link
             href="/recuperar-senha"
-            className="font-label-md text-label-md uppercase tracking-wider text-primary-container transition-colors hover:text-primary"
+            className="font-body-md text-body-md font-semibold text-primary-container transition-colors hover:text-primary"
           >
             Esqueci minha senha
           </Link>
@@ -63,16 +63,18 @@ export function LoginForm({ next, oauthError }: { next: string; oauthError?: boo
 
       <div className="my-lg flex items-center gap-4">
         <span className="h-px flex-1 bg-outline-variant" />
-        <span className="font-label-sm text-label-sm uppercase tracking-widest text-outline">
-          ou acesse com
-        </span>
+        <span className="font-body-md text-body-md text-on-surface-variant">ou</span>
         <span className="h-px flex-1 bg-outline-variant" />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <OAuthButton provider="google" next={next} label="Google" icon="mail" />
-        <OAuthButton provider="apple" next={next} label="Apple" icon="devices" />
+        <OAuthButton provider="google" next={next} label="Google" icon="google" />
+        <OAuthButton provider="apple" next={next} label="Apple" icon="apple" />
       </div>
+
+      <p className="mt-lg text-center font-body-md text-body-md text-on-surface-variant">
+        Recebeu um convite? Abra o link enviado pela sua fábrica para entrar na rede.
+      </p>
     </div>
   );
 }

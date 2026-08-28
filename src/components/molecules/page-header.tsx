@@ -6,14 +6,14 @@ export interface PageHeaderProps {
 
 export function PageHeader({ title, description, action }: PageHeaderProps) {
   return (
-    <header className="flex items-start justify-between gap-4">
-      <div>
-        <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">{title}</h1>
+    <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0">
+        <h1 className="font-headline-lg text-headline-lg text-on-surface">{title}</h1>
         {description && (
           <p className="mt-1 font-body-md text-body-md text-on-surface-variant">{description}</p>
         )}
       </div>
-      {action}
+      {action && <div className="shrink-0 [&_a]:inline-block">{action}</div>}
     </header>
   );
 }

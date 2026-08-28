@@ -16,33 +16,44 @@ export default async function LoginPage({
   const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
 
   return (
-    <main className="flex min-h-screen flex-col md:flex-row">
-      {/* Brand / hero — desktop only (login/code.html) */}
-      <section className="relative hidden flex-1 overflow-hidden bg-surface-container-high md:flex">
-        <div className="absolute inset-0 bg-gradient-to-tr from-surface/80 via-surface/40 to-transparent" />
-        <div className="relative z-10 flex h-full max-w-xl flex-col justify-end p-margin-desktop">
-          <h2 className="mb-lg font-display-lg text-display-lg text-on-surface">
+    <main className="flex min-h-screen">
+      {/* Brand panel — desktop only */}
+      <section className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-primary p-12 text-on-primary lg:flex xl:w-[45%]">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-secondary-container/30 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-32 -left-16 h-96 w-96 rounded-full bg-primary-container/40 blur-3xl"
+        />
+        <Logo size={32} className="relative" />
+        <div className="relative max-w-md">
+          <h2 className="font-display-lg text-display-lg leading-tight">
             Sua rede vende melhor conectada.
           </h2>
-          <p className="font-body-lg text-body-lg text-on-surface-variant">
-            O Vestiq é a plataforma de gestão para o mercado de revenda de moda. Conecte seu estoque
-            às oportunidades da sua rede.
+          <p className="mt-lg font-body-lg text-body-lg text-primary-fixed">
+            Gestão de estoque, clientes e vendas — e uma rede privada para circular as peças com
+            outras revendedoras da sua fábrica.
           </p>
         </div>
+        <p className="relative font-label-md text-label-md uppercase tracking-widest text-primary-fixed-dim">
+          Vestiq · B2B fashion
+        </p>
       </section>
 
-      {/* Form */}
-      <section className="relative z-10 flex flex-1 flex-col justify-center bg-surface px-margin-mobile py-12 md:px-margin-desktop md:py-0">
-        <div className="mx-auto w-full max-w-md">
-          <div className="mb-xl flex justify-center md:justify-start">
-            <Logo size={56} />
+      {/* Form panel */}
+      <section className="flex flex-1 flex-col justify-center bg-surface px-6 py-12 sm:px-12">
+        <div className="mx-auto w-full max-w-sm">
+          <div className="mb-xl flex justify-center lg:hidden">
+            <Logo size={40} />
           </div>
-          <div className="mb-lg text-center md:text-left">
-            <h1 className="mb-sm font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-lg md:text-headline-lg">
+          <div className="mb-xl">
+            <h1 className="font-headline-lg text-headline-lg text-on-surface">
               Bem-vindo de volta
             </h1>
-            <p className="font-body-md text-body-md text-on-surface-variant">
-              Acesse sua conta para gerenciar seu estoque.
+            <p className="mt-2 font-body-md text-body-md text-on-surface-variant">
+              Acesse sua conta para gerenciar seu negócio.
             </p>
           </div>
           <LoginForm next={safeNext} oauthError={error === "oauth"} />

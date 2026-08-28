@@ -62,27 +62,29 @@ export default async function ProductsPage({
             <li key={p.id}>
               <Link
                 href={`/produtos/${p.id}`}
-                className="flex items-center justify-between rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-surface transition-colors hover:bg-surface-container-low"
+                className="flex flex-col gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-surface transition-colors hover:bg-surface-container-low"
               >
-                <div>
-                  <p className="font-title-lg text-title-lg text-on-surface">{p.name}</p>
-                  <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
-                    {[p.brand, p.internalSku && `SKU ${p.internalSku}`]
-                      .filter(Boolean)
-                      .join(" · ") || "Sem SKU"}
-                  </p>
-                  <div className="mt-2 flex items-center gap-2">
-                    <Badge tone={p.totalStock > 0 ? "neutral" : "error"}>
-                      {p.totalStock} em estoque
-                    </Badge>
-                    <Badge tone="neutral">
-                      {p.variantCount} variaç{p.variantCount === 1 ? "ão" : "ões"}
-                    </Badge>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-title-lg text-title-lg text-on-surface">{p.name}</p>
+                    <p className="mt-0.5 truncate font-body-md text-body-md text-on-surface-variant">
+                      {[p.brand, p.internalSku && `SKU ${p.internalSku}`]
+                        .filter(Boolean)
+                        .join(" · ") || "Sem SKU"}
+                    </p>
                   </div>
+                  <span className="shrink-0 font-title-lg text-title-lg text-primary-container">
+                    {p.minPrice !== null ? formatBRL(p.minPrice) : "—"}
+                  </span>
                 </div>
-                <span className="font-title-lg text-title-lg text-primary-container">
-                  {p.minPrice !== null ? formatBRL(p.minPrice) : "—"}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge tone={p.totalStock > 0 ? "neutral" : "error"}>
+                    {p.totalStock} em estoque
+                  </Badge>
+                  <Badge tone="neutral">
+                    {p.variantCount} variaç{p.variantCount === 1 ? "ão" : "ões"}
+                  </Badge>
+                </div>
               </Link>
             </li>
           ))}
