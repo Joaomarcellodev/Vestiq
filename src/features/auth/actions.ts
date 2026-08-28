@@ -68,7 +68,8 @@ export async function signInWithOAuth(formData: FormData): Promise<void> {
 /** RF-AUTH-002 — end the session. */
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  // "local" — end only this device's session, not every session for the user.
+  await supabase.auth.signOut({ scope: "local" });
   redirect("/login");
 }
 
