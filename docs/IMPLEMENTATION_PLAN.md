@@ -22,6 +22,9 @@ Status: **atualizar a cada PR**.
 | CI GitHub Actions (lint → typecheck → test → e2e) | ⬜ |
 | Configurar provedores OAuth (Google, Apple) no Supabase | ⬜ |
 | `develop` protegida no GitHub | ⬜ |
+| Ambiente local Supabase (portas 544xx) + migrations 0001–0009 aplicadas | ✅ |
+| Seed de desenvolvimento (`scripts/seed.mjs`) | ✅ |
+| 70 testes unit/integration + 5 E2E verdes; `build`/`lint`/`typecheck` limpos | ✅ |
 
 ## Fase 1 — Modelo de dados & RLS
 
@@ -52,17 +55,17 @@ As demais migrations acompanham cada feature.
 
 | # | Feature | Sprint | RF | Telas | Depende de | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | **auth** | 1 | RF-AUTH-001..004 | login | Fase 0 | 🟨 |
-| 2 | **organizations** | 1 | base RF-NET, RF-AUTH-004 | — | auth | ⬜ |
-| 3 | **network** | 1 / 6 | RF-NET-001..008 | rede conectada 1·2, perfil da revendedora | organizations | ⬜ |
-| 4 | **catalog** | 2 | RF-PROD-001..006 | novo produto, detalhes do produto, inventário | organizations | ⬜ |
-| 5 | **inventory** | 3 | RF-INV-001..006 | inventário, detalhes do produto | catalog | ⬜ |
-| 6 | **customers** | 3 | RF-CUSTOMER-001..004 | clientes, detalhes do cliente | organizations | ⬜ |
-| 7 | **sales** | 3 | RF-SALE-001..009 | registrar venda, vendas | inventory, customers | ⬜ |
-| 8 | **offers** | 4 | RF-OFFER-001..007 | detalhes da oferta, rede | inventory, network | ⬜ |
-| 9 | **negotiations** | 5 | RF-NEG-001..009 | negociações, chat de negociação | offers | ⬜ |
-| 10 | **dashboard (revendedora)** | 3→6 | RF-DASH-001 | dashboard | sales, inventory, offers, negotiations | ⬜ |
-| 11 | **dashboard (fábrica)** | 6 | RF-FACTORY-DASH-001 | (nova) | network, offers, negotiations | ⬜ |
+| 1 | **auth** | 1 | RF-AUTH-001..004 | login | Fase 0 | ✅ |
+| 2 | **organizations** | 1 | base RF-NET, RF-AUTH-004 | — | auth | ✅ |
+| 3 | **network** | 1 / 6 | RF-NET-001..008 | rede conectada 1·2, perfil da revendedora | organizations | 🟨 back-end + telas base; falta email de convite real, perfil público |
+| 4 | **catalog** | 2 | RF-PROD-001..006 | novo produto, detalhes do produto, inventário | organizations | 🟨 CRUD funcional; falta upload de imagens, categorias UI, archive UI |
+| 5 | **inventory** | 3 | RF-INV-001..006 | inventário, detalhes do produto | catalog | ✅ RPCs + controles; histórico de movimentações pendente na UI |
+| 6 | **customers** | 3 | RF-CUSTOMER-001..004 | clientes, detalhes do cliente | organizations | 🟨 CRUD + histórico; falta editar/arquivar na UI |
+| 7 | **sales** | 3 | RF-SALE-001..009 | registrar venda, vendas | inventory, customers | ✅ confirmar/cancelar transacional + telas |
+| 8 | **offers** | 4 | RF-OFFER-001..007 | detalhes da oferta, rede | inventory, network | ✅ publicar/cancelar + feed + detalhe |
+| 9 | **negotiations** | 5 | RF-NEG-001..009 | negociações, chat de negociação | offers | ✅ proposta→aceite→conclusão transacional + timeline |
+| 10 | **dashboard (revendedora)** | 3→6 | RF-DASH-001 | dashboard | sales, inventory, offers, negotiations | 🟨 KPIs principais; falta "mais vendidos", highlights da rede |
+| 11 | **dashboard (fábrica)** | 6 | RF-FACTORY-DASH-001 | (nova) | network, offers, negotiations | 🟨 `/rede-fabrica` com indicadores agregados; falta view `security_barrier` dedicada |
 
 Cada feature: `SPEC → ACCEPTANCE → TESTS` (em `specs/<feature>/`) → migration + RLS
 → `queries.ts`/`actions.ts` → componentes → composição da página → testes → PR
