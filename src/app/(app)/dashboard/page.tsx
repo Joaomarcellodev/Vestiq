@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser } from "@/features/auth/queries";
 import { getResellerDashboard } from "@/features/dashboard/queries";
+import {
+  SalesTrendChart,
+  TopProductsChart,
+} from "@/features/dashboard/components/dashboard-charts";
 import { StatCard } from "@/components/molecules/stat-card";
 import { Button, Icon } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
@@ -17,16 +21,24 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-lg">
-      <header>
-        <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
-          Bom dia{name ? `, ${name}` : ""}.
-        </h1>
-        <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
-          Resumo de {data.orgName} — {new Date().toLocaleDateString("pt-BR", { month: "long" })}.
-        </p>
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="font-headline-lg text-headline-lg text-on-surface">
+            Bom dia{name ? `, ${name}` : ""}.
+          </h1>
+          <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
+            Resumo de {data.orgName} — {new Date().toLocaleDateString("pt-BR", { month: "long" })}.
+          </p>
+        </div>
+        <Link href="/vendas/nova" className="shrink-0">
+          <Button size="md">
+            <Icon name="add_circle" size={18} />
+            Registrar venda
+          </Button>
+        </Link>
       </header>
 
-      <div className="grid gap-md sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-md sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Vendas no mês"
           value={formatBRL(data.monthRevenue)}
@@ -43,15 +55,12 @@ export default async function DashboardPage() {
           value={String(data.pendingNegotiations)}
           accent={data.pendingNegotiations > 0 ? "ação necessária" : undefined}
         />
-        <StatCard label="Ofertas ativas" value={String(data.activeOffers)} />
       </div>
 
-      <Link href="/vendas/nova">
-        <Button size="lg" fullWidth>
-          <Icon name="add_circle" size={20} />
-          Registrar venda
-        </Button>
-      </Link>
+      <div className="grid gap-md lg:grid-cols-2">
+        <SalesTrendChart data={data.salesTrend} />
+        <TopProductsChart data={data.topProducts} />
+      </div>
 
       <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
         <div className="flex items-center gap-2">
@@ -63,11 +72,13 @@ export default async function DashboardPage() {
             Nenhum produto com estoque baixo.
           </p>
         ) : (
-          <ul className="mt-sm divide-y divide-outline-variant">
+          <ul className="mt-2 divide-y divide-outline-variant">
             {data.lowStock.map((item) => (
-              <li key={item.id} className="flex items-center justify-between py-3">
-                <span className="font-body-md text-body-md text-on-surface">{item.label}</span>
-                <span className="font-label-md text-label-md text-error">
+              <li key={item.id} className="flex items-center justify-between gap-3 py-3">
+                <span className="min-w-0 truncate font-body-md text-body-md text-on-surface">
+                  {item.label}
+                </span>
+                <span className="shrink-0 font-body-md text-body-md font-semibold text-error">
                   {item.stock} restante{item.stock > 1 ? "s" : ""}
                 </span>
               </li>
