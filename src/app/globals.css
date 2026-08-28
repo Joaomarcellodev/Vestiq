@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background font-sans text-on-background;
+  }
+
+  ::selection {
+    @apply bg-primary-container text-on-primary;
+  }
+
+  /* Sensible defaults for native form controls that keep the design language. */
+  select,
+  textarea,
+  input {
+    @apply font-sans;
+  }
+}
+
+@layer components {
+  /* DESIGN.md — Input Fields §Focus State */
+  .field-focus-ring {
+    @apply border-outline-variant transition-shadow duration-150;
+  }
+  .field-focus-ring:focus,
+  .field-focus-ring:focus-visible {
+    @apply border-primary-container outline-none;
+    box-shadow: theme("boxShadow.focus-ring");
+  }
+
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Chat de Negociação - VESTIQ</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#fe4cca",
+                    "outline-variant": "#cec2d5",
+                    "on-secondary-fixed-variant": "#880069",
+                    "primary-fixed": "#efdbff",
+                    "on-surface": "#1b1a28",
+                    "on-primary-fixed": "#2b0052",
+                    "on-surface-variant": "#4c4453",
+                    "inverse-surface": "#302f3e",
+                    "tertiary": "#3b3850",
+                    "surface-container-low": "#f6f2ff",
+                    "surface-container": "#f0ebff",
+                    "background": "#fcf8ff",
+                    "on-primary-container": "#dab6ff",
+                    "surface-container-highest": "#e4e0f4",
+                    "inverse-on-surface": "#f3eeff",
+                    "secondary-fixed": "#ffd8eb",
+                    "surface-bright": "#fcf8ff",
+                    "tertiary-fixed-dim": "#c8c3e1",
+                    "on-tertiary-container": "#c6c2e0",
+                    "surface-tint": "#7e38c6",
+                    "surface-dim": "#dbd7ec",
+                    "error": "#ba1a1a",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-container": "#5d0047",
+                    "surface-variant": "#e4e0f4",
+                    "surface": "#fcf8ff",
+                    "secondary": "#b1008a",
+                    "on-secondary-fixed": "#3b002c",
+                    "tertiary-fixed": "#e4dffe",
+                    "on-error-container": "#93000a",
+                    "on-background": "#1b1a28",
+                    "on-error": "#ffffff",
+                    "tertiary-container": "#524f68",
+                    "primary-fixed-dim": "#dbb8ff",
+                    "on-tertiary-fixed-variant": "#47445d",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#dbb8ff",
+                    "on-tertiary-fixed": "#1b192f",
+                    "on-secondary": "#ffffff",
+                    "surface-container-high": "#eae6fa",
+                    "primary-container": "#7027b8",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed-variant": "#6415ac",
+                    "outline": "#7d7384",
+                    "secondary-fixed-dim": "#ffaedd",
+                    "error-container": "#ffdad6",
+                    "primary": "#56009a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "unit": "4px",
+                    "sm": "8px",
+                    "margin-desktop": "40px",
+                    "md": "16px",
+                    "lg": "24px",
+                    "margin-mobile": "16px",
+                    "gutter": "24px",
+                    "xl": "32px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "label-sm": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "title-lg": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8F7FA; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .fill-icon { font-variation-settings: 'FILL' 1; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background flex flex-col h-screen overflow-hidden">
+<!-- TopAppBar Semantic Shell - Supressed as this is a transactional/task-focused sub-page (Chat) -->
+<!-- Custom Chat Header -->
+<header class="flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 w-full bg-surface shadow-sm border-b border-outline-variant shrink-0 sticky top-0 z-10">
+<div class="flex items-center gap-md cursor-pointer hover:bg-surface-container-high transition-colors p-sm rounded-lg -ml-sm">
+<span class="material-symbols-outlined text-on-surface-variant">arrow_back</span>
+<div class="flex items-center gap-sm">
+<img class="w-10 h-10 rounded-full object-cover border border-outline-variant shadow-sm" data-alt="A professional headshot of a female fashion reseller in her 30s, looking confident. She is wearing a modern, tailored blazer. The lighting is soft and studio-quality, emphasizing a premium corporate modern aesthetic suitable for a high-end B2B fashion platform. The background is a subtle, out-of-focus clothing rack to establish context without distracting from her face." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVxOrR_YmMensZcJTQ01YIoE9M2x45k0IZVEpcL-vlBPlliJNXANAlen9askBN0EGlyHWuNh9vHHqXIihq9zUIlB_OghFCTdj81LolDVxMMKOTQNTEN_akiX7P9t9EgSXxsnGmYulHR6V2kSixwPnXaNqB9XbvyPf1q7gadB_DwjmL_PM8_q_8YRZBrVTrRys-XwAlUd70NL4JaIo5D4-oJGNttFEFWVgTE9Y0ArJGV4PiumI7yEMD7Q"/>
+<div>
+<h2 class="font-title-lg text-title-lg text-on-surface leading-tight">Clara Mendes</h2>
+<p class="font-label-md text-label-md text-on-surface-variant">Online agora</p>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="hidden sm:flex items-center gap-sm bg-surface-container-lowest border border-outline-variant rounded-lg p-xs pr-md shadow-sm">
+<img class="w-8 h-8 rounded object-cover" data-alt="A close-up studio shot of a luxury black leather handbag with gold hardware. The bag is positioned slightly angled on a pristine white surface, highlighting its texture and premium quality. The lighting is crisp and even, creating a sophisticated, high-end commercial aesthetic. Minimalist background to ensure focus on the product." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOeV3d38nBDR25-czYXBcUnl9kGHIVp-7S53hgSMNcTkvhibb6_fAp4gk0gWJ-I_1agBdpXRU1AIKWi3CFUWWyOTLJrXXTZH8uHZ-xkwslyBUzjAOXLL9bzDnsUHzjKVqHVCCZ_-nTXe92suuDnnOYRyNl4M3BQzCtLAFW3s7REji4xfMX9nTsiaRqbEWPp3n8tRM_DMj3kRA3O9S_GMTZRXYfYhPAkgeDS8PiCDRHR8fzSVUb7jayfg"/>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Negociando:</span>
+<span class="font-label-md text-label-md text-on-surface truncate w-32">Bolsa Chanel Classic Flap</span>
+</div>
+</div>
+<button class="p-sm text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Chat Canvas -->
+<main class="flex-1 overflow-y-auto px-margin-mobile md:px-margin-desktop py-lg hide-scrollbar flex flex-col gap-lg pb-32">
+<div class="text-center">
+<span class="font-label-md text-label-md text-on-surface-variant bg-surface-container-high px-md py-xs rounded-full">Hoje</span>
+</div>
+<!-- Received Message -->
+<div class="flex gap-sm self-start max-w-[85%] md:max-w-[70%]">
+<img class="w-8 h-8 rounded-full object-cover hidden sm:block mt-auto border border-outline-variant shadow-sm" data-alt="A professional headshot of a female fashion reseller in her 30s, looking confident. She is wearing a modern, tailored blazer. The lighting is soft and studio-quality, emphasizing a premium corporate modern aesthetic suitable for a high-end B2B fashion platform. The background is a subtle, out-of-focus clothing rack to establish context without distracting from her face." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKOFaWN3kVFKLQ9EUvdFPkiZFUhJUoHO8xt1nismc0DOhVX_CV7jNrGv6Hj1ixp2tUbZ8EWJLesMmvTrc8L5honHi2U1BX7UrFCyhmsjitN3rG6Hu-z1EXWuxxoqvcdUPP8iVc99CFNeTbfvazU0G4H6s9xGjJclUqwE4HJoA4ccJvYpGxvPbOite3EVvM-HeCTnj35_WXajqdoGQNSw53E5ybM_Eq0DDPC2grQIYbZxMtqg86SBE6fw"/>
+<div class="flex flex-col gap-xs">
+<div class="bg-surface-container-lowest border border-outline-variant text-on-surface font-body-lg text-body-lg p-md rounded-2xl rounded-bl-sm shadow-sm">
+                    Olá! Vi que você tem a Bolsa Chanel Classic Flap disponível para transferência. O lote 4022B está impecável.
+                </div>
+<span class="font-label-sm text-label-sm text-on-surface-variant ml-sm">09:41</span>
+</div>
+</div>
+<!-- Sent Message -->
+<div class="flex gap-sm self-end max-w-[85%] md:max-w-[70%]">
+<div class="flex flex-col gap-xs items-end">
+<div class="bg-primary-container text-on-primary font-body-lg text-body-lg p-md rounded-2xl rounded-br-sm shadow-sm">
+                    Bom dia, Clara. Sim, está disponível. Recebemos na semana passada e passou por autenticação rigorosa. Qual a sua proposta?
+                </div>
+<span class="font-label-sm text-label-sm text-on-surface-variant mr-sm flex items-center gap-xs">
+                    09:45 <span class="material-symbols-outlined text-[14px] text-primary">done_all</span>
+</span>
+</div>
+</div>
+<!-- Received Proposal Card -->
+<div class="flex gap-sm self-start max-w-[95%] md:max-w-[80%] w-full">
+<img class="w-8 h-8 rounded-full object-cover hidden sm:block mt-auto border border-outline-variant shadow-sm" data-alt="A professional headshot of a female fashion reseller in her 30s, looking confident. She is wearing a modern, tailored blazer. The lighting is soft and studio-quality, emphasizing a premium corporate modern aesthetic suitable for a high-end B2B fashion platform. The background is a subtle, out-of-focus clothing rack to establish context without distracting from her face." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVwLP9RKVf0MRzauaiFlHJ2lbTIZyT4ojIAArjcbtef7a7RL0RQzb5x9LjYcTSUYPMMufveJhJSWeqLtZ68x8m4MZu2VuDjhjGKE6K51snf9_yUl7mSog_GIhZaAspefW0uie_B_ryhwNCQa15zGZDZdoEz5OSO_8bQ1sVEVO5vInm4uLQKF3x0WYa-xgkArwxsvWfW58Vh14Lf4z_k6wfsI_x7nZutWcFzA0b3XsCOcRg3SRcEpltzw"/>
+<div class="flex flex-col gap-xs w-full">
+<!-- Special Interactive Proposal Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-md overflow-hidden relative w-full">
+<!-- Subtle Accent Line -->
+<div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+<div class="p-md md:p-lg">
+<div class="flex justify-between items-start mb-md">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary fill-icon">description</span>
+<span class="font-headline-md text-headline-md text-on-surface">Proposta de Transferência</span>
+</div>
+<span class="bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm px-sm py-xs rounded-full">Em Análise</span>
+</div>
+<div class="flex flex-col sm:flex-row gap-lg items-center border-t border-b border-outline-variant py-md mb-md">
+<div class="w-full sm:w-1/3 flex justify-center">
+<img class="w-24 h-24 rounded-lg object-cover shadow-sm border border-outline-variant" data-alt="A close-up studio shot of a luxury black leather handbag with gold hardware. The bag is positioned slightly angled on a pristine white surface, highlighting its texture and premium quality. The lighting is crisp and even, creating a sophisticated, high-end commercial aesthetic. Minimalist background to ensure focus on the product." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD81j0bm5wP-6n2KK5I51wkqTwQZOUYwPr_qP_MPmoYNSuuUmyCl3KtM_RarP1wTof-_jQLM6qbvVhelOnvcf6OJQ9SMwaeTsUYwplCa5Xu8iFa1INvTgCxiNEJ94n2x6jM7oe1reJY6suQHUG9xJLOZuxz90RSOz8vZ7KNTUCWkn3fw56h28si07zQX5XCE3bL1Fo5jasuVa-qpfAQA4zJKOlEHGV-_L3iKZG9BT9PJvinrTdTNj1JIQ"/>
+</div>
+<div class="w-full sm:w-2/3 flex flex-col gap-sm">
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface">Bolsa Chanel Classic Flap</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Lote #4022B • Condição: Pristine</p>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Valor Ofertado</span>
+<span class="font-display-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold">R$ 28.500,00</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row gap-sm justify-end">
+<button class="px-lg py-sm font-label-md text-label-md text-on-surface border border-outline-variant rounded-lg hover:bg-surface-container-highest hover:text-primary transition-colors">
+                                Fazer Contraproposta
+                            </button>
+<button class="px-lg py-sm font-label-md text-label-md bg-primary-container text-on-primary rounded-lg shadow-sm hover:opacity-90 transition-opacity">
+                                Aceitar Proposta
+                            </button>
+</div>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant ml-sm">09:50</span>
+</div>
+</div>
+</main>
+<!-- Bottom Input Bar -->
+<div class="fixed bottom-0 w-full bg-surface border-t border-outline-variant p-sm md:p-md flex items-center gap-sm shadow-[0px_-4px_20px_rgba(23,21,43,0.04)] z-20 pb-safe">
+<button class="p-sm text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors flex-shrink-0">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<div class="flex-1 relative">
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-full py-sm px-md pr-xl font-body-lg text-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim transition-all shadow-sm" placeholder="Digite sua mensagem..." type="text"/>
+<button class="absolute right-xs top-1/2 -translate-y-1/2 p-xs text-on-surface-variant hover:text-primary transition-colors rounded-full">
+<span class="material-symbols-outlined">sentiment_satisfied</span>
+</button>
+</div>
+<button class="p-sm bg-primary-container text-on-primary rounded-full shadow-sm hover:opacity-90 transition-opacity flex-shrink-0 flex items-center justify-center h-10 w-10">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+<!-- BottomNavBar Semantic Shell - Supressed as this is a transactional/task-focused sub-page (Chat) -->
+</body></html>

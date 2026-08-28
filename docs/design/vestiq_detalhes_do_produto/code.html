@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Product Detail - Vestiq</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#5d0047",
+                        "secondary-fixed": "#ffd8eb",
+                        "surface-variant": "#e4e0f4",
+                        "secondary": "#b1008a",
+                        "on-background": "#1b1a28",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#e4dffe",
+                        "on-tertiary-fixed-variant": "#47445d",
+                        "on-secondary-fixed-variant": "#880069",
+                        "on-primary-container": "#dab6ff",
+                        "surface": "#fcf8ff",
+                        "surface-bright": "#fcf8ff",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#eae6fa",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#cec2d5",
+                        "inverse-on-surface": "#f3eeff",
+                        "outline": "#7d7384",
+                        "on-tertiary-fixed": "#1b192f",
+                        "on-primary-fixed-variant": "#6415ac",
+                        "on-surface-variant": "#4c4453",
+                        "inverse-primary": "#dbb8ff",
+                        "on-primary-fixed": "#2b0052",
+                        "primary-fixed-dim": "#dbb8ff",
+                        "tertiary-fixed-dim": "#c8c3e1",
+                        "secondary-fixed-dim": "#ffaedd",
+                        "on-secondary-fixed": "#3b002c",
+                        "secondary-container": "#fe4cca",
+                        "tertiary-container": "#524f68",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#7e38c6",
+                        "surface-container": "#f0ebff",
+                        "on-tertiary-container": "#c6c2e0",
+                        "surface-dim": "#dbd7ec",
+                        "primary": "#56009a",
+                        "surface-container-lowest": "#ffffff",
+                        "background": "#fcf8ff",
+                        "tertiary": "#3b3850",
+                        "surface-container-highest": "#e4e0f4",
+                        "primary-fixed": "#efdbff",
+                        "surface-container-low": "#f6f2ff",
+                        "on-secondary": "#ffffff",
+                        "on-surface": "#1b1a28",
+                        "inverse-surface": "#302f3e",
+                        "primary-container": "#7027b8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "xs": "4px",
+                        "md": "16px",
+                        "gutter": "24px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "title-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-surface text-primary border-b border-outline-variant flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<button class="md:hidden text-on-surface hover:bg-surface-container rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="font-display-lg text-headline-lg-mobile md:text-headline-lg font-bold tracking-tighter text-primary">VESTIQ</div>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="font-label-md text-label-md text-on-surface-variant hover:bg-surface-container px-3 py-2 rounded-md transition-colors" href="#">Dashboard</a>
+<a class="font-label-md text-label-md text-primary font-semibold hover:bg-surface-container px-3 py-2 rounded-md transition-colors border-b-2 border-primary" href="#">Products</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:bg-surface-container px-3 py-2 rounded-md transition-colors" href="#">Network</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:bg-surface-container px-3 py-2 rounded-md transition-colors" href="#">Sales</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:bg-surface-container px-3 py-2 rounded-md transition-colors" href="#">More</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface hover:bg-surface-container rounded-full p-2 transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a business user in a modern office setting. The lighting is soft and corporate, creating a trustworthy and efficient mood. The image uses a clean, light color palette with subtle warm tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4QC-pDuQ_CuqOtQDykL79J5VMFrkgh61V8ZNpjl7w_72PfO5rTJRwjNbB0P1KOUTM0WpxfWQ4TjA9H5FSPEQO4ZiC5bOlqs_kEIdFNGHW0xnnkyAtCzyVfmqnZgo7svmG73AXqx5z_zQM6Ce_DH4MTJw4lHeNiUrmcBAzQ8FipFVrGmyoIO4iJZva9xzJSq-1pdOSmg8-ogCEBZVgMmuxE8XhktfSBlj58pRRN2vOkof3n2yq8iz0OQ"/>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-8">
+<!-- Breadcrumb & Actions -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<a class="hover:text-primary font-label-md text-label-md transition-colors flex items-center" href="#"><span class="material-symbols-outlined text-[16px] mr-1">arrow_back</span> Inventory</a>
+<span class="font-label-md text-label-md">/</span>
+<span class="font-label-md text-label-md text-on-surface">Product Details</span>
+</div>
+<div class="flex gap-4 w-full md:w-auto">
+<button class="flex-1 md:flex-none border border-outline-variant text-on-background font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-surface-container transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">edit</span> Edit Product
+                </button>
+<button class="flex-1 md:flex-none bg-primary-container text-on-primary font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-primary transition-colors flex items-center justify-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">share</span> Available in Network
+                </button>
+</div>
+</div>
+<!-- Main Content Bento Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Left Column: Gallery & Core Info -->
+<div class="lg:col-span-2 space-y-6">
+<!-- Product Gallery Card -->
+<div class="bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(23,21,43,0.04)]">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-1 bg-surface-container-lowest">
+<div class="aspect-square relative group bg-surface-container-low">
+<img alt="Main Product Image" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A high-end luxury handbag displayed on a pristine white marble pedestal. The lighting is crisp and studio-quality, emphasizing the texture of the premium leather and metallic hardware. The background is a soft, light-mode minimal gradient." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAg3JQEjudpfjgSIr09Pe0z2FjgLKau3fHKe9ZuklRFr8kvNMbskwTjgYTIVoibFc3fTo8IkpLrmYgIV4NlrdzGKtVZciz8L4KTqfBkH9nNjKrHfvoiSNYJJkyKsALTOE2Mah_5p3AlNTDfPmk7pV3Fzvi_EyBs5Zx5hix8h57uGyg3yjgZ44rBgS5mv3DKawEXjADRaHsKpPhVqxadB2-JW7HbvRPlhQqsWVPcVRVpGatNmL1D-kN9IQ"/>
+<div class="absolute top-4 left-4 bg-primary text-on-primary font-label-sm text-label-sm px-3 py-1 rounded-full uppercase tracking-wider">In Stock</div>
+</div>
+<div class="grid grid-cols-2 grid-rows-2 gap-1 bg-surface-container-low">
+<img alt="Detail 1" class="w-full h-full object-cover" data-alt="A detailed close-up shot of the stitching and zipper hardware of a luxury leather handbag. The focus is sharp, highlighting the craftsmanship against a bright, clean, minimalist background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC52CXxbh0GPnuH9a52Ywo_WmjgVMlDBSwdswZJXG3j-XuoHeEqlCkCi-2dnZEvrJjJoY0h3Z6XdwP_tfIKg6tkFqJxVWmFBGpqaKikFHrh4dnUTl-eY-6FIlPNjrqOzRoUbOJ_ZQHMNcLG_vJI9me0qlou8tF4iTh1ULiNLKdohPRgai_RBd5SqvSC_CSsI5RhJavz_i7xVncja0evzwNG_IFpjMuArkZos7SX-tj5uV3mLrMVMcS_Ew"/>
+<img alt="Detail 2" class="w-full h-full object-cover" data-alt="An interior view of a luxury designer handbag showing the silk lining and internal branding tag. The lighting is soft and even, maintaining the bright, modern, and clean visual aesthetic of the platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCio9QuiJeWrGd2JqOR4IKhhA007ZgB6LNY5lp1PMsshlylIFiIdvp0zOj49hVTIdti-TaX1aHRLZ-lqvgzHIC_ZrczjdquyoZLO1FPtH23ab8UpsSsMwT2d-4qMZvYbOFHcd6OjRZmUIvIUPF24wW6P6i7wPko2m23vS2PjNhWM9InHCJZJIk6uC_jiOF2RUVTNaWey39dGs21iOLjD98QCYQ9uQt8WlLR9kLjgG3JjpmpZ9jAuCNp3A"/>
+<img alt="Detail 3" class="w-full h-full object-cover" data-alt="A lifestyle shot of the luxury handbag being held by a model wearing neutral, sophisticated corporate modern attire. The background is a slightly blurred, bright contemporary office space." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3UIGk0pRND1e2qqOzOLE8xQG9aH57ewPzvdxTyzcJjNMmZuUW5QYGClBAC_CEQAFrOHJLd9x_GEOxtF_QK0zUt25hVNJr7QkmS8MJL4Xr8IaO9K3Ne4UGUcCn6bR5mP6oAVP2vRub_-ITUezyj6AHgXT1LVdjHqofbrs6o69TG5Pz7dTpOWSv1L4fCIGDIrVT6NNwmKItXNx_PAnRZDHysaZFYgTRhyktM952V9uI767mpKPreKBrJg"/>
+<div class="w-full h-full bg-surface-container flex items-center justify-center cursor-pointer hover:bg-surface-container-highest transition-colors">
+<span class="font-label-md text-label-md text-primary flex items-center gap-2"><span class="material-symbols-outlined">add_photo_alternate</span> View All (8)</span>
+</div>
+</div>
+</div>
+<div class="p-6">
+<h1 class="font-headline-md text-headline-md text-on-background mb-2">Aura Signature Leather Tote</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">A timeless piece crafted from full-grain calfskin leather, featuring custom gold-tone hardware and a spacious interior designed for the modern professional.</p>
+<div class="flex flex-wrap gap-4 pt-4 border-t border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline">sell</span>
+<div>
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Brand</div>
+<div class="font-body-md text-body-md font-semibold">Celine</div>
+</div>
+</div>
+<div class="flex items-center gap-2 ml-4">
+<span class="material-symbols-outlined text-outline">category</span>
+<div>
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Category</div>
+<div class="font-body-md text-body-md font-semibold">Handbags / Totes</div>
+</div>
+</div>
+<div class="flex items-center gap-2 ml-4">
+<span class="material-symbols-outlined text-outline">tag</span>
+<div>
+<div class="font-label-sm text-label-sm text-outline uppercase tracking-wider">SKU</div>
+<div class="font-body-md text-body-md font-mono">CEL-TTE-24B-BLK</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Variant & Stock Table -->
+<div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-[0px_4px_20px_rgba(23,21,43,0.04)]">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-title-lg text-title-lg text-on-background">Inventory by Variant</h2>
+<button class="text-primary hover:bg-surface-container p-2 rounded-md transition-colors"><span class="material-symbols-outlined">filter_list</span></button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant">
+<th class="font-label-md text-label-md text-on-surface-variant uppercase pb-4 font-semibold">Variant (Color/Size)</th>
+<th class="font-label-md text-label-md text-on-surface-variant uppercase pb-4 font-semibold">SKU</th>
+<th class="font-label-md text-label-md text-on-surface-variant uppercase pb-4 font-semibold text-right">Available</th>
+<th class="font-label-md text-label-md text-on-surface-variant uppercase pb-4 font-semibold text-right">Committed</th>
+<th class="font-label-md text-label-md text-on-surface-variant uppercase pb-4 font-semibold text-right">Status</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md text-on-surface">
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="py-4 flex items-center gap-3">
+<div class="w-4 h-4 rounded-full bg-black border border-outline"></div>
+                                        Noir / Medium
+                                    </td>
+<td class="py-4 font-mono text-sm text-on-surface-variant">CEL-TTE-24B-BLK-M</td>
+<td class="py-4 text-right font-semibold">12</td>
+<td class="py-4 text-right text-on-surface-variant">3</td>
+<td class="py-4 text-right">
+<span class="inline-block bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm text-label-sm px-2 py-1 rounded-full">In Stock</span>
+</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="py-4 flex items-center gap-3">
+<div class="w-4 h-4 rounded-full bg-amber-800 border border-outline"></div>
+                                        Tan / Medium
+                                    </td>
+<td class="py-4 font-mono text-sm text-on-surface-variant">CEL-TTE-24B-TAN-M</td>
+<td class="py-4 text-right font-semibold">5</td>
+<td class="py-4 text-right text-on-surface-variant">1</td>
+<td class="py-4 text-right">
+<span class="inline-block bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm text-label-sm px-2 py-1 rounded-full">Low Stock</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-4 flex items-center gap-3">
+<div class="w-4 h-4 rounded-full bg-black border border-outline"></div>
+                                        Noir / Large
+                                    </td>
+<td class="py-4 font-mono text-sm text-on-surface-variant">CEL-TTE-24B-BLK-L</td>
+<td class="py-4 text-right font-semibold text-error">0</td>
+<td class="py-4 text-right text-on-surface-variant">0</td>
+<td class="py-4 text-right">
+<span class="inline-block bg-error-container text-on-error-container font-label-sm text-label-sm px-2 py-1 rounded-full">Out of Stock</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right Column: Pricing & Network -->
+<div class="space-y-6">
+<!-- Pricing Card -->
+<div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-[0px_4px_20px_rgba(23,21,43,0.04)]">
+<h2 class="font-title-lg text-title-lg text-on-background mb-6 flex items-center gap-2"><span class="material-symbols-outlined text-primary">payments</span> Financials</h2>
+<div class="space-y-4">
+<div class="bg-surface-container-low rounded-lg p-4 flex justify-between items-center border border-outline-variant">
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Cost Price (Avg)</div>
+<div class="font-headline-md text-headline-md text-on-surface">$1,450.00</div>
+</div>
+<div class="text-right">
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Retail Price</div>
+<div class="font-headline-md text-headline-md text-on-surface">$2,800.00</div>
+</div>
+</div>
+<div class="flex justify-between items-center py-2">
+<span class="font-body-md text-body-md text-on-surface-variant">Estimated Margin</span>
+<span class="font-title-lg text-title-lg text-primary font-bold">48.2%</span>
+</div>
+<div class="flex justify-between items-center py-2">
+<span class="font-body-md text-body-md text-on-surface-variant">Profit per unit</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">$1,350.00</span>
+</div>
+<div class="flex justify-between items-center py-2 border-t border-outline-variant mt-2 pt-4">
+<span class="font-body-md text-body-md text-on-surface-variant">Total Inventory Value (Cost)</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">$24,650.00</span>
+</div>
+</div>
+</div>
+<!-- Network Status Card -->
+<div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-[0px_4px_20px_rgba(23,21,43,0.04)]">
+<h2 class="font-title-lg text-title-lg text-on-background mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-secondary">hub</span> Network Status</h2>
+<div class="bg-inverse-on-surface border border-primary-fixed-dim rounded-lg p-4 mb-4">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<div>
+<div class="font-label-md text-label-md font-semibold text-on-surface mb-1">Available in Vestiq Network</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">This product is visible to other verified resellers in the network.</p>
+</div>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">Network Price</span>
+<span class="font-body-md text-body-md font-semibold">$2,400.00</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">Active Requests</span>
+<span class="inline-flex items-center justify-center bg-secondary-container text-on-secondary-container font-label-sm text-label-sm rounded-full w-6 h-6">2</span>
+</div>
+</div>
+<button class="w-full mt-6 border border-outline-variant text-primary font-label-md text-label-md py-2 rounded-lg hover:bg-surface-container transition-colors">Manage Network Settings</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden bg-surface border-t border-outline-variant shadow-[0px_-4px_20px_rgba(23,21,43,0.04)] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]">inventory_2</span>
+<span class="font-label-sm text-label-sm font-semibold">Products</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]">hub</span>
+<span class="font-label-sm text-label-sm">Network</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]">payments</span>
+<span class="font-label-sm text-label-sm">Sales</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]">more_horiz</span>
+<span class="font-label-sm text-label-sm">More</span>
+</a>
+</nav>
+</body></html>

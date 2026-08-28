@@ -1,0 +1,312 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Vestiq - Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-surface": "#1b1a28",
+                      "on-tertiary-fixed": "#1b192f",
+                      "primary-container": "#7027b8",
+                      "on-background": "#1b1a28",
+                      "tertiary-fixed-dim": "#c8c3e1",
+                      "surface-container": "#f0ebff",
+                      "secondary-container": "#fe4cca",
+                      "on-surface-variant": "#4c4453",
+                      "outline": "#7d7384",
+                      "secondary-fixed-dim": "#ffaedd",
+                      "surface-container-lowest": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "surface-container-highest": "#e4e0f4",
+                      "on-secondary-container": "#5d0047",
+                      "primary-fixed-dim": "#dbb8ff",
+                      "primary": "#56009a",
+                      "surface": "#fcf8ff",
+                      "secondary": "#b1008a",
+                      "outline-variant": "#cec2d5",
+                      "inverse-on-surface": "#f3eeff",
+                      "on-primary-fixed": "#2b0052",
+                      "secondary-fixed": "#ffd8eb",
+                      "on-secondary-fixed": "#3b002c",
+                      "surface-variant": "#e4e0f4",
+                      "on-secondary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "surface-dim": "#dbd7ec",
+                      "error-container": "#ffdad6",
+                      "tertiary-container": "#524f68",
+                      "surface-container-high": "#eae6fa",
+                      "on-error": "#ffffff",
+                      "surface-bright": "#fcf8ff",
+                      "error": "#ba1a1a",
+                      "on-tertiary-fixed-variant": "#47445d",
+                      "background": "#fcf8ff",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-fixed-variant": "#880069",
+                      "on-tertiary-container": "#c6c2e0",
+                      "inverse-primary": "#dbb8ff",
+                      "tertiary": "#3b3850",
+                      "tertiary-fixed": "#e4dffe",
+                      "surface-tint": "#7e38c6",
+                      "on-primary-container": "#dab6ff",
+                      "inverse-surface": "#302f3e",
+                      "surface-container-low": "#f6f2ff",
+                      "on-primary-fixed-variant": "#6415ac",
+                      "primary-fixed": "#efdbff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "sm": "8px",
+                      "gutter": "24px",
+                      "margin-mobile": "16px",
+                      "margin-desktop": "40px",
+                      "unit": "4px",
+                      "xl": "32px",
+                      "md": "16px",
+                      "xs": "4px",
+                      "lg": "24px"
+              },
+              "fontFamily": {
+                      "display-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "title-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "60px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "title-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+      </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased md:hidden pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-50 w-full bg-surface border-b border-outline-variant flex justify-between items-center px-margin-mobile h-16">
+<div class="flex items-center gap-3">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A small, professional user profile photo of a modern business person, well lit against a neutral grey background, high resolution and crisp, representing a luxury fashion reseller account avatar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJYaNt8F02YCNdCUBn1vORf815DSyCteFuax86E676sp1B5u2gj_einkQQuTzh4r1Mwhbq2krRER7Ti9S8651Oz0KwP9avhLjfIFJrsouyyBCoBpvf9G41mdmVvHGDzLknShYU_H5zKGh1N16Io0UTAZFFH1U404IAxMW1lptxrlvRfsXWVi-0-KfDGo4c8j2pu6P_1OTcUc473h2D96CDO8EGemV8LhelQpHSHwgBApyG8-8qeUnDOQ">
+<span class="font-display-lg text-title-lg font-bold tracking-tighter text-primary">VESTIQ</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-primary">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<main class="pt-20 px-margin-mobile space-y-xl">
+<!-- Welcome Section -->
+<section class="space-y-sm">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Good morning, Sarah.</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Here is a summary of your operations today.</p>
+</section>
+<!-- Quick Stats Grid -->
+<section class="grid grid-cols-2 gap-md">
+<div class="bg-surface-container-lowest rounded-xl p-md border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] flex flex-col justify-between h-24">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Sales This Month</span>
+<span class="font-title-lg text-title-lg text-primary">$12,450</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-md border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] flex flex-col justify-between h-24">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Stock Items</span>
+<span class="font-title-lg text-title-lg text-primary">142</span>
+</div>
+<div class="col-span-2 bg-surface-container-lowest rounded-xl p-md border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] flex flex-col justify-between h-24">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Active Negotiations</span>
+<span class="bg-surface-container text-primary-container px-2 py-1 rounded-full font-label-sm text-label-sm">3 Pending</span>
+</div>
+<span class="font-title-lg text-title-lg text-primary">7 Deals</span>
+</div>
+</section>
+<!-- Primary Action -->
+<section>
+<button class="w-full bg-[#7027B8] hover:bg-primary text-on-primary rounded-lg py-3 flex items-center justify-center gap-2 font-label-md text-label-md shadow-[0px_4px_20px_rgba(23,21,43,0.1)] transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+                Registrar Venda
+            </button>
+</section>
+<!-- Network Highlights -->
+<section class="space-y-md">
+<div class="flex justify-between items-end border-b border-outline-variant pb-2">
+<h2 class="font-title-lg text-title-lg text-on-surface">Network Highlights</h2>
+<a class="font-label-sm text-label-sm text-primary hover:underline" href="#">View All</a>
+</div>
+<div class="flex gap-md overflow-x-auto pb-4 snap-x">
+<div class="min-w-[200px] bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] overflow-hidden snap-start flex flex-col">
+<div class="h-32 bg-surface-variant relative">
+<img class="w-full h-full object-cover" data-alt="A high quality product shot of a luxury designer leather handbag in classic black, perfectly lit on a clean white background, showcasing texture and hardware, conveying premium quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGJX6_x5X_ki3LkSxI4B6SxyX1o1GyUifbSn-Bt1H7rqHhWOwP9jyes5ZCjNz4DpvQaXtuHZVkI-05EtSAer7dPV7-q4s8zGDnJz9L-y9V8ZFAhxQLMu3GKbyNMc9xdVixv1OxjdzyHrj5OBPPl0nPuQi9gM8UzIWC3MAs3PuyBEww6PMfHA09U1rBpsuL1kFODqCFHtIESawR8Z5i6xcEKvXYuUama2-jpV_dDbTZEHLqZbV51CN6sg">
+<span class="absolute top-2 right-2 bg-surface-container-lowest text-primary font-label-sm text-label-sm px-2 py-1 rounded-full shadow-sm">Offer</span>
+</div>
+<div class="p-md flex flex-col gap-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Saint Laurent</span>
+<span class="font-body-md text-body-md font-semibold truncate">Loulou Medium Bag</span>
+<span class="font-title-lg text-title-lg text-primary mt-2">$1,850</span>
+</div>
+</div>
+<div class="min-w-[200px] bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(23,21,43,0.04)] overflow-hidden snap-start flex flex-col">
+<div class="h-32 bg-surface-variant relative">
+<img class="w-full h-full object-cover" data-alt="A pristine pair of limited edition designer sneakers in white and beige tones, shot at a 45 degree angle on a stark white backdrop, emphasizing clean lines and pristine condition for high-end resale." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2SzNVGKDoaLuN3E8OJaJsFM1q0_KtZoMaLCgBdcivCrHcWSknJVJMuo1PgzxP6fNbb9fD_fFJMmELF0Vr3nXmL70ezGdvQoEwr1hUy7EgFumsGiMhohjdTZ82PWXWNs-V202bNQMPiKyMthOTBJRHkJu1cw5KAibvgalQKzQSoUdrZJiUQeEnZ2H4fv0HQiYeyaowW1uQipwCUUi67vC5LR_3TBbF7V8onyIMRlG03Kw5qpln-nMDBg">
+<span class="absolute top-2 right-2 bg-surface-container-lowest text-primary font-label-sm text-label-sm px-2 py-1 rounded-full shadow-sm">Offer</span>
+</div>
+<div class="p-md flex flex-col gap-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Balenciaga</span>
+<span class="font-body-md text-body-md font-semibold truncate">Triple S Clear Sole</span>
+<span class="font-title-lg text-title-lg text-primary mt-2">$720</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Inventory Alerts -->
+<section class="space-y-md">
+<div class="flex justify-between items-end border-b border-outline-variant pb-2">
+<h2 class="font-title-lg text-title-lg text-on-surface">Inventory Alert</h2>
+</div>
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-[0px_4px_20px_rgba(23,21,43,0.04)]">
+<div class="p-md flex items-center justify-between border-b border-outline-variant bg-error-container/30">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error">warning</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Gucci Marmont Belt</span>
+<span class="font-label-sm text-label-sm text-error">Low Stock: 1 remaining</span>
+</div>
+</div>
+<button class="font-label-sm text-label-sm text-primary hover:underline">Restock</button>
+</div>
+<div class="p-md flex items-center justify-between border-b border-outline-variant last:border-0">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">inventory_2</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Prada Nylon Tote</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Aging Stock: &gt; 90 days</span>
+</div>
+</div>
+<button class="font-label-sm text-label-sm text-primary hover:underline">Review</button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-surface shadow-lg border-t border-outline-variant rounded-t-xl">
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90 transition-transform duration-150">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm mt-1">Dashboard</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-sm text-label-sm mt-1">Products</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-label-sm text-label-sm mt-1">Network</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-label-sm text-label-sm mt-1">Sales</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+<span class="font-label-sm text-label-sm mt-1">More</span>
+</button>
+</nav>
+</body></html>

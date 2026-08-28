@@ -29,14 +29,14 @@ O produto foi projetado com foco em **simplicidade, confiabilidade e escalabilid
 
 ## Funcionalidades
 
-* **Produtos** — cadastro e gerenciamento do catálogo.
-* **Variações** — controle individual por tamanho, cor e SKU.
-* **Estoque** — entradas, saídas, ajustes e histórico de movimentações.
-* **Clientes** — cadastro e histórico de compras.
-* **Vendas** — registro de itens, descontos e formas de pagamento.
-* **Dashboard** — indicadores essenciais da operação.
-* **Relatórios** — acompanhamento de vendas e estoque.
-* **Controle de acesso** — autenticação e permissões por perfil.
+- **Produtos** — cadastro e gerenciamento do catálogo.
+- **Variações** — controle individual por tamanho, cor e SKU.
+- **Estoque** — entradas, saídas, ajustes e histórico de movimentações.
+- **Clientes** — cadastro e histórico de compras.
+- **Vendas** — registro de itens, descontos e formas de pagamento.
+- **Dashboard** — indicadores essenciais da operação.
+- **Relatórios** — acompanhamento de vendas e estoque.
+- **Controle de acesso** — autenticação e permissões por perfil.
 
 ---
 
@@ -118,13 +118,13 @@ payments
 
 A aplicação adota práticas de segurança como:
 
-* autenticação de usuários;
-* autorização baseada em perfis;
-* Row Level Security (RLS);
-* validação de operações críticas;
-* proteção de rotas;
-* gerenciamento seguro de variáveis de ambiente;
-* separação entre credenciais públicas e privilegiadas.
+- autenticação de usuários;
+- autorização baseada em perfis;
+- Row Level Security (RLS);
+- validação de operações críticas;
+- proteção de rotas;
+- gerenciamento seguro de variáveis de ambiente;
+- separação entre credenciais públicas e privilegiadas.
 
 ---
 
@@ -197,15 +197,15 @@ chore:    manutenção
 
 O desenvolvimento do Vestiq está concentrado inicialmente nos principais fluxos da operação:
 
-* [ ] Autenticação e controle de acesso
-* [ ] Produtos e categorias
-* [ ] Variações e SKUs
-* [ ] Controle de estoque
-* [ ] Clientes
-* [ ] Vendas
-* [ ] Dashboard
-* [ ] Relatórios
-* [ ] Estabilização do MVP
+- [ ] Autenticação e controle de acesso
+- [ ] Produtos e categorias
+- [ ] Variações e SKUs
+- [ ] Controle de estoque
+- [ ] Clientes
+- [ ] Vendas
+- [ ] Dashboard
+- [ ] Relatórios
+- [ ] Estabilização do MVP
 
 Evoluções posteriores poderão incluir gestão de fornecedores, compras, inventário, código de barras, múltiplas lojas e integrações externas.
 
@@ -221,7 +221,6 @@ Evoluções posteriores poderão incluir gestão de fornecedores, compras, inven
 
 **Backend Developer**
 [Guilherme](https://github.com/GuilhermeMede04)
-
 
 ---
 
