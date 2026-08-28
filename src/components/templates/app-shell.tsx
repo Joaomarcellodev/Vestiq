@@ -18,10 +18,10 @@ export interface AppShellProps {
 export function AppShell({ children, avatarUrl, role, orgName, userName }: AppShellProps) {
   return (
     <div className="min-h-screen bg-background">
-      <SidebarNav role={role} orgName={orgName} userName={userName} />
+      <SidebarNav role={role} orgName={orgName} userName={userName} avatarUrl={avatarUrl} />
 
       <div className="lg:pl-64">
-        <TopAppBar avatarUrl={avatarUrl} />
+        <TopAppBar avatarUrl={avatarUrl} userName={userName} />
         <main className="mx-auto w-full max-w-5xl px-margin-mobile pb-28 pt-lg sm:px-6 lg:px-8 lg:pb-12">
           {children}
         </main>
