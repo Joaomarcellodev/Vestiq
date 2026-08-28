@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Não gerar AGENTS.md/CLAUDE.md automaticamente; convenções ficam em CONTRIBUTING.md.
+  agentRules: false,
   // typedRoutes: re-enable once the route surface stabilises (post Sprint 2).
   // Incremental route creation across sprints makes strict route typing noisy now.
   typedRoutes: false,
