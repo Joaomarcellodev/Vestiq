@@ -6,6 +6,7 @@ import { cancelSale } from "@/features/sales/actions";
 import { PageHeader } from "@/components/molecules/page-header";
 import { Badge, Button } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
+import { PAYMENT_METHOD } from "@/lib/i18n/labels";
 
 export const metadata: Metadata = { title: "Venda" };
 
@@ -45,7 +46,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
           </div>
         ))}
         <div className="flex items-center justify-between p-4 font-title-lg text-title-lg">
-          <span>Total ({sale.payment_method})</span>
+          <span>Total · {PAYMENT_METHOD[sale.payment_method]}</span>
           <span className="text-primary-container">{formatBRL(Number(sale.total))}</span>
         </div>
       </section>

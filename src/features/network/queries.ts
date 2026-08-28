@@ -16,8 +16,11 @@ export async function getFactoryNetworkOverview() {
   const { data: members } = networkIds.length
     ? await supabase
         .from("network_members")
-        .select("id, status, invited_email, joined_at, network_id, organizations(name)")
+        .select(
+          "id, status, invited_email, joined_at, network_id, reseller:organizations!network_members_reseller_id_fkey(name)",
+        )
         .in("network_id", networkIds)
+        .order("created_at")
     : { data: [] };
 
   const { data: offers } = networkIds.length

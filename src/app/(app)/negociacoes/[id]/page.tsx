@@ -12,6 +12,7 @@ import type {
 import { PageHeader } from "@/components/molecules/page-header";
 import { Badge, Button } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
+import { NEGOTIATION_EVENT, NEGOTIATION_STATUS } from "@/lib/i18n/labels";
 
 export const metadata: Metadata = { title: "Negociação" };
 
@@ -47,7 +48,11 @@ export default async function NegotiationDetailPage({
       <PageHeader
         title={variant?.products?.name ?? "Negociação"}
         description={`${n.seller?.name} → ${n.buyer?.name}`}
-        action={<Badge>{n.status}</Badge>}
+        action={
+          <Badge tone={NEGOTIATION_STATUS[n.status].tone}>
+            {NEGOTIATION_STATUS[n.status].label}
+          </Badge>
+        }
       />
 
       <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
@@ -69,8 +74,11 @@ export default async function NegotiationDetailPage({
               key={e.id}
               className="rounded-lg border border-outline-variant bg-surface-container-lowest p-3"
             >
-              <p className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
-                {e.type} · {new Date(e.created_at).toLocaleString("pt-BR")}
+              <p className="font-body-md text-body-md font-semibold text-on-surface-variant">
+                {NEGOTIATION_EVENT[e.type]}
+                <span className="ml-2 font-normal">
+                  {new Date(e.created_at).toLocaleString("pt-BR")}
+                </span>
               </p>
               {e.body && <p className="mt-1 font-body-md text-body-md text-on-surface">{e.body}</p>}
             </li>

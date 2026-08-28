@@ -5,16 +5,9 @@ import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
 import { Badge } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
+import { NEGOTIATION_STATUS } from "@/lib/i18n/labels";
 
 export const metadata: Metadata = { title: "Negociações" };
-
-const STATUS_TONE = {
-  PENDING: "warning",
-  ACCEPTED: "info",
-  COMPLETED: "success",
-  REJECTED: "error",
-  CANCELLED: "neutral",
-} as const;
 
 export default async function NegotiationsPage() {
   const negotiations = await listNegotiations();
@@ -58,8 +51,10 @@ export default async function NegotiationsPage() {
                             {n.counterparty} · {n.quantity} un.
                           </p>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge tone={STATUS_TONE[n.status]}>{n.status}</Badge>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <Badge tone={NEGOTIATION_STATUS[n.status].tone}>
+                            {NEGOTIATION_STATUS[n.status].label}
+                          </Badge>
                           <span className="font-title-lg text-title-lg text-on-surface">
                             {formatBRL(n.amount)}
                           </span>

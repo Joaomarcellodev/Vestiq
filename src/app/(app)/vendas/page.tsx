@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/molecules/empty-state";
 import { StatCard } from "@/components/molecules/stat-card";
 import { Badge, Button, Icon } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
+import { PAYMENT_METHOD } from "@/lib/i18n/labels";
 
 export const metadata: Metadata = { title: "Vendas" };
 
@@ -18,8 +19,8 @@ export default async function SalesPage() {
         title="Vendas"
         description="Resumo e transações recentes."
         action={
-          <Link href="/vendas/nova">
-            <Button size="sm">
+          <Link href="/vendas/nova" className="block">
+            <Button size="md" className="w-full sm:w-auto">
               <Icon name="add" size={18} />
               Nova venda
             </Button>
@@ -47,7 +48,7 @@ export default async function SalesPage() {
                   <p className="font-body-md text-body-md text-on-surface">{s.customerName}</p>
                   <p className="font-body-md text-body-md text-on-surface-variant">
                     {new Date(s.createdAt).toLocaleDateString("pt-BR")} · {s.itemCount} item(ns) ·{" "}
-                    {s.paymentMethod}
+                    {PAYMENT_METHOD[s.paymentMethod]}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">

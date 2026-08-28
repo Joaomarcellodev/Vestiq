@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getFactoryNetworkOverview } from "@/features/network/queries";
-import { disableMember } from "@/features/network/actions";
+import { disableMember, enableMember } from "@/features/network/actions";
+import { MEMBER_STATUS } from "@/lib/i18n/labels";
 import {
   CreateNetworkForm,
   InviteResellerForm,
@@ -47,39 +48,43 @@ export default async function FactoryNetworkPage() {
           </p>
         ) : (
           <ul className="divide-y divide-outline-variant rounded-xl border border-outline-variant bg-surface-container-lowest">
-            {members.map((m) => (
-              <li key={m.id} className="flex items-center justify-between p-4">
-                <div>
-                  <p className="font-body-md text-body-md text-on-surface">
-                    {m.organizations?.name ?? m.invited_email}
-                  </p>
-                  <p className="font-body-md text-body-md text-on-surface-variant">
-                    {m.invited_email}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    tone={
-                      m.status === "ACTIVE"
-                        ? "success"
-                        : m.status === "INVITED"
-                          ? "warning"
-                          : "neutral"
-                    }
-                  >
-                    {m.status}
-                  </Badge>
-                  {m.status === "ACTIVE" && (
-                    <form action={disableMember}>
-                      <input type="hidden" name="memberId" value={m.id} />
-                      <Button type="submit" variant="ghost" size="sm">
-                        Desativar
-                      </Button>
-                    </form>
-                  )}
-                </div>
-              </li>
-            ))}
+            {members.map((m) => {
+              const status = MEMBER_STATUS[m.status];
+              return (
+                <li
+                  key={m.id}
+                  className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-body-md text-body-md text-on-surface">
+                      {m.reseller?.name ?? m.invited_email}
+                    </p>
+                    <p className="truncate font-body-md text-body-md text-on-surface-variant">
+                      {m.invited_email}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Badge tone={status.tone}>{status.label}</Badge>
+                    {m.status === "ACTIVE" && (
+                      <form action={disableMember}>
+                        <input type="hidden" name="memberId" value={m.id} />
+                        <Button type="submit" variant="ghost" size="sm">
+                          Desativar
+                        </Button>
+                      </form>
+                    )}
+                    {m.status === "DISABLED" && (
+                      <form action={enableMember}>
+                        <input type="hidden" name="memberId" value={m.id} />
+                        <Button type="submit" variant="secondary" size="sm">
+                          Reativar
+                        </Button>
+                      </form>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

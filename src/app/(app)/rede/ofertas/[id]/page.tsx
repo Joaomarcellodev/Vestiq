@@ -7,6 +7,7 @@ import { ProposeForm } from "@/features/negotiations/components/propose-form";
 import { PageHeader } from "@/components/molecules/page-header";
 import { Badge, Button } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
+import { OFFER_STATUS } from "@/lib/i18n/labels";
 
 export const metadata: Metadata = { title: "Detalhes da oferta" };
 
@@ -29,7 +30,7 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
           .filter(Boolean)
           .join(" · ")}
         action={
-          <Badge tone={offer.status === "ACTIVE" ? "success" : "warning"}>{offer.status}</Badge>
+          <Badge tone={OFFER_STATUS[offer.status].tone}>{OFFER_STATUS[offer.status].label}</Badge>
         }
       />
 
