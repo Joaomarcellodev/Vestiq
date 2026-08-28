@@ -24,7 +24,7 @@
     "db:reset": "supabase db reset",
     "db:diff": "supabase db diff",
     "db:types": "supabase gen types typescript --local > src/types/database.ts",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

@@ -1,0 +1,11 @@
+# Netlify — Next.js 16 is supported with zero config; Netlify auto-installs
+# @netlify/plugin-nextjs on detection. See docs/DEPLOY.md for env vars.
+
+[build]
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "20.18.0"
+  # Skip Playwright browser download during `npm install` on the build.
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
+  NEXT_TELEMETRY_DISABLED = "1"
