@@ -151,6 +151,23 @@ async function main() {
     { organization_id: orgA.id, name: "Maria Rodrigues" },
   );
 
+  // --- an offer on the network from org A ------------------------------
+  const { data: existingOffer } = await db
+    .from("offers")
+    .select("id")
+    .eq("product_variant_id", variant.id)
+    .maybeSingle();
+  if (!existingOffer) {
+    const { error } = await asA.rpc("publish_offer", {
+      p_variant_id: variant.id,
+      p_network_id: network.id,
+      p_quantity: 3,
+      p_transfer_price: 28500,
+      p_note: "Nunca usada, plásticos de proteção nas ferragens.",
+    });
+    if (error) console.warn("offer:", error.message);
+  }
+
   console.log("\n✅ Seed concluído.\n");
   console.log("Usuários (senha: vestiq123):");
   console.log("  • revenda@vestiq.dev   — revendedora (Atelier Sarah) — use este para entrar");
