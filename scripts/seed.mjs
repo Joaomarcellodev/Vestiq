@@ -145,11 +145,71 @@ async function main() {
     if (error) console.warn("entry:", error.message);
   }
 
-  await insert(
-    "customers",
-    { organization_id: orgA.id, name: "Maria Rodrigues", email: "maria@exemplo.com" },
-    { organization_id: orgA.id, name: "Maria Rodrigues" },
-  );
+  // extra catalog so the dashboard has data
+  async function ensureVariant(prodName, brand, cat, sku, cost, price, stock) {
+    const prod = await insert(
+      "products",
+      { organization_id: orgA.id, category_id: cat, name: prodName, brand },
+      { organization_id: orgA.id, name: prodName },
+    );
+    const vr = await insert(
+      "product_variants",
+      { organization_id: orgA.id, product_id: prod.id, size: "Único", sku, cost_price: cost, retail_price: price },
+      { organization_id: orgA.id, sku },
+    );
+    const { data: cur } = await db.from("product_variants").select("stock_on_hand").eq("id", vr.id).single();
+    if ((cur?.stock_on_hand ?? 0) === 0) {
+      await asA.rpc("record_inventory_entry", { p_variant_id: vr.id, p_quantity: stock, p_note: "estoque inicial (seed)" });
+    }
+    return vr;
+  }
+  const tshirt = await ensureVariant("T-Shirt Gucci Logo", "Gucci", category.id, "GUCCI-TEE-01", 800, 1200, 20);
+  const sneaker = await ensureVariant("Balenciaga Triple S", "Balenciaga", category.id, "BAL-TS-01", 3200, 5400, 8);
+
+  const clientes = [
+    { name: "Maria Rodrigues", email: "maria@exemplo.com" },
+    { name: "João Silva", email: "joao@exemplo.com" },
+    { name: "Ana Costa", email: "ana@exemplo.com" },
+  ];
+  const customerIds = [];
+  for (const c of clientes) {
+    const row = await insert(
+      "customers",
+      { organization_id: orgA.id, ...c },
+      { organization_id: orgA.id, name: c.name },
+    );
+    customerIds.push(row.id);
+  }
+
+  // --- a few sales spread over the last 12 days -----------------------
+  const { count: saleCount } = await db
+    .from("sales")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", orgA.id);
+  if ((saleCount ?? 0) === 0) {
+    const plan = [
+      { daysAgo: 11, items: [{ variant_id: tshirt.id, quantity: 2 }], customer: customerIds[0] },
+      { daysAgo: 9, items: [{ variant_id: sneaker.id, quantity: 1 }], customer: customerIds[1] },
+      { daysAgo: 6, items: [{ variant_id: tshirt.id, quantity: 3 }, { variant_id: sneaker.id, quantity: 1 }], customer: customerIds[0] },
+      { daysAgo: 3, items: [{ variant_id: tshirt.id, quantity: 1 }], customer: null },
+      { daysAgo: 1, items: [{ variant_id: sneaker.id, quantity: 2 }], customer: customerIds[2] },
+    ];
+    for (const s of plan) {
+      const { data: sale, error } = await asA.rpc("confirm_sale", {
+        p_payment_method: "PIX",
+        p_items: s.items,
+        p_discount: 0,
+        p_customer_id: s.customer,
+      });
+      if (error) {
+        console.warn("sale:", error.message);
+        continue;
+      }
+      const at = new Date();
+      at.setDate(at.getDate() - s.daysAgo);
+      await db.from("sales").update({ created_at: at.toISOString() }).eq("id", sale.id);
+    }
+  }
 
   // --- an offer on the network from org A ------------------------------
   const { data: existingOffer } = await db
