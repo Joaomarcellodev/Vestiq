@@ -18,20 +18,21 @@ abra
 `https://github.com/Joaomarcellodev/Vestiq/security/secret-scanning/unblock-secret/3IYOJ2oFossXCMf2zXYHNSauIvo`
 → *Allow me to push this secret* (motivo: teste / falso positivo).
 
-**Opção B — limpar o histórico:**
+**Opção B — limpar o histórico (recomendado):** `develop` nunca foi enviada e
+`main` remoto só tem o README, então reescrever é seguro. Na raiz do repo, com a
+árvore limpa:
 
 ```bash
 FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f --tree-filter \
- 'for f in scripts/seed.mjs src/test/supabase.ts; do \
-   [ -f "$f" ] && sed -i "s/sb_secret_[A-Za-z0-9_-]*/x/g;s/sb_publishable_[A-Za-z0-9_-]*/x/g" "$f" || true; \
+ 'for f in scripts/seed.mjs src/test/supabase.ts scripts/scrub-history.sh; do \
+   [ -f "$f" ] && sed -i "s#sb_secret_[A-Za-z0-9_-]\{10,\}#x#g; s#sb_publishable_[A-Za-z0-9_-]\{10,\}#x#g" "$f"; \
   done; true' -- --all
-```
 
-Depois:
-
-```bash
+git reflog expire --expire=now --all && git gc --prune=now
 git push --force-with-lease origin main develop
 ```
+
+Confere que sumiu: `git log --all -S "sb_secret_" --oneline` deve ficar vazio.
 
 ---
 
