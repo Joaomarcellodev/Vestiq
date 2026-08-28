@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getProduct } from "@/features/catalog/queries";
+import { archiveProduct } from "@/features/catalog/actions";
 import { BackButton } from "@/components/molecules/back-button";
 import { classifyStock, DEFAULT_LOW_STOCK_THRESHOLD } from "@/features/inventory/classify";
 import { StockControls } from "@/features/inventory/components/stock-controls";
 import { PageHeader } from "@/components/molecules/page-header";
 import { StockBadge } from "@/components/molecules/stock-badge";
+import { Button, Icon } from "@/components/atoms";
 import { formatBRL, estimatedMargin, formatPercent } from "@/lib/utils/currency";
 
 export const metadata: Metadata = { title: "Produto" };
@@ -23,6 +26,23 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       <PageHeader
         title={product.name}
         description={[product.brand, product.categories?.name].filter(Boolean).join(" · ")}
+        action={
+          <div className="flex gap-2">
+            <Link href={`/produtos/${id}/editar`}>
+              <Button variant="secondary" size="sm">
+                <Icon name="edit" size={16} />
+                Editar
+              </Button>
+            </Link>
+            <form action={archiveProduct}>
+              <input type="hidden" name="id" value={id} />
+              <Button variant="ghost" size="sm" type="submit">
+                <Icon name="archive" size={16} />
+                Arquivar
+              </Button>
+            </form>
+          </div>
+        }
       />
       {product.description && (
         <p className="font-body-md text-body-md text-on-surface-variant">{product.description}</p>

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import { categorySchema, productSchema } from "./validation";
@@ -81,8 +82,9 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
       })
       .select("id")
       .single();
-    if (vErr)
+    if (vErr) {
       return { error: vErr.code === "23505" ? "SKU de variação já utilizado" : vErr.message };
+    }
 
     if (variant && v.initialStock > 0) {
       await supabase.rpc("record_inventory_entry", {
@@ -97,9 +99,57 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
   redirect(`/produtos/${product.id}`);
 }
 
-export async function archiveProduct(id: string): Promise<void> {
+const updateProductSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().trim().min(1, "Informe o nome do produto").max(120),
+  brand: z.string().trim().max(80).optional().or(z.literal("")),
+  categoryId: z.string().uuid().optional().or(z.literal("")),
+  internalSku: z.string().trim().max(40).optional().or(z.literal("")),
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
+});
+
+export async function updateProduct(_prev: ActionState, formData: FormData): Promise<ActionState> {
   await requireActiveOrganization();
+  const parsed = updateProductSchema.safeParse({
+    id: formData.get("id"),
+    name: formData.get("name"),
+    brand: formData.get("brand"),
+    categoryId: formData.get("categoryId") || "",
+    internalSku: formData.get("internalSku"),
+    description: formData.get("description"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  const d = parsed.data;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("products")
+    .update({
+      name: d.name,
+      brand: d.brand || null,
+      category_id: d.categoryId || null,
+      internal_sku: d.internalSku || null,
+      description: d.description || null,
+    })
+    .eq("id", d.id);
+
+  if (error) {
+    return { error: error.code === "23505" ? "SKU já utilizado" : error.message };
+  }
+  revalidatePath("/produtos");
+  revalidatePath(`/produtos/${d.id}`);
+  redirect(`/produtos/${d.id}`);
+}
+
+export async function archiveProduct(formData: FormData): Promise<void> {
+  await requireActiveOrganization();
+  const id = formData.get("id") as string;
   const supabase = await createClient();
   await supabase.from("products").update({ archived_at: new Date().toISOString() }).eq("id", id);
+  await supabase
+    .from("product_variants")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("product_id", id);
   revalidatePath("/produtos");
+  redirect("/produtos");
 }

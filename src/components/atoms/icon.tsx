@@ -16,6 +16,8 @@ type IconName =
   | "chevron_left"
   | "dashboard"
   | "delete"
+  | "edit"
+  | "archive"
   | "devices"
   | "factory"
   | "group"
@@ -55,6 +57,13 @@ const PATHS: Record<IconName, React.ReactNode> = {
   ),
   chevron_right: <path d="m9 6 6 6-6 6" />,
   chevron_left: <path d="m15 6-6 6 6 6" />,
+  edit: <path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3ZM13.5 6.5l4 4" />,
+  archive: (
+    <>
+      <rect x="3" y="4" width="18" height="4" rx="1" />
+      <path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4" />
+    </>
+  ),
   dashboard: (
     <>
       <rect x="3" y="3" width="7" height="9" rx="1.5" />

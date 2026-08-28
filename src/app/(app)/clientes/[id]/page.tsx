@@ -6,7 +6,8 @@ import { getCustomerWithHistory } from "@/features/customers/queries";
 import { PageHeader } from "@/components/molecules/page-header";
 import { StatCard } from "@/components/molecules/stat-card";
 import { EmptyState } from "@/components/molecules/empty-state";
-import { Badge } from "@/components/atoms";
+import { Badge, Button, Icon } from "@/components/atoms";
+import { archiveCustomer } from "@/features/customers/actions";
 import { formatBRL } from "@/lib/utils/currency";
 
 export const metadata: Metadata = { title: "Cliente" };
@@ -23,6 +24,23 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
       <PageHeader
         title={customer.name}
         description={[customer.email, customer.phone].filter(Boolean).join(" · ")}
+        action={
+          <div className="flex gap-2">
+            <Link href={`/clientes/${id}/editar`}>
+              <Button variant="secondary" size="sm">
+                <Icon name="edit" size={16} />
+                Editar
+              </Button>
+            </Link>
+            <form action={archiveCustomer}>
+              <input type="hidden" name="id" value={id} />
+              <Button variant="ghost" size="sm" type="submit">
+                <Icon name="archive" size={16} />
+                Arquivar
+              </Button>
+            </form>
+          </div>
+        }
       />
 
       <div className="grid gap-md sm:grid-cols-3">
