@@ -1,63 +1,95 @@
-# Deploy — Netlify
+# Deploy — Netlify (manual)
 
-O Vestiq roda no Netlify com o runtime nativo de Next.js (Next 16 é suportado sem
-configuração; o Netlify instala `@netlify/plugin-nextjs` automaticamente).
+O Vestiq roda no Netlify com o runtime nativo de Next.js. Next 16 é suportado sem
+configuração — o Netlify instala `@netlify/plugin-nextjs` automaticamente.
 
-## 1. Conectar o repositório
+Dá para fazer **tudo manualmente**, sem CLI. Passos abaixo.
 
-No painel do Netlify → **Add new site → Import an existing project → GitHub →
-`Joaomarcellodev/Vestiq`**.
+---
 
-- Branch de produção: **`main`**
-- Build command: `npm run build` (já no `netlify.toml`)
-- Publish directory: detectado automaticamente
+## 1. Enviar o código para o GitHub
 
-## 2. Variáveis de ambiente (Site configuration → Environment variables)
+O histórico tem uma chave do Supabase **local** (Docker, `127.0.0.1`) que foi
+fixada em commits antigos e depois removida. O GitHub bloqueia o push por causa
+disso. Resolva de uma das formas:
 
-Defina **antes do primeiro build** — as `NEXT_PUBLIC_*` são embutidas no bundle.
+**Opção A — liberar (rápido):**
+abra
+`https://github.com/Joaomarcellodev/Vestiq/security/secret-scanning/unblock-secret/3IYOJ2oFossXCMf2zXYHNSauIvo`
+→ *Allow me to push this secret* (motivo: teste / falso positivo).
 
-| Variável | Valor | Escopo |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://inixwmfxufnsxgpvlfku.supabase.co` | Build + Runtime |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_LAjj9wuVIjtFz0GmLmP2KQ_68fEUzqM` | Build + Runtime |
-| `SUPABASE_SECRET_KEY` | *(secret key do projeto — Supabase → Settings → API)* | Runtime only |
-| `NEXT_PUBLIC_SITE_URL` | *(opcional)* URL final do site, ex. `https://vestiq.netlify.app` | Build + Runtime |
+**Opção B — limpar o histórico:**
 
-> `NEXT_PUBLIC_SITE_URL` é opcional: sem ela, o código usa a `URL` que o Netlify
-> injeta no build. Defina explicitamente se usar domínio próprio.
+```bash
+FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f --tree-filter \
+ 'for f in scripts/seed.mjs src/test/supabase.ts; do \
+   [ -f "$f" ] && sed -i "s/sb_secret_[A-Za-z0-9_-]*/x/g;s/sb_publishable_[A-Za-z0-9_-]*/x/g" "$f" || true; \
+  done; true' -- --all
+```
 
-## 3. Configurar o Supabase para o domínio de produção
+Depois:
 
-Supabase → **Authentication → URL Configuration**:
+```bash
+git push --force-with-lease origin main develop
+```
 
-- **Site URL:** `https://<seu-site>.netlify.app`
-- **Redirect URLs:** adicione `https://<seu-site>.netlify.app/auth/callback`
+---
 
-Sem isso o login por email funciona, mas o **login social (Google/Apple)** e a
-recuperação de senha falham (redirect não autorizado).
+## 2. Criar o site no Netlify (sem CLI)
 
-Para login social também configure os provedores em
-**Authentication → Providers** (Client ID/Secret do Google e do Apple).
+1. [app.netlify.com](https://app.netlify.com) → **Add new site → Import an existing project → GitHub**
+2. Autorize e escolha o repositório **`Joaomarcellodev/Vestiq`**
+3. Configuração:
+   - **Branch to deploy:** `main`
+   - **Build command:** `npm run build` *(já vem do `netlify.toml`)*
+   - **Publish directory:** deixe em branco (detectado)
+4. **Deploy site**
 
-## 4. Migrations
+## 3. Variáveis de ambiente
 
-O schema já foi aplicado ao projeto hospedado (`supabase db push`, migrations
-0001–0013). Novas migrations: `npx supabase db push` após `supabase link`.
+Site → **Site configuration → Environment variables → Add a variable**.
+Só duas — ambas públicas (protegidas por RLS):
 
-## 5. Deploy
+| Chave | Valor |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://inixwmfxufnsxgpvlfku.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_LAjj9wuVIjtFz0GmLmP2KQ_68fEUzqM` |
 
-Cada push na `main` dispara um build. Para deploy manual pela CLI:
+> `NEXT_PUBLIC_SITE_URL` **não** é necessária — o código usa a `URL` que o Netlify
+> injeta no build. Só defina se usar domínio próprio.
+>
+> `SUPABASE_SECRET_KEY` **não** é usada pelo app em produção (só em seeds/scripts).
+
+Depois de adicionar as variáveis: **Deploys → Trigger deploy → Deploy site**.
+
+## 4. Configurar o Supabase para o domínio do Netlify
+
+Anote a URL final (ex.: `https://vestiq.netlify.app`) e vá em
+**Supabase → Authentication → URL Configuration**:
+
+- **Site URL:** `https://vestiq.netlify.app`
+- **Redirect URLs:** adicione `https://vestiq.netlify.app/**`
+
+Sem isso o login por **email/senha funciona**, mas login social e recuperação de
+senha falham (redirect não autorizado).
+
+Login social (opcional): **Authentication → Providers** → configure Client ID /
+Secret de Google e Apple.
+
+---
+
+## Pronto
+
+- Cada `git push` na `main` dispara um novo deploy.
+- Usuários de teste (senha `vestiq123`): `revenda@vestiq.dev`, `revenda2@vestiq.dev`,
+  `fabrica@vestiq.dev` — já existem no banco hospedado (seed).
+- Schema: migrations 0001–0013 já aplicadas ao projeto hospedado.
+
+## Deploy pela CLI (alternativa)
 
 ```bash
 npm i -g netlify-cli
 netlify login
-netlify link          # escolher o site
+netlify link            # escolher o site já criado
 netlify deploy --prod
 ```
-
-## Notas
-
-- `.env` e `.env.local` **não** são versionados; o Netlify usa só as variáveis do
-  painel.
-- O build não roda testes nem lint (isso é papel do CI — ver `docs/TESTING.md`).
-- Storage de avatares: bucket `avatars` já criado pela migration 0012.
