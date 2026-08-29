@@ -4,10 +4,58 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireActiveOrganization } from "@/features/organizations/queries";
-import { categorySchema, productSchema } from "./validation";
+import type { Database } from "@/types/database";
+import {
+  categorySchema,
+  PRODUCT_IMAGE_MAX_BYTES,
+  PRODUCT_IMAGE_MAX_COUNT,
+  PRODUCT_IMAGE_TYPES,
+  productSchema,
+} from "./validation";
 
 export type ActionState = { error?: string; ok?: boolean };
+
+const IMAGE_BUCKET = "product-images";
+
+/**
+ * Uploads the picked files to `product-images/{orgId}/{productId}/…` and
+ * returns their public URLs. Returns an error string instead of throwing so
+ * the caller can surface it in the form.
+ */
+async function uploadProductImages(
+  supabase: SupabaseClient<Database>,
+  orgId: string,
+  productId: string,
+  files: File[],
+): Promise<{ urls: string[]; error?: string }> {
+  const urls: string[] = [];
+  for (const file of files) {
+    if (!(file instanceof File) || file.size === 0) continue;
+    if (!PRODUCT_IMAGE_TYPES.includes(file.type)) {
+      return { urls, error: "Envie imagens JPG, PNG ou WebP." };
+    }
+    if (file.size > PRODUCT_IMAGE_MAX_BYTES) {
+      return { urls, error: "Cada imagem deve ter no máximo 5 MB." };
+    }
+    const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+    const path = `${orgId}/${productId}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage
+      .from(IMAGE_BUCKET)
+      .upload(path, file, { contentType: file.type, upsert: false });
+    if (error) return { urls, error: `Falha no upload da imagem: ${error.message}` };
+    urls.push(supabase.storage.from(IMAGE_BUCKET).getPublicUrl(path).data.publicUrl);
+  }
+  return { urls };
+}
+
+function readImageFiles(formData: FormData): File[] {
+  return formData
+    .getAll("images")
+    .filter((v): v is File => v instanceof File && v.size > 0)
+    .slice(0, PRODUCT_IMAGE_MAX_COUNT);
+}
 
 export async function createCategory(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const org = await requireActiveOrganization();
@@ -63,6 +111,21 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
     };
   }
 
+  const imageFiles = readImageFiles(formData);
+  if (imageFiles.length > 0) {
+    const { urls, error: upErr } = await uploadProductImages(
+      supabase,
+      org.id,
+      product.id,
+      imageFiles,
+    );
+    if (upErr) {
+      await supabase.from("products").delete().eq("id", product.id);
+      return { error: upErr };
+    }
+    await supabase.from("products").update({ image_urls: urls }).eq("id", product.id);
+  }
+
   const variants =
     input.variants.length > 0
       ? input.variants
@@ -109,7 +172,7 @@ const updateProductSchema = z.object({
 });
 
 export async function updateProduct(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  await requireActiveOrganization();
+  const org = await requireActiveOrganization();
   const parsed = updateProductSchema.safeParse({
     id: formData.get("id"),
     name: formData.get("name"),
@@ -122,6 +185,23 @@ export async function updateProduct(_prev: ActionState, formData: FormData): Pro
   const d = parsed.data;
 
   const supabase = await createClient();
+
+  // Images: kept existing URLs + freshly uploaded files.
+  let keptImages: string[] = [];
+  try {
+    const raw = formData.get("existingImages");
+    keptImages = raw ? (JSON.parse(raw as string) as string[]) : [];
+  } catch {
+    keptImages = [];
+  }
+  const imageFiles = readImageFiles(formData);
+  let imageUrls = keptImages;
+  if (imageFiles.length > 0) {
+    const { urls, error: upErr } = await uploadProductImages(supabase, org.id, d.id, imageFiles);
+    if (upErr) return { error: upErr };
+    imageUrls = [...keptImages, ...urls].slice(0, PRODUCT_IMAGE_MAX_COUNT);
+  }
+
   const { error } = await supabase
     .from("products")
     .update({
@@ -130,6 +210,7 @@ export async function updateProduct(_prev: ActionState, formData: FormData): Pro
       category_id: d.categoryId || null,
       internal_sku: d.internalSku || null,
       description: d.description || null,
+      image_urls: imageUrls,
     })
     .eq("id", d.id);
 

@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { Button, Icon, TextField } from "@/components/atoms";
 import { estimatedMargin, formatPercent } from "@/lib/utils/currency";
 import { createProduct, type ActionState } from "../actions";
+import { ImageUploadField } from "./image-upload-field";
 
 interface VariantRow {
   size: string;
@@ -26,6 +27,7 @@ const emptyVariant: VariantRow = {
 export function ProductForm({ categories }: { categories: { id: string; name: string }[] }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(createProduct, {});
   const [variants, setVariants] = useState<VariantRow[]>([{ ...emptyVariant }]);
+  const [images, setImages] = useState<File[]>([]);
 
   const update = (i: number, patch: Partial<VariantRow>) =>
     setVariants((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
@@ -46,6 +48,8 @@ export function ProductForm({ categories }: { categories: { id: string; name: st
             })),
           ),
         );
+        fd.delete("images");
+        images.forEach((f) => fd.append("images", f));
         action(fd);
       }}
       className="space-y-lg"
@@ -96,6 +100,11 @@ export function ProductForm({ categories }: { categories: { id: string; name: st
             placeholder="Material, estado de conservação, detalhes..."
           />
         </div>
+      </section>
+
+      <section className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
+        <h2 className="font-headline-md text-headline-md text-on-surface">Fotos</h2>
+        <ImageUploadField files={images} onFilesChange={setImages} />
       </section>
 
       <section className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">

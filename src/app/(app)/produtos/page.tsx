@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { listProducts } from "@/features/catalog/queries";
 import { unarchiveProduct } from "@/features/catalog/actions";
 import { PageHeader } from "@/components/molecules/page-header";
@@ -89,28 +90,45 @@ export default async function ProductsPage({
               key={p.id}
               className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-surface"
             >
-              <Link href={`/produtos/${p.id}`} className="flex flex-col gap-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate font-title-lg text-title-lg text-on-surface">{p.name}</p>
-                    <p className="mt-0.5 truncate font-body-md text-body-md text-on-surface-variant">
-                      {[p.brand, p.internalSku && `SKU ${p.internalSku}`]
-                        .filter(Boolean)
-                        .join(" · ") || "Sem SKU"}
-                    </p>
+              <Link href={`/produtos/${p.id}`} className="flex gap-4">
+                <span className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-lg bg-surface-container text-outline">
+                  {p.imageUrl ? (
+                    <Image
+                      src={p.imageUrl}
+                      alt=""
+                      width={80}
+                      height={80}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <Icon name="inventory_2" size={24} />
+                  )}
+                </span>
+                <div className="flex min-w-0 flex-1 flex-col gap-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-title-lg text-title-lg text-on-surface">
+                        {p.name}
+                      </p>
+                      <p className="mt-0.5 truncate font-body-md text-body-md text-on-surface-variant">
+                        {[p.brand, p.internalSku && `SKU ${p.internalSku}`]
+                          .filter(Boolean)
+                          .join(" · ") || "Sem SKU"}
+                      </p>
+                    </div>
+                    <span className="shrink-0 font-title-lg text-title-lg text-primary-container">
+                      {p.minPrice !== null ? formatBRL(p.minPrice) : "—"}
+                    </span>
                   </div>
-                  <span className="shrink-0 font-title-lg text-title-lg text-primary-container">
-                    {p.minPrice !== null ? formatBRL(p.minPrice) : "—"}
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  {p.archived && <Badge tone="warning">Arquivado</Badge>}
-                  <Badge tone={p.totalStock > 0 ? "neutral" : "error"}>
-                    {p.totalStock} em estoque
-                  </Badge>
-                  <Badge tone="neutral">
-                    {p.variantCount} variaç{p.variantCount === 1 ? "ão" : "ões"}
-                  </Badge>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {p.archived && <Badge tone="warning">Arquivado</Badge>}
+                    <Badge tone={p.totalStock > 0 ? "neutral" : "error"}>
+                      {p.totalStock} em estoque
+                    </Badge>
+                    <Badge tone="neutral">
+                      {p.variantCount} variaç{p.variantCount === 1 ? "ão" : "ões"}
+                    </Badge>
+                  </div>
                 </div>
               </Link>
               {p.archived && (

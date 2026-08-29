@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { getProduct } from "@/features/catalog/queries";
 import { archiveProduct, unarchiveProduct } from "@/features/catalog/actions";
 import { BackButton } from "@/components/molecules/back-button";
@@ -20,6 +21,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const variants = product.product_variants ?? [];
   const archived = product.archived_at !== null;
+  const images: string[] = product.image_urls ?? [];
 
   return (
     <div className="space-y-lg">
@@ -62,6 +64,25 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           Este produto está arquivado — não aparece nas vendas nem pode ser ofertado.
         </p>
       )}
+      {images.length > 0 && (
+        <div className="flex gap-3 overflow-x-auto pb-1">
+          {images.map((url, i) => (
+            <div
+              key={url}
+              className="relative aspect-square w-40 shrink-0 overflow-hidden rounded-xl border border-outline-variant bg-surface-container"
+            >
+              <Image
+                src={url}
+                alt={`${product.name} — foto ${i + 1}`}
+                fill
+                sizes="160px"
+                className="object-cover"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
       {product.description && (
         <p className="font-body-md text-body-md text-on-surface-variant">{product.description}</p>
       )}
