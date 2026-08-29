@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
 import { StatCard } from "@/components/molecules/stat-card";
 import { Badge, Button, Icon } from "@/components/atoms";
+import { Reveal } from "@/components/motion";
 import { formatBRL } from "@/lib/utils/currency";
 import { PAYMENT_METHOD } from "@/lib/i18n/labels";
 
@@ -29,15 +30,18 @@ export default async function SalesPage() {
       />
 
       <div className="grid gap-md sm:grid-cols-3">
-        <StatCard label="Faturamento" value={formatBRL(summary.revenue)} />
-        <StatCard label="Vendas confirmadas" value={String(summary.count)} />
-        <StatCard label="Ticket médio" value={formatBRL(summary.averageTicket)} />
+        <StatCard label="Faturamento" value={summary.revenue} format="brl" />
+        <StatCard label="Vendas confirmadas" value={summary.count} />
+        <StatCard label="Ticket médio" value={summary.averageTicket} format="brl" />
       </div>
 
       {sales.length === 0 ? (
         <EmptyState icon="receipt_long" title="Nenhuma venda registrada" />
       ) : (
-        <ul className="divide-y divide-outline-variant rounded-xl border border-outline-variant bg-surface-container-lowest">
+        <Reveal
+          as="ul"
+          className="divide-y divide-outline-variant rounded-xl border border-outline-variant bg-surface-container-lowest"
+        >
           {sales.map((s) => (
             <li key={s.id}>
               <Link
@@ -60,7 +64,7 @@ export default async function SalesPage() {
               </Link>
             </li>
           ))}
-        </ul>
+        </Reveal>
       )}
     </div>
   );

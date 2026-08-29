@@ -1,4 +1,5 @@
 import { Logo } from "@/components/atoms";
+import { Reveal } from "@/components/motion";
 
 /**
  * Shared two-panel shell for the unauthenticated screens (login, password
@@ -42,7 +43,7 @@ export function AuthScreen({
 
       {/* Content panel */}
       <section className="flex flex-1 flex-col justify-center bg-surface px-6 py-12 sm:px-12">
-        <div className="mx-auto w-full max-w-sm">
+        <Reveal className="mx-auto w-full max-w-sm">
           <div className="mb-xl flex justify-center lg:hidden">
             <Logo size={40} />
           </div>
@@ -51,7 +52,7 @@ export function AuthScreen({
             <p className="mt-2 font-body-md text-body-md text-on-surface-variant">{subtitle}</p>
           </div>
           {children}
-        </div>
+        </Reveal>
       </section>
     </main>
   );

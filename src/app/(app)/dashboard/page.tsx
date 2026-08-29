@@ -8,7 +8,7 @@ import {
 } from "@/features/dashboard/components/dashboard-charts";
 import { StatCard } from "@/components/molecules/stat-card";
 import { Button, Icon } from "@/components/atoms";
-import { formatBRL } from "@/lib/utils/currency";
+import { Reveal, RevealGroup, RevealCell } from "@/components/motion";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -38,29 +38,38 @@ export default async function DashboardPage() {
         </Link>
       </header>
 
-      <div className="grid gap-md sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Vendas no mês"
-          value={formatBRL(data.monthRevenue)}
-          hint={`${data.monthSales} venda(s)`}
-        />
-        <StatCard label="Ticket médio" value={formatBRL(data.averageTicket)} />
-        <StatCard
-          label="Itens em estoque"
-          value={String(data.stockUnits)}
-          hint={`${data.variantCount} variações`}
-        />
-        <StatCard
-          label="Negociações pendentes"
-          value={String(data.pendingNegotiations)}
-          accent={data.pendingNegotiations > 0 ? "ação necessária" : undefined}
-        />
-      </div>
+      <RevealGroup className="grid gap-md sm:grid-cols-2 lg:grid-cols-4">
+        <RevealCell>
+          <StatCard
+            label="Vendas no mês"
+            value={data.monthRevenue}
+            format="brl"
+            hint={`${data.monthSales} venda(s)`}
+          />
+        </RevealCell>
+        <RevealCell>
+          <StatCard label="Ticket médio" value={data.averageTicket} format="brl" />
+        </RevealCell>
+        <RevealCell>
+          <StatCard
+            label="Itens em estoque"
+            value={data.stockUnits}
+            hint={`${data.variantCount} variações`}
+          />
+        </RevealCell>
+        <RevealCell>
+          <StatCard
+            label="Negociações pendentes"
+            value={data.pendingNegotiations}
+            accent={data.pendingNegotiations > 0 ? "ação necessária" : undefined}
+          />
+        </RevealCell>
+      </RevealGroup>
 
-      <div className="grid gap-md lg:grid-cols-2">
+      <Reveal delay={0.1} className="grid gap-md lg:grid-cols-2">
         <SalesTrendChart data={data.salesTrend} />
         <TopProductsChart data={data.topProducts} />
-      </div>
+      </Reveal>
 
       <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
         <div className="flex items-center gap-2">

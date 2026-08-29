@@ -1,6 +1,7 @@
 import { BottomNav } from "@/components/organisms/bottom-nav";
 import { SidebarNav } from "@/components/organisms/sidebar-nav";
 import { TopAppBar } from "@/components/organisms/top-app-bar";
+import { PageTransition } from "@/components/motion/page-transition";
 import type { AppNotification } from "@/features/notifications/queries";
 
 export interface AppShellProps {
@@ -39,7 +40,7 @@ export function AppShell({
           unreadCount={unreadCount}
         />
         <main className="mx-auto w-full max-w-5xl px-margin-mobile pb-28 pt-lg sm:px-6 lg:px-8 lg:pb-12">
-          {children}
+          <PageTransition>{children}</PageTransition>
         </main>
       </div>
 

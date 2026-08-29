@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
 import { FilterTabs } from "@/components/molecules/filter-tabs";
 import { Badge, Button, Icon } from "@/components/atoms";
+import { RevealList, RevealItem } from "@/components/motion";
 import { formatBRL } from "@/lib/utils/currency";
 
 export const metadata: Metadata = { title: "Produtos" };
@@ -84,9 +85,9 @@ export default async function ProductsPage({
           }
         />
       ) : (
-        <ul className="space-y-md">
+        <RevealList className="space-y-md">
           {products.map((p) => (
-            <li
+            <RevealItem
               key={p.id}
               className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-surface"
             >
@@ -140,9 +141,9 @@ export default async function ProductsPage({
                   </Button>
                 </form>
               )}
-            </li>
+            </RevealItem>
           ))}
-        </ul>
+        </RevealList>
       )}
     </div>
   );
