@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Button, Icon, TextField } from "@/components/atoms";
+import { useToast } from "@/components/organisms/toast/toast-provider";
 import { updateProfile, type ProfileState } from "../actions";
 import type { MyProfile } from "../queries";
 
@@ -10,6 +11,11 @@ export function ProfileForm({ profile }: { profile: MyProfile }) {
   const [state, action, pending] = useActionState<ProfileState, FormData>(updateProfile, {});
   const [preview, setPreview] = useState<string | null>(profile.avatarUrl);
   const fileRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (state.ok) toast({ message: state.ok, variant: "success" });
+  }, [state.ok, toast]);
 
   return (
     <form action={action} className="space-y-lg">
@@ -19,11 +25,6 @@ export function ProfileForm({ profile }: { profile: MyProfile }) {
           className="rounded-lg bg-error-container px-4 py-3 font-body-md text-body-md text-on-error-container"
         >
           {state.error}
-        </p>
-      )}
-      {state.ok && (
-        <p className="rounded-lg bg-success-container px-4 py-3 font-body-md text-body-md text-on-success-container">
-          {state.ok}
         </p>
       )}
 

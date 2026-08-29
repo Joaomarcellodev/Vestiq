@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
   // Incremental route creation across sprints makes strict route typing noisy now.
   typedRoutes: false,
   images: {
+    // Next 16 blocks the optimizer from fetching private IPs (SSRF guard). The
+    // local Supabase Storage runs on 127.0.0.1, so allow it in dev only.
+    dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
     remotePatterns: [
       // Supabase Storage public buckets (hosted + local)
       { protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" },

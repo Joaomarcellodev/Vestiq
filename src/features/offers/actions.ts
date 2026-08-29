@@ -30,7 +30,7 @@ export async function publishOffer(_prev: ActionState, formData: FormData): Prom
   if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
 
   revalidatePath("/rede");
-  redirect("/rede");
+  redirect("/rede?toast=offer-published");
 }
 
 export async function cancelOffer(formData: FormData): Promise<void> {
@@ -47,4 +47,5 @@ export async function cancelOffer(formData: FormData): Promise<void> {
   if (error) throw new Error(error.message);
 
   revalidatePath("/rede");
+  redirect("/rede?toast=offer-cancelled");
 }

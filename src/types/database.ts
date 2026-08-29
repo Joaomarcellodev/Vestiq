@@ -395,6 +395,47 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          organization_id: string
+          read_at: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          organization_id: string
+          read_at?: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          organization_id?: string
+          read_at?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       offers: {
         Row: {
           created_at: string
@@ -1075,6 +1116,14 @@ export type Database = {
         | "CANCELLED"
         | "COMPLETED"
       network_member_status: "INVITED" | "ACTIVE" | "DISABLED"
+      notification_type:
+        | "OFFER_PUBLISHED"
+        | "NEGOTIATION_OPENED"
+        | "NEGOTIATION_MESSAGE"
+        | "NEGOTIATION_ACCEPTED"
+        | "NEGOTIATION_REJECTED"
+        | "NEGOTIATION_CANCELLED"
+        | "NEGOTIATION_COMPLETED"
       offer_status:
         | "ACTIVE"
         | "PARTIALLY_NEGOTIATED"
@@ -1241,6 +1290,15 @@ export const Constants = {
         "COMPLETED",
       ],
       network_member_status: ["INVITED", "ACTIVE", "DISABLED"],
+      notification_type: [
+        "OFFER_PUBLISHED",
+        "NEGOTIATION_OPENED",
+        "NEGOTIATION_MESSAGE",
+        "NEGOTIATION_ACCEPTED",
+        "NEGOTIATION_REJECTED",
+        "NEGOTIATION_CANCELLED",
+        "NEGOTIATION_COMPLETED",
+      ],
       offer_status: [
         "ACTIVE",
         "PARTIALLY_NEGOTIATED",

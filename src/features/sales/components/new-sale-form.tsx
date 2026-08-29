@@ -1,8 +1,10 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
+import Image from "next/image";
 import { Button, Icon } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
+import type { CatalogProduct } from "../queries";
 import { computeTotals, validateDiscount } from "../totals";
 import { confirmSale, type SaleActionState } from "../actions";
 
@@ -22,9 +24,11 @@ interface CartLine {
 
 export function NewSaleForm({
   variants,
+  catalog,
   customers,
 }: {
   variants: VariantOption[];
+  catalog: CatalogProduct[];
   customers: { id: string; name: string }[];
 }) {
   const [state, action, pending] = useActionState<SaleActionState, FormData>(confirmSale, {});
@@ -40,6 +44,12 @@ export function NewSaleForm({
     return variants.filter((v) => v.label.toLowerCase().includes(q)).slice(0, 6);
   }, [search, variants]);
 
+  const catalogResults = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return catalog;
+    return catalog.filter((p) => `${p.name} ${p.brand ?? ""}`.toLowerCase().includes(q));
+  }, [search, catalog]);
+
   const totals = useMemo(
     () =>
       computeTotals(
@@ -50,21 +60,33 @@ export function NewSaleForm({
   );
   const discountError = validateDiscount(totals.subtotal, Number(discount) || 0);
 
-  const addLine = (v: VariantOption) => {
-    setSearch("");
+  const addItem = (item: { id: string; label: string; price: number; stock: number }) => {
     setCart((c) => {
-      const existing = c.find((l) => l.variantId === v.id);
+      const existing = c.find((l) => l.variantId === item.id);
       if (existing) {
         return c.map((l) =>
-          l.variantId === v.id ? { ...l, quantity: Math.min(l.quantity + 1, l.stock) } : l,
+          l.variantId === item.id ? { ...l, quantity: Math.min(l.quantity + 1, l.stock) } : l,
         );
       }
       return [
         ...c,
-        { variantId: v.id, label: v.label, unitPrice: v.price, quantity: 1, stock: v.stock },
+        {
+          variantId: item.id,
+          label: item.label,
+          unitPrice: item.price,
+          quantity: 1,
+          stock: item.stock,
+        },
       ];
     });
   };
+
+  const addLine = (v: VariantOption) => {
+    setSearch("");
+    addItem(v);
+  };
+
+  const cartQty = (variantId: string) => cart.find((l) => l.variantId === variantId)?.quantity ?? 0;
 
   return (
     <form
@@ -113,8 +135,8 @@ export function NewSaleForm({
         </select>
       </section>
 
-      <section className="space-y-sm rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
-        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
+      <section className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
+        <label className="block font-body-md text-body-md font-semibold text-on-surface">
           Produtos
         </label>
         <div className="relative">
@@ -144,6 +166,22 @@ export function NewSaleForm({
           )}
         </div>
 
+        {/* Visual catalog — tap a card to add it to the sale */}
+        {catalogResults.length === 0 ? (
+          <p className="py-2 font-body-md text-body-md text-on-surface-variant">
+            {search ? "Nenhum produto encontrado." : "Nenhum produto com estoque disponível."}
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {catalogResults.map((p) => (
+              <CatalogCard key={p.id} product={p} onAdd={addItem} inCart={cartQty} />
+            ))}
+          </div>
+        )}
+
+        <div className="border-t border-outline-variant pt-sm font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
+          Itens da venda
+        </div>
         {cart.length === 0 ? (
           <p className="py-4 text-center font-body-md text-body-md text-on-surface-variant">
             Nenhum item adicionado.
@@ -250,5 +288,95 @@ export function NewSaleForm({
         </Button>
       </div>
     </form>
+  );
+}
+
+function CatalogCard({
+  product,
+  onAdd,
+  inCart,
+}: {
+  product: CatalogProduct;
+  onAdd: (item: { id: string; label: string; price: number; stock: number }) => void;
+  inCart: (variantId: string) => number;
+}) {
+  const [open, setOpen] = useState(false);
+  const only = product.variants.length === 1 ? product.variants[0] : undefined;
+  const single = Boolean(only);
+  const qtyInCart = product.variants.reduce((n, v) => n + inCart(v.id), 0);
+
+  const add = (v: CatalogProduct["variants"][number]) =>
+    onAdd({
+      id: v.id,
+      label: single ? product.name : `${product.name} · ${v.label}`,
+      price: v.price,
+      stock: v.stock,
+    });
+
+  return (
+    <div className="flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest">
+      <button
+        type="button"
+        aria-label={only ? `Adicionar ${product.name}` : `${product.name} — escolher variante`}
+        onClick={() => (only ? add(only) : setOpen((o) => !o))}
+        className="group relative aspect-square w-full bg-surface-container text-outline"
+      >
+        {product.imageUrl ? (
+          <Image
+            src={product.imageUrl}
+            alt={product.name}
+            fill
+            sizes="(min-width: 640px) 200px, 45vw"
+            className="object-cover transition-transform duration-200 group-hover:scale-105"
+          />
+        ) : (
+          <span className="grid h-full w-full place-items-center">
+            <Icon name="inventory_2" size={28} />
+          </span>
+        )}
+        <span className="absolute right-1.5 top-1.5 grid h-7 w-7 place-items-center rounded-full bg-primary-container text-on-primary shadow-primary">
+          {qtyInCart > 0 ? (
+            <span className="font-label-md text-label-md">{qtyInCart}</span>
+          ) : (
+            <Icon name="add" size={16} />
+          )}
+        </span>
+      </button>
+
+      <div className="flex flex-1 flex-col gap-0.5 p-2.5">
+        <p className="truncate font-body-md text-body-md font-semibold text-on-surface">
+          {product.name}
+        </p>
+        <p className="truncate font-label-md text-label-md text-on-surface-variant">
+          {product.brand ?? "—"}
+        </p>
+        <p className="mt-0.5 font-body-md text-body-md text-primary-container">
+          {formatBRL(product.minPrice)}
+          {!single && (
+            <span className="text-on-surface-variant"> · {product.variants.length} var.</span>
+          )}
+        </p>
+
+        {open && !single && (
+          <ul className="mt-1.5 space-y-1">
+            {product.variants.map((v) => (
+              <li key={v.id}>
+                <button
+                  type="button"
+                  onClick={() => add(v)}
+                  className="flex w-full items-center justify-between rounded-md border border-outline-variant px-2 py-1.5 text-left font-label-md text-label-md hover:bg-surface-container-low"
+                >
+                  <span className="truncate">{v.label}</span>
+                  <span className="shrink-0 text-on-surface-variant">
+                    {formatBRL(v.price)}
+                    {inCart(v.id) > 0 && ` · ${inCart(v.id)}`}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
   );
 }

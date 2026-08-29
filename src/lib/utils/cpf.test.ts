@@ -5,6 +5,9 @@ describe("isValidCPF", () => {
   it("accepts valid CPFs (with and without mask)", () => {
     expect(isValidCPF("529.982.247-25")).toBe(true);
     expect(isValidCPF("52998224725")).toBe(true);
+    // check digit resolves to 0 via the `mod === 10 ? 0` branch
+    expect(isValidCPF("00000000604")).toBe(true);
+    expect(isValidCPF("00000001830")).toBe(true);
   });
 
   it("rejects invalid CPFs", () => {

@@ -73,6 +73,54 @@ export async function listSellableVariants(search?: string) {
     : rows;
 }
 
+export interface CatalogProduct {
+  id: string;
+  name: string;
+  brand: string | null;
+  imageUrl: string | null;
+  minPrice: number;
+  variants: { id: string; label: string; price: number; stock: number }[];
+}
+
+/**
+ * Visual catalog for the sale screen: in-stock products grouped by product,
+ * each with its photo and sellable variants. Browsed before / alongside the
+ * text search.
+ */
+export async function listSellableCatalog(): Promise<CatalogProduct[]> {
+  await requireActiveOrganization();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select(
+      "id, name, brand, image_urls, product_variants(id, size, color, retail_price, stock_on_hand, archived_at)",
+    )
+    .is("archived_at", null)
+    .order("name");
+  if (error) throw error;
+
+  return (data ?? [])
+    .map((p) => {
+      const variants = (p.product_variants ?? [])
+        .filter((v) => v.archived_at === null && v.stock_on_hand > 0)
+        .map((v) => ({
+          id: v.id,
+          label: [v.color, v.size].filter(Boolean).join(" / ") || "Único",
+          price: Number(v.retail_price),
+          stock: v.stock_on_hand,
+        }));
+      return {
+        id: p.id,
+        name: p.name,
+        brand: p.brand,
+        imageUrl: p.image_urls?.[0] ?? null,
+        minPrice: variants.length ? Math.min(...variants.map((v) => v.price)) : 0,
+        variants,
+      };
+    })
+    .filter((p) => p.variants.length > 0);
+}
+
 export async function listCustomerOptions() {
   await requireActiveOrganization();
   const supabase = await createClient();

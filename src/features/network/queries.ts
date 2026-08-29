@@ -13,23 +13,20 @@ export async function getFactoryNetworkOverview() {
     .eq("factory_id", org.id);
 
   const networkIds = (networks ?? []).map((n) => n.id);
-  const { data: members } = networkIds.length
-    ? await supabase
-        .from("network_members")
-        .select(
-          "id, status, invited_email, joined_at, network_id, reseller:organizations!network_members_reseller_id_fkey(name)",
-        )
-        .in("network_id", networkIds)
-        .order("created_at")
-    : { data: [] };
 
-  const { data: offers } = networkIds.length
-    ? await supabase.from("offers").select("id").in("network_id", networkIds)
-    : { data: [] };
-
-  const { data: negotiations } = networkIds.length
-    ? await supabase.from("negotiations").select("status").in("network_id", networkIds)
-    : { data: [] };
+  const [{ data: members }, { data: offers }, { data: negotiations }] = networkIds.length
+    ? await Promise.all([
+        supabase
+          .from("network_members")
+          .select(
+            "id, status, invited_email, joined_at, network_id, reseller:organizations!network_members_reseller_id_fkey(name)",
+          )
+          .in("network_id", networkIds)
+          .order("created_at"),
+        supabase.from("offers").select("id").in("network_id", networkIds),
+        supabase.from("negotiations").select("status").in("network_id", networkIds),
+      ])
+    : [{ data: [] }, { data: [] }, { data: [] }];
 
   const activeMembers = (members ?? []).filter((m) => m.status === "ACTIVE").length;
   const negs = negotiations ?? [];
