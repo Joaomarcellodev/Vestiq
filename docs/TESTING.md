@@ -41,12 +41,47 @@ transferência transacional), autorização, isolamento de dados.
 ## Convenções
 
 - Arquivo de teste ao lado do código: `x.ts` → `x.test.ts`.
-- Testes de integração/RLS: sufixo `.integration.test.ts`, exigem `supabase start`
-  e são marcados para rodar em job separado no CI.
-- E2E em `e2e/<fluxo>.spec.ts`.
+- Testes de integração/RLS: sufixo `.integration.test.ts`. Exigem `supabase start`;
+  quando o stack está fora do ar eles fazem `describe.skip` (não quebram, mas a
+  cobertura cai — o gate do CI portanto sobe o Supabase). Rodam no ambiente `node`
+  do vitest (`environmentMatchGlobs`).
+- E2E em `e2e/<fluxo>.spec.ts`. Helpers compartilhados em `e2e/helpers.ts`
+  (`login`, `createUser` via admin API, `latestEmailBody` via Mailpit `54424`,
+  `toast`/`formAlert` locators).
 - Nomear pelo comportamento: `it("bloqueia venda acima do estoque disponível")`.
-- Cada `TESTS.md` de feature lista os `TC-<RF>-NN` e o arquivo que os implementa
-  (rastreabilidade — SDD §32).
+
+## Harness de Server Actions (`src/test/`)
+
+As Server Actions/queries do Next chamam `createClient()` (cookies) e
+`redirect()`/`revalidatePath()`. O harness torna isso testável **de verdade**
+contra o Supabase local:
+
+- `src/test/setup.ts` — `vi.mock` global de `next/cache`, `next/navigation`
+  (`redirect` lança `RedirectError`; `useRouter`/`usePathname`/`useSearchParams`
+  vêm de setters), `next/headers` e `@/lib/supabase/server` (devolve o client
+  injetado). Também polyfills de jsdom (`IntersectionObserver`, `ResizeObserver`,
+  `matchMedia`, `URL.createObjectURL`) para `motion`/`recharts`.
+- `src/test/next.ts` — `setPathname`, `setSearchParams`, `setCookie`, `routerSpy`,
+  `resetNext`, classes `RedirectError`/`NotFoundError`.
+- `src/test/actions.ts` — `setTestClient(client)` injeta o client autenticado;
+  `formData(obj)`, `pngFile()`/`textFile()`, `expectRedirect(fn, matcher)`, e
+  fábricas (`makeCategory`, `makeCustomer`, `makeNetwork`, `addMember`,
+  `inviteMember`, `stockUp`). Reusa `src/test/supabase.ts` (`makeUser`, `makeOrg`,
+  `makeProduct`, `makeVariant`, `admin`, `supabaseUp`).
+
+Padrão:
+```ts
+const up = await supabaseUp();
+const d = up ? describe : describe.skip;
+d("createProduct", () => {
+  beforeEach(async () => { const u = await makeUser(); await makeOrg(u.userId); setTestClient(u.client); });
+  afterEach(() => clearTestClient());
+  it("…", async () => {
+    await expectRedirect(() => createProduct({}, formData({ name: "X", variants: "[]" })),
+      /\/produtos\/[0-9a-f-]{36}\?toast=product-created/);
+  });
+});
+```
 
 ## Unit — o que cobrir
 
@@ -88,14 +123,29 @@ Factory Admin faz login → cria rede → convida revendedora
 Mais E2E por sprint: login/logout/guarda de rota, registrar+cancelar venda,
 cadastro de produto com variações.
 
-## CI (GitHub Actions)
+## Cobertura
+
+`npm run test:coverage` — gate no CI (`vitest.config.ts` → `coverage.thresholds`).
+
+- **Incluído:** lógica de negócio (`features/*/{actions,queries,validation}.ts`),
+  componentes (`components/**`, `features/*/components/**`), `lib/{theme,i18n,toast,utils}`,
+  `components/motion/**`.
+- **Excluído (coberto por E2E, não por vitest):** `app/**/{page,layout,loading,error}.tsx`,
+  `app/**/route.ts`, `lib/supabase/**`, `proxy.ts`, `lib/env.ts`, `**/index.ts`.
+- **Floor atual:** statements/lines 95, functions 88, branches 79 (real ≈ 98 / 90 / 81).
+  Subir os thresholds conforme a cobertura melhora; nunca baixar sem nota no PR.
+
+## CI (GitHub Actions — `.github/workflows/ci.yml`)
 
 ```
-lint  →  typecheck  →  unit+component  →  integration (supabase local)  →  e2e (build + run)
+npm ci → lint → typecheck → supabase start → gerar .env.local
+       → test:coverage (unit + integração + gate)
+       → playwright install → db:reset + seed → e2e (chromium)
+       → upload coverage/ + playwright-report/
 ```
 
-`main` e `develop` protegidas: PR só faz merge com todos os jobs verdes, review
-aprovado e o checklist de PR do SDD §42 preenchido.
+`main` e `develop` protegidas: PR só faz merge com o job verde, review aprovado e
+o checklist de PR do SDD §42 preenchido.
 
 ## Definition of Done (recorte de testes — SDD §37)
 

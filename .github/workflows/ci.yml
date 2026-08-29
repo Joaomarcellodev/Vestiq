@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint + typecheck
+        run: |
+          npm run lint
+          npm run typecheck
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase
+        run: supabase start
+
+      - name: Write .env.local from the local stack
+        run: |
+          node - <<'EOF'
+          const { execSync } = require("node:child_process");
+          const s = JSON.parse(execSync("supabase status -o json").toString());
+          const lines = [
+            `NEXT_PUBLIC_SUPABASE_URL=${s.API_URL}`,
+            `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${s.PUBLISHABLE_KEY ?? s.ANON_KEY}`,
+            `SUPABASE_SECRET_KEY=${s.SECRET_KEY ?? s.SERVICE_ROLE_KEY}`,
+            `NEXT_PUBLIC_SITE_URL=http://localhost:3000`,
+          ];
+          require("node:fs").writeFileSync(".env.local", lines.join("\n") + "\n");
+          console.log(lines.join("\n"));
+          EOF
+
+      - name: Unit + integration tests (with coverage gate)
+        run: npm run test:coverage
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Reset + seed the database for E2E
+        run: |
+          npm run db:reset
+          node scripts/seed.mjs
+
+      - name: E2E tests
+        run: npx playwright test --project=chromium
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: reports
+          path: |
+            coverage/
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
