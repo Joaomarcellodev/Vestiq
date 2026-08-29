@@ -317,6 +317,7 @@ function CatalogCard({
     <div className="flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest">
       <button
         type="button"
+        aria-label={only ? `Adicionar ${product.name}` : `${product.name} — escolher variante`}
         onClick={() => (only ? add(only) : setOpen((o) => !o))}
         className="group relative aspect-square w-full bg-surface-container text-outline"
       >
