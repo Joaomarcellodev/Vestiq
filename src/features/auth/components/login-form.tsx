@@ -67,10 +67,7 @@ export function LoginForm({ next, oauthError }: { next: string; oauthError?: boo
         <span className="h-px flex-1 bg-outline-variant" />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <OAuthButton provider="google" next={next} label="Google" icon="google" />
-        <OAuthButton provider="apple" next={next} label="Apple" icon="apple" />
-      </div>
+      <OAuthButton provider="google" next={next} label="Continuar com Google" icon="google" />
 
       <p className="mt-lg text-center font-body-md text-body-md text-on-surface-variant">
         Recebeu um convite? Abra o link enviado pela sua fábrica para entrar na rede.
@@ -85,7 +82,7 @@ function OAuthButton({
   label,
   icon,
 }: {
-  provider: "google" | "apple";
+  provider: "google";
   next: string;
   label: string;
   icon: string;

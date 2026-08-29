@@ -26,7 +26,7 @@ sessão, e garantir que rotas privadas exijam sessão válida e o papel adequado
 ## Escopo
 
 - Login com email/senha.
-- Login social: Google e Apple (Supabase OAuth, fluxo PKCE via `/auth/callback`).
+- Login social: Google (Supabase OAuth, fluxo PKCE via `/auth/callback`).
 - "Lembrar-me" e "Esqueci minha senha" (recuperação via Supabase).
 - Logout.
 - Proxy que renova a sessão e bloqueia rotas privadas.
@@ -64,7 +64,7 @@ sessão, e garantir que rotas privadas exijam sessão válida e o papel adequado
 | ID         | Como…                   | Quero…                                        | Para…                                            |
 | ---------- | ----------------------- | --------------------------------------------- | ------------------------------------------------ |
 | US-AUTH-01 | usuário                 | entrar com email e senha                      | acessar minha conta                              |
-| US-AUTH-02 | usuário                 | entrar com Google ou Apple                    | não gerenciar outra senha                        |
+| US-AUTH-02 | usuário                 | entrar com Google                             | não gerenciar outra senha                        |
 | US-AUTH-03 | usuário autenticado     | sair da conta                                 | proteger meu acesso em dispositivo compartilhado |
 | US-AUTH-04 | usuário não autenticado | ser levado ao login ao abrir uma rota privada | entender que preciso entrar                      |
 | US-AUTH-05 | sistema                 | negar ação fora do papel do usuário           | manter a separação de responsabilidades          |
@@ -93,7 +93,7 @@ sessão, e garantir que rotas privadas exijam sessão válida e o papel adequado
 
 ## Fluxos Alternativos
 
-- **A1 — social:** clica em Google/Apple → Server Action `signInWithOAuth` →
+- **A1 — social:** clica em Google → Server Action `signInWithOAuth` →
   redirect ao provedor → volta em `/auth/callback?code=…&next=…` → troca do código
   → redirect para `next`.
 - **A2 — credencial inválida:** passo 4 falha → formulário exibe BR-AUTH-01,

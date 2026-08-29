@@ -38,7 +38,6 @@ type IconName =
   | "visibility_off"
   | "warning"
   | "logout"
-  | "apple"
   | "google";
 
 const PATHS: Record<IconName, React.ReactNode> = {
@@ -188,13 +187,6 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M12 3.5 22 20H2L12 3.5Z" />
       <path d="M12 9v5M12 17h.01" />
     </>
-  ),
-  apple: (
-    <path
-      fill="currentColor"
-      stroke="none"
-      d="M16 3c.1 1-.3 2-1 2.8-.7.8-1.7 1.4-2.7 1.3-.1-1 .4-2 1-2.7C14 1 15 3 16 3Zm2.4 6c-1 .6-1.6 1.6-1.6 2.9 0 1.4.9 2.7 2.2 3.2-.3.9-.7 1.7-1.2 2.5-.7 1-1.5 2.2-2.6 2.2s-1.4-.6-2.7-.6-1.6.6-2.7.7c-1 0-1.9-1.1-2.6-2.1-1.4-2-2.5-5.7-1-8.2.7-1.3 2-2.1 3.4-2.1 1.1 0 2 .7 2.7.7.6 0 1.8-.9 3-.8.6 0 2.1.2 3 1.5Z"
-    />
   ),
   google: (
     <path

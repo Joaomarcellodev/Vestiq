@@ -45,7 +45,7 @@ export async function signInWithPassword(
   redirect(next);
 }
 
-/** RF-AUTH-001 — sign in with a social provider (Google / Apple). */
+/** RF-AUTH-001 — sign in with a social provider (Google). */
 export async function signInWithOAuth(formData: FormData): Promise<void> {
   const provider = oauthProviderSchema.parse(formData.get("provider"));
   const next = sanitizeNext(formData.get("next"));

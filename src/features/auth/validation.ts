@@ -9,5 +9,5 @@ export const credentialsSchema = z.object({
 
 export type Credentials = z.infer<typeof credentialsSchema>;
 
-export const oauthProviderSchema = z.enum(["google", "apple"]);
+export const oauthProviderSchema = z.enum(["google"]);
 export type OAuthProvider = z.infer<typeof oauthProviderSchema>;
