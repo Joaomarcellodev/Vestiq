@@ -157,5 +157,5 @@ Ver [`TESTS.md`](./TESTS.md).
 - [ ] Migration `profiles` + trigger `on_auth_user_created`
 - [ ] `requireRole()` / `requireOrgRole()` + testes
 - [ ] Tela "aguardando convite"
-- [ ] Link "Esqueci minha senha" → fluxo de recuperação
+- [x] Link "Esqueci minha senha" → fluxo de recuperação (`/recuperar-senha` + `/redefinir-senha`)
 - [ ] E2E: login, logout, guarda de rota, open-redirect
