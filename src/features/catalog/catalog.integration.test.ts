@@ -7,7 +7,7 @@ import {
   makeCategory,
   pngFile,
   textFile,
-  useTestClient,
+  setTestClient,
 } from "@/test/actions";
 import {
   archiveProduct,
@@ -29,7 +29,7 @@ d("catalog actions + queries (SPEC-004)", () => {
     user = await makeUser();
     const org = await makeOrg(user.userId, "RESELLER");
     orgId = org.id;
-    useTestClient(user.client);
+    setTestClient(user.client);
   });
   afterEach(() => clearTestClient());
 

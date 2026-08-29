@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { makeOrg, makeUser, supabaseUp } from "@/test/supabase";
-import { clearTestClient, expectRedirect, useTestClient } from "@/test/actions";
+import { clearTestClient, expectRedirect, setTestClient } from "@/test/actions";
 import { RedirectError } from "@/test/next";
 import {
   getActiveOrganization,
@@ -18,7 +18,7 @@ d("organizations + auth guards (SPEC-002)", () => {
 
   beforeEach(async () => {
     user = await makeUser();
-    useTestClient(user.client);
+    setTestClient(user.client);
   });
   afterEach(() => clearTestClient());
 

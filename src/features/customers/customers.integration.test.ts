@@ -5,7 +5,7 @@ import {
   expectRedirect,
   formData,
   makeCustomer,
-  useTestClient,
+  setTestClient,
 } from "@/test/actions";
 import { isValidCPF } from "@/lib/utils/cpf";
 import { archiveCustomer, createCustomer, unarchiveCustomer, updateCustomer } from "./actions";
@@ -23,7 +23,7 @@ d("customers actions + queries (SPEC-006)", () => {
   beforeEach(async () => {
     const u = await makeUser();
     orgId = (await makeOrg(u.userId, "RESELLER")).id;
-    useTestClient(u.client);
+    setTestClient(u.client);
   });
   afterEach(() => clearTestClient());
 

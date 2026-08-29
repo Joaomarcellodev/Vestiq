@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { admin, makeOrg, makeUser, supabaseUp, uniqueEmail } from "@/test/supabase";
-import { clearTestClient, formData, pngFile, textFile, useTestClient } from "@/test/actions";
+import { clearTestClient, formData, pngFile, textFile, setTestClient } from "@/test/actions";
 import { updateProfile } from "./actions";
 import { getMyProfile } from "./queries";
 
@@ -13,7 +13,7 @@ d("profile actions + queries (SPEC-001)", () => {
   beforeEach(async () => {
     user = await makeUser();
     await makeOrg(user.userId, "RESELLER", "RESELLER", "Loja da Ana");
-    useTestClient(user.client);
+    setTestClient(user.client);
   });
   afterEach(() => clearTestClient());
 

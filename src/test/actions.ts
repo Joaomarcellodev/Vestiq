@@ -6,13 +6,13 @@ import { RedirectError } from "./next";
 
 /**
  * Server Actions and queries call `createClient()` from `@/lib/supabase/server`,
- * which reads request cookies. In tests we bypass that: `useTestClient()` sets
+ * which reads request cookies. In tests we bypass that: `setTestClient()` sets
  * the authenticated client the mock in `setup.ts` hands back.
  */
 
 let current: SupabaseClient<Database> | null = null;
 
-export function useTestClient(client: SupabaseClient<Database>): void {
+export function setTestClient(client: SupabaseClient<Database>): void {
   current = client;
 }
 export function clearTestClient(): void {
@@ -20,7 +20,7 @@ export function clearTestClient(): void {
 }
 export function _currentClient(): SupabaseClient<Database> {
   if (!current) {
-    throw new Error("useTestClient() must be called before invoking a Server Action in tests");
+    throw new Error("setTestClient() must be called before invoking a Server Action in tests");
   }
   return current;
 }

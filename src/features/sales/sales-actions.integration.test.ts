@@ -6,7 +6,7 @@ import {
   formData,
   makeCustomer,
   stockUp,
-  useTestClient,
+  setTestClient,
 } from "@/test/actions";
 import { cancelSale, confirmSale } from "./actions";
 import {
@@ -37,7 +37,7 @@ d("sales actions + queries (SPEC-007)", () => {
 
   beforeEach(async () => {
     ctx = await setup();
-    useTestClient(ctx.u.client);
+    setTestClient(ctx.u.client);
   });
   afterEach(() => clearTestClient());
 

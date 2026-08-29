@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { makeUser, supabaseUp, uniqueEmail } from "@/test/supabase";
-import { clearTestClient, expectRedirect, formData, useTestClient } from "@/test/actions";
+import { clearTestClient, expectRedirect, formData, setTestClient } from "@/test/actions";
 import {
   requestPasswordReset,
   signInWithOAuth,
@@ -17,7 +17,7 @@ d("auth actions (SPEC-002)", () => {
 
   beforeEach(async () => {
     user = await makeUser(uniqueEmail("auth"), "test-pass-1234");
-    useTestClient(user.client);
+    setTestClient(user.client);
   });
   afterEach(() => clearTestClient());
 

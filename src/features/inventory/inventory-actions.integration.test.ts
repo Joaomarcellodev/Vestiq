@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { makeOrg, makeProduct, makeUser, makeVariant, supabaseUp } from "@/test/supabase";
-import { clearTestClient, formData, useTestClient } from "@/test/actions";
+import { clearTestClient, formData, setTestClient } from "@/test/actions";
 import { adjustStock, recordEntry } from "./actions";
 import { listInventory, listMovements } from "./queries";
 
@@ -15,7 +15,7 @@ d("inventory actions + queries (SPEC-005)", () => {
     const org = await makeOrg(u.userId, "RESELLER");
     const product = await makeProduct(org.id, { name: "Bota" });
     const variant = await makeVariant(product.id, { sku: "BOT-1", retail_price: 200 });
-    useTestClient(u.client);
+    setTestClient(u.client);
     ctx = { client: u.client, variantId: variant.id };
   });
   afterEach(() => clearTestClient());
