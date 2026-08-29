@@ -16,27 +16,27 @@ export function AuthScreen({
 }) {
   return (
     <main className="flex min-h-screen">
-      {/* Brand panel — desktop only */}
-      <section className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-primary p-12 text-on-primary lg:flex xl:w-[45%]">
+      {/* Brand panel — desktop only. Deep purple in every theme (decorative). */}
+      <section className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-[#3f0a75] bg-gradient-to-br from-[#4a0d85] to-[#2a0552] p-12 text-white lg:flex xl:w-[45%]">
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-secondary-container/30 blur-3xl"
+          className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-[#fe4cca]/25 blur-3xl"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-32 -left-16 h-96 w-96 rounded-full bg-primary-container/40 blur-3xl"
+          className="pointer-events-none absolute -bottom-32 -left-16 h-96 w-96 rounded-full bg-[#7027b8]/50 blur-3xl"
         />
         <Logo size={32} className="relative" />
         <div className="relative max-w-md">
           <h2 className="font-display-lg text-display-lg leading-tight">
             Sua rede vende melhor conectada.
           </h2>
-          <p className="mt-lg font-body-lg text-body-lg text-primary-fixed">
+          <p className="mt-lg font-body-lg text-body-lg text-white/80">
             Gestão de estoque, clientes e vendas — e uma rede privada para circular as peças com
             outras revendedoras da sua fábrica.
           </p>
         </div>
-        <p className="relative font-label-md text-label-md uppercase tracking-widest text-primary-fixed-dim">
+        <p className="relative font-label-md text-label-md uppercase tracking-widest text-white/60">
           Vestiq · B2B fashion
         </p>
       </section>

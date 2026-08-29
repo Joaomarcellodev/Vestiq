@@ -38,7 +38,9 @@ type IconName =
   | "visibility_off"
   | "warning"
   | "logout"
-  | "google";
+  | "google"
+  | "sun"
+  | "moon";
 
 const PATHS: Record<IconName, React.ReactNode> = {
   add: <path d="M12 5v14M5 12h14" />,
@@ -195,6 +197,13 @@ const PATHS: Record<IconName, React.ReactNode> = {
       d="M21.35 12.2c0-.7-.06-1.2-.18-1.75H12v3.3h5.3a4.5 4.5 0 0 1-1.96 2.96v2.46h3.17c1.85-1.7 2.84-4.2 2.84-6.97ZM12 22c2.55 0 4.7-.84 6.26-2.28l-3.17-2.46c-.88.6-2 .96-3.09.96-2.38 0-4.4-1.6-5.12-3.77H3.6v2.53A9.5 9.5 0 0 0 12 22ZM6.88 12.45a5.7 5.7 0 0 1 0-3.63V6.29H3.6a9.5 9.5 0 0 0 0 8.68l3.28-2.52ZM12 5.55c1.38 0 2.62.48 3.6 1.42l2.7-2.7A9.5 9.5 0 0 0 12 2 9.5 9.5 0 0 0 3.6 6.29l3.28 2.53C7.6 7.15 9.62 5.55 12 5.55Z"
     />
   ),
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </>
+  ),
+  moon: <path d="M20 13.5A8 8 0 1 1 10.5 4a6.5 6.5 0 0 0 9.5 9.5Z" />,
 };
 
 // Backward-compatible aliases for names used across the codebase.

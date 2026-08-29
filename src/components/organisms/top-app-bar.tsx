@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Icon, Logo } from "@/components/atoms";
+import { Icon, Logo, ThemeToggle } from "@/components/atoms";
 import { NotificationBell } from "@/components/organisms/notification-bell";
 import type { AppNotification } from "@/features/notifications/queries";
 
@@ -27,7 +27,8 @@ export function TopAppBar({
           <Logo size={24} />
         </div>
         <div className="hidden lg:block" />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
           <NotificationBell initialNotifications={notifications} initialUnread={unreadCount} />
           {/* Profile affordance — mobile only; on desktop the sidebar owns it. */}
           <Link

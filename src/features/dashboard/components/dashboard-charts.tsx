@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -13,11 +14,54 @@ import {
 } from "recharts";
 import { formatBRL } from "@/lib/utils/currency";
 
-const PRIMARY = "#7027b8";
-const GRID = "#e4e0f4";
-const AXIS = "#4c4453";
+interface ChartColors {
+  primary: string;
+  grid: string;
+  axis: string;
+  surface: string;
+}
+
+const FALLBACK: ChartColors = {
+  primary: "#7027b8",
+  grid: "#e4e0f4",
+  axis: "#4c4453",
+  surface: "#ffffff",
+};
+
+function readChartColors(): ChartColors {
+  if (typeof document === "undefined") return FALLBACK;
+  const s = getComputedStyle(document.documentElement);
+  const v = (name: string, fallback: string) => {
+    const raw = s.getPropertyValue(`--color-${name}`).trim();
+    return raw ? `rgb(${raw})` : fallback;
+  };
+  return {
+    primary: v("primary-container", FALLBACK.primary),
+    grid: v("outline-variant", FALLBACK.grid),
+    axis: v("on-surface-variant", FALLBACK.axis),
+    surface: v("surface-container-lowest", FALLBACK.surface),
+  };
+}
+
+/** Chart colours pulled from the live theme tokens; re-read when the theme flips. */
+function useChartColors(): ChartColors {
+  const [colors, setColors] = useState<ChartColors>(readChartColors);
+  useEffect(() => {
+    const update = () => setColors(readChartColors());
+    const mo = new MutationObserver(update);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    mq.addEventListener("change", update);
+    return () => {
+      mo.disconnect();
+      mq.removeEventListener("change", update);
+    };
+  }, []);
+  return colors;
+}
 
 export function SalesTrendChart({ data }: { data: { label: string; total: number }[] }) {
+  const { primary: PRIMARY, grid: GRID, axis: AXIS, surface: SURFACE } = useChartColors();
   const empty = data.every((d) => d.total === 0);
 
   return (
@@ -60,6 +104,8 @@ export function SalesTrendChart({ data }: { data: { label: string; total: number
                 contentStyle={{
                   borderRadius: 12,
                   border: `1px solid ${GRID}`,
+                  background: SURFACE,
+                  color: AXIS,
                   fontSize: 13,
                 }}
               />
@@ -79,6 +125,7 @@ export function SalesTrendChart({ data }: { data: { label: string; total: number
 }
 
 export function TopProductsChart({ data }: { data: { name: string; units: number }[] }) {
+  const { primary: PRIMARY, grid: GRID, axis: AXIS, surface: SURFACE } = useChartColors();
   return (
     <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
       <h2 className="font-title-lg text-title-lg text-on-surface">Mais vendidos</h2>
@@ -112,7 +159,13 @@ export function TopProductsChart({ data }: { data: { name: string; units: number
               />
               <Tooltip
                 formatter={(v) => [`${Number(v)} un.`, "Vendidas"]}
-                contentStyle={{ borderRadius: 12, border: `1px solid ${GRID}`, fontSize: 13 }}
+                contentStyle={{
+                  borderRadius: 12,
+                  border: `1px solid ${GRID}`,
+                  background: SURFACE,
+                  color: AXIS,
+                  fontSize: 13,
+                }}
               />
               <Bar dataKey="units" fill={PRIMARY} radius={[0, 6, 6, 0]} maxBarSize={26} />
             </BarChart>
