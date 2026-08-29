@@ -34,6 +34,10 @@ if (hasDOM) {
       disconnect() {}
     };
   }
+  if (!URL.createObjectURL) {
+    URL.createObjectURL = () => `blob:mock/${Math.random().toString(36).slice(2)}`;
+    URL.revokeObjectURL = () => {};
+  }
   if (!window.matchMedia) {
     window.matchMedia = ((query: string) => ({
       matches: false,
