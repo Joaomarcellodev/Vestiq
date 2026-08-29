@@ -4,4 +4,6 @@ export { Checkbox } from "./checkbox";
 export { Icon } from "./icon";
 export { Logo } from "./logo";
 export { Spinner } from "./spinner";
+export { Switch } from "./switch";
 export { TextField } from "./text-field";
+export { ThemeToggle } from "./theme-toggle";

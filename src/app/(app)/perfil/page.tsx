@@ -5,7 +5,7 @@ import { signOut } from "@/features/auth/actions";
 import { ProfileForm } from "@/features/profile/components/profile-form";
 import { PageHeader } from "@/components/molecules/page-header";
 import { BackButton } from "@/components/molecules/back-button";
-import { Button, Icon } from "@/components/atoms";
+import { Button, Icon, ThemeToggle } from "@/components/atoms";
 import { MEMBER_ROLE } from "@/lib/i18n/labels";
 
 export const metadata: Metadata = { title: "Meu perfil" };
@@ -22,6 +22,16 @@ export default async function ProfilePage() {
       />
 
       <ProfileForm profile={profile} />
+
+      <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
+        <p className="font-title-lg text-title-lg text-on-surface">Aparência</p>
+        <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
+          Escolha entre tema claro, escuro ou o padrão do seu dispositivo.
+        </p>
+        <div className="mt-3">
+          <ThemeToggle variant="button" />
+        </div>
+      </section>
 
       <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

@@ -1,11 +1,18 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { Button, TextField } from "@/components/atoms";
+import { useToast } from "@/components/organisms/toast/toast-provider";
 import { createNetwork, inviteReseller, type ActionState } from "../actions";
 
 export function CreateNetworkForm() {
   const [state, action, pending] = useActionState<ActionState, FormData>(createNetwork, {});
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (state.ok) toast({ message: "Rede criada.", variant: "success" });
+  }, [state.ok, toast]);
+
   return (
     <form action={action} className="flex gap-2">
       <TextField label="Nome da nova rede" name="name" required />
@@ -21,6 +28,12 @@ export function CreateNetworkForm() {
 
 export function InviteResellerForm({ networks }: { networks: { id: string; name: string }[] }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(inviteReseller, {});
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (state.ok) toast({ message: "Convite enviado.", variant: "success" });
+  }, [state.ok, toast]);
+
   return (
     <form action={action} className="space-y-sm rounded-xl border border-outline-variant p-lg">
       <h3 className="font-title-lg text-title-lg text-on-surface">Convidar revendedora</h3>

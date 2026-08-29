@@ -85,7 +85,8 @@ token → email com link `/convite/[token]`.
 **Aceitar:** revendedora abre o link autenticada → valida token/expiração/email →
 cria org RESELLER (se novo) + `organization_members` + ativa `network_members`.
 
-**Desativar:** FACTORY_ADMIN → `status = DISABLED` na revendedora.
+**Ativar / desativar:** FACTORY_ADMIN alterna o toggle na linha da revendedora →
+`setMemberActive` grava `status = ACTIVE` ou `status = DISABLED`.
 
 ## Estados
 
@@ -115,7 +116,7 @@ Ver [`TESTS.md`](./TESTS.md).
 ## Tasks
 
 - [ ] Migrations `factory_networks`, `network_members` + policies
-- [ ] Actions: `createNetwork`, `inviteReseller`, `acceptInvite`, `disableMember`, `reinvite`
+- [ ] Actions: `createNetwork`, `inviteReseller`, `acceptInvite`, `setMemberActive`, `reinvite`
 - [ ] Envio de email de convite (Supabase / provider)
 - [ ] Página `/convite/[token]`
 - [ ] Tela diretório da rede (revendedora) + perfil público da revendedora

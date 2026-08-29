@@ -17,7 +17,7 @@ export async function openNegotiation(
     offerId: formData.get("offerId"),
     quantity: formData.get("quantity"),
     amount: formData.get("amount"),
-    message: formData.get("message"),
+    message: formData.get("message") ?? undefined,
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
@@ -31,7 +31,7 @@ export async function openNegotiation(
   if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
 
   revalidatePath("/negociacoes");
-  redirect(`/negociacoes/${(data as { id: string }).id}`);
+  redirect(`/negociacoes/${(data as { id: string }).id}?toast=negotiation-opened`);
 }
 
 export async function negotiationAction(formData: FormData): Promise<void> {
@@ -39,7 +39,8 @@ export async function negotiationAction(formData: FormData): Promise<void> {
   const parsed = negotiationActionSchema.safeParse({
     negotiationId: formData.get("negotiationId"),
     action: formData.get("action"),
-    message: formData.get("message"),
+    // accept/reject/cancel/complete forms have no message field → null
+    message: formData.get("message") ?? undefined,
   });
   if (!parsed.success) throw new Error(parsed.error.issues[0]?.message);
 
@@ -60,4 +61,14 @@ export async function negotiationAction(formData: FormData): Promise<void> {
   revalidatePath(`/negociacoes/${negotiationId}`);
   revalidatePath("/negociacoes");
   revalidatePath("/dashboard");
+
+  const toastCode: Record<string, string> = {
+    accept: "negotiation-accepted",
+    reject: "negotiation-rejected",
+    cancel: "negotiation-cancelled",
+    complete: "negotiation-completed",
+  };
+  if (toastCode[action]) {
+    redirect(`/negociacoes/${negotiationId}?toast=${toastCode[action]}`);
+  }
 }

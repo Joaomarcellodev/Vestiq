@@ -4,7 +4,7 @@ import { publicEnv } from "@/lib/env";
 import type { Database } from "@/types/database";
 
 /** Public routes reachable without an authenticated session. */
-const PUBLIC_PATHS = ["/login", "/auth"];
+const PUBLIC_PATHS = ["/login", "/auth", "/recuperar-senha", "/redefinir-senha"];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
@@ -37,9 +37,12 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // `getClaims()` verifies the JWT locally when the project uses asymmetric
+  // JWT signing keys (no network round-trip), and transparently falls back to
+  // `getUser()` for legacy HS256 projects. `getSession()` inside it still
+  // refreshes and rewrites the auth cookies when the token is stale.
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims ?? null;
 
   const { pathname } = request.nextUrl;
 

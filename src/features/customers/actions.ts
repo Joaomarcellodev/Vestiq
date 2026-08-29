@@ -39,7 +39,7 @@ export async function createCustomer(_prev: ActionState, formData: FormData): Pr
     return { error: error.code === "23505" ? "Cliente com este CPF já existe" : error.message };
   }
   revalidatePath("/clientes");
-  redirect("/clientes");
+  redirect("/clientes?toast=customer-created");
 }
 
 export async function updateCustomer(_prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -68,7 +68,7 @@ export async function updateCustomer(_prev: ActionState, formData: FormData): Pr
   }
   revalidatePath("/clientes");
   revalidatePath(`/clientes/${id.data}`);
-  redirect(`/clientes/${id.data}`);
+  redirect(`/clientes/${id.data}?toast=customer-updated`);
 }
 
 export async function archiveCustomer(formData: FormData): Promise<void> {
@@ -77,7 +77,7 @@ export async function archiveCustomer(formData: FormData): Promise<void> {
   const supabase = await createClient();
   await supabase.from("customers").update({ archived_at: new Date().toISOString() }).eq("id", id);
   revalidatePath("/clientes");
-  redirect("/clientes");
+  redirect("/clientes?toast=customer-archived");
 }
 
 export async function unarchiveCustomer(formData: FormData): Promise<void> {
@@ -87,5 +87,5 @@ export async function unarchiveCustomer(formData: FormData): Promise<void> {
   await supabase.from("customers").update({ archived_at: null }).eq("id", id);
   revalidatePath("/clientes");
   revalidatePath(`/clientes/${id}`);
-  redirect(`/clientes/${id}`);
+  redirect(`/clientes/${id}?toast=customer-unarchived`);
 }

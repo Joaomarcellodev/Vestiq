@@ -24,3 +24,8 @@ export const productSchema = z.object({
 
 export type ProductInput = z.infer<typeof productSchema>;
 export type VariantInput = z.infer<typeof variantSchema>;
+
+/** Product photos — Storage bucket `product-images`. */
+export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+export const PRODUCT_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+export const PRODUCT_IMAGE_MAX_COUNT = 5;

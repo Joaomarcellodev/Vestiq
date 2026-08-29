@@ -34,7 +34,7 @@ export async function confirmSale(
 
   revalidatePath("/vendas");
   revalidatePath("/dashboard");
-  redirect(`/vendas/${(data as { id: string }).id}`);
+  redirect(`/vendas/${(data as { id: string }).id}?toast=sale-confirmed`);
 }
 
 export async function cancelSale(formData: FormData): Promise<void> {
@@ -54,4 +54,5 @@ export async function cancelSale(formData: FormData): Promise<void> {
 
   revalidatePath("/vendas");
   revalidatePath("/dashboard");
+  redirect(`/vendas/${parsed.data.saleId}?toast=sale-cancelled`);
 }

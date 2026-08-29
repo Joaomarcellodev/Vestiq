@@ -32,7 +32,7 @@ test.describe("Profile", () => {
     });
     await page.getByRole("button", { name: "Salvar alterações" }).click();
 
-    await expect(page.getByText(/perfil atualizado/i)).toBeVisible();
+    await expect(page.getByRole("status").getByText(/perfil atualizado/i)).toBeVisible();
 
     // reload → values are still there
     await page.reload();

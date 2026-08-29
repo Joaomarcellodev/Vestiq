@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { cookies } from "next/headers";
+import { ToastProvider } from "@/components/organisms/toast/toast-provider";
+import { THEME_COOKIE, THEME_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 const jakarta = localFont({
@@ -21,15 +24,30 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#7027b8",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#7027b8" },
+    { media: "(prefers-color-scheme: dark)", color: "#14121a" },
+  ],
   width: "device-width",
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieTheme = (await cookies()).get(THEME_COOKIE)?.value;
+  const themeClass = cookieTheme === "dark" ? "dark" : cookieTheme === "light" ? "light" : "";
+
   return (
-    <html lang="pt-BR" className={jakarta.variable}>
-      <body>{children}</body>
+    <html
+      lang="pt-BR"
+      className={`${jakarta.variable} ${themeClass}`.trim()}
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
+      <body>
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   );
 }

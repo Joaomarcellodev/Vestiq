@@ -34,9 +34,9 @@ describe("credentialsSchema", () => {
 });
 
 describe("oauthProviderSchema", () => {
-  it("allows google and apple only", () => {
+  it("allows google only", () => {
     expect(oauthProviderSchema.safeParse("google").success).toBe(true);
-    expect(oauthProviderSchema.safeParse("apple").success).toBe(true);
+    expect(oauthProviderSchema.safeParse("apple").success).toBe(false);
     expect(oauthProviderSchema.safeParse("facebook").success).toBe(false);
   });
 });
