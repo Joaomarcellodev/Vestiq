@@ -5,6 +5,49 @@ const hasDOM = typeof document !== "undefined";
 
 // Env comes from vitest.config.ts (`test.env`, which reads .env.local).
 
+// --- jsdom polyfills used by `motion` and `recharts` -----------------------
+if (hasDOM) {
+  if (!("IntersectionObserver" in globalThis)) {
+    class IO {
+      private cb: IntersectionObserverCallback;
+      constructor(cb: IntersectionObserverCallback) {
+        this.cb = cb;
+      }
+      observe(el: Element) {
+        this.cb(
+          [{ isIntersecting: true, target: el, intersectionRatio: 1 } as IntersectionObserverEntry],
+          this as unknown as IntersectionObserver,
+        );
+      }
+      unobserve() {}
+      disconnect() {}
+      takeRecords() {
+        return [];
+      }
+    }
+    globalThis.IntersectionObserver = IO as unknown as typeof IntersectionObserver;
+  }
+  if (!("ResizeObserver" in globalThis)) {
+    globalThis.ResizeObserver = class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    };
+  }
+  if (!window.matchMedia) {
+    window.matchMedia = ((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    })) as unknown as typeof window.matchMedia;
+  }
+}
+
 // --- Next.js shims for the test environment ---------------------------------
 // Kept here so every test file gets them without repeating `vi.mock`.
 // (`server-only` is aliased to a stub in vitest.config.ts.)
