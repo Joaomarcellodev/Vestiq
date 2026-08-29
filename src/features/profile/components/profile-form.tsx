@@ -27,11 +27,6 @@ export function ProfileForm({ profile }: { profile: MyProfile }) {
           {state.error}
         </p>
       )}
-      {state.ok && (
-        <p className="rounded-lg bg-success-container px-4 py-3 font-body-md text-body-md text-on-success-container">
-          {state.ok}
-        </p>
-      )}
 
       <section className="flex flex-col items-center gap-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface sm:flex-row">
         <span className="grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-full bg-surface-container-high text-on-surface-variant">

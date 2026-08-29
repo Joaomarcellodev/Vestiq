@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/features/auth/queries";
@@ -17,8 +18,10 @@ export interface ActiveOrg {
 
 /**
  * The current user's memberships (ACTIVE). Empty array => "aguardando convite".
+ * `cache()`d — the layout and every feature query resolve the active org from
+ * this within one render, so it must not re-query per call.
  */
-export async function listMyOrganizations(): Promise<ActiveOrg[]> {
+export const listMyOrganizations = cache(async (): Promise<ActiveOrg[]> => {
   const user = await requireUser();
   const supabase = await createClient();
 
@@ -38,13 +41,13 @@ export async function listMyOrganizations(): Promise<ActiveOrg[]> {
       type: m.organizations!.type,
       role: m.role,
     }));
-}
+});
 
 /** Resolve the active organization, or null when the user has none. */
-export async function getActiveOrganization(): Promise<ActiveOrg | null> {
+export const getActiveOrganization = cache(async (): Promise<ActiveOrg | null> => {
   const orgs = await listMyOrganizations();
   return orgs[0] ?? null;
-}
+});
 
 /** Require an active organization; redirect to the waiting screen otherwise. */
 export async function requireActiveOrganization(): Promise<ActiveOrg> {

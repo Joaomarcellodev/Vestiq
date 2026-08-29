@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/features/auth/queries";
 
@@ -11,7 +12,7 @@ export interface MyProfile {
   birthDate: string | null;
 }
 
-export async function getMyProfile(): Promise<MyProfile> {
+export const getMyProfile = cache(async (): Promise<MyProfile> => {
   const user = await requireUser();
   const supabase = await createClient();
 
@@ -36,4 +37,4 @@ export async function getMyProfile(): Promise<MyProfile> {
       null,
     birthDate: data?.birth_date ?? null,
   };
-}
+});
