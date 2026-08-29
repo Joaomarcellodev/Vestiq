@@ -42,10 +42,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${jakarta.variable} ${themeClass}`.trim()}
       suppressHydrationWarning
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
-      </head>
       <body>
+        {/* Runs before paint to set the theme class — no manual <head> (App
+            Router owns it) so hydration stays consistent. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
