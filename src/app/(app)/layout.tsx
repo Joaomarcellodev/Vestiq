@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { AppShell } from "@/components/templates/app-shell";
+import { RouteProgress } from "@/components/organisms/route-progress";
 import { requireUser } from "@/features/auth/queries";
 import { getActiveOrganization } from "@/features/organizations/queries";
 
@@ -14,8 +16,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     (user.user_metadata?.full_name as string | undefined) ?? user.email?.split("@")[0] ?? "Conta";
 
   return (
-    <AppShell avatarUrl={avatarUrl} role={org?.role} orgName={org?.name} userName={userName}>
-      {children}
-    </AppShell>
+    <>
+      <Suspense fallback={null}>
+        <RouteProgress />
+      </Suspense>
+      <AppShell avatarUrl={avatarUrl} role={org?.role} orgName={org?.name} userName={userName}>
+        {children}
+      </AppShell>
+    </>
   );
 }
