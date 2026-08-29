@@ -34,6 +34,9 @@ export default defineConfig({
     environmentMatchGlobs: [["src/**/*.integration.test.{ts,tsx}", "node"]],
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
+    // Local Supabase / GoTrue occasionally returns a transient
+    // "Database error creating new user" under heavy parallel load.
+    retry: process.env.CI ? 2 : 1,
     env: {
       NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54421",
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "test-publishable-key",
@@ -45,8 +48,33 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reportsDirectory: "./coverage",
+      reporter: ["text", "html", "lcov"],
       include: ["src/**/*.{ts,tsx}"],
-      exclude: ["src/**/*.{test,spec}.{ts,tsx}", "src/test/**", "src/types/**", "src/**/*.d.ts"],
+      exclude: [
+        "src/**/*.{test,spec}.{ts,tsx}",
+        "src/test/**",
+        "src/types/**",
+        "src/**/*.d.ts",
+        // --- glue covered by Playwright E2E, not by vitest ------------------
+        // Server Components / route composition — exercised end-to-end.
+        "src/app/**/{layout,loading,error,not-found,page}.tsx",
+        "src/app/**/route.ts",
+        // Thin factories / framework wiring.
+        "src/lib/supabase/**",
+        "src/proxy.ts",
+        "src/lib/env.ts",
+        "src/**/index.ts",
+      ],
+      thresholds: {
+        // Enforced floor for the business-logic + component set (actuals are
+        // ~98% lines / ~81% branches). Ratchet up as coverage improves; do not
+        // lower without a note in the PR. Requires the local Supabase stack —
+        // the *.integration.test.ts suites skip (and coverage drops) without it.
+        statements: 95,
+        lines: 95,
+        functions: 88,
+        branches: 79,
+      },
     },
   },
 });
