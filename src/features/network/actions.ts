@@ -64,24 +64,21 @@ export async function acceptInvite(_prev: ActionState, formData: FormData): Prom
   redirect("/dashboard");
 }
 
-async function setMemberStatus(formData: FormData, status: "ACTIVE" | "DISABLED"): Promise<void> {
+/**
+ * RF-NET-007 — toggle a reseller's access to the network with a single
+ * on/off control. `active=true` (re)activates, `active=false` disables.
+ */
+export async function setMemberActive(formData: FormData): Promise<void> {
   await requireRole("FACTORY_ADMIN", "PLATFORM_ADMIN");
   const memberId = formData.get("memberId") as string;
+  const active = formData.get("active") === "true";
   const supabase = await createClient();
 
-  const patch: { status: "ACTIVE" | "DISABLED"; joined_at?: string } = { status };
-  if (status === "ACTIVE") patch.joined_at = new Date().toISOString();
+  const patch: { status: "ACTIVE" | "DISABLED"; joined_at?: string } = {
+    status: active ? "ACTIVE" : "DISABLED",
+  };
+  if (active) patch.joined_at = new Date().toISOString();
 
   await supabase.from("network_members").update(patch).eq("id", memberId);
   revalidatePath("/rede-fabrica");
-}
-
-/** RF-NET-007 — desativar acesso de uma revendedora à rede. */
-export async function disableMember(formData: FormData): Promise<void> {
-  await setMemberStatus(formData, "DISABLED");
-}
-
-/** Reativar uma revendedora previamente desativada (reconvite implícito). */
-export async function enableMember(formData: FormData): Promise<void> {
-  await setMemberStatus(formData, "ACTIVE");
 }

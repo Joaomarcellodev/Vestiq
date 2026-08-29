@@ -36,9 +36,14 @@ test("factory admin can disable and re-enable a reseller (pt-BR labels)", async 
   const row = page.locator("li", { hasText: "Clara Boutique" });
   await expect(row.getByText("Ativa", { exact: true })).toBeVisible();
 
-  await row.getByRole("button", { name: "Desativar" }).click();
-  await expect(row.getByText("Desativada", { exact: true })).toBeVisible();
+  const toggle = row.getByRole("switch");
+  await expect(toggle).toHaveAttribute("aria-checked", "true");
 
-  await row.getByRole("button", { name: "Reativar" }).click();
+  await toggle.click();
+  await expect(row.getByText("Desativada", { exact: true })).toBeVisible();
+  await expect(toggle).toHaveAttribute("aria-checked", "false");
+
+  await toggle.click();
   await expect(row.getByText("Ativa", { exact: true })).toBeVisible();
+  await expect(toggle).toHaveAttribute("aria-checked", "true");
 });

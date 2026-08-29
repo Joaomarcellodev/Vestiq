@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { getFactoryNetworkOverview } from "@/features/network/queries";
-import { disableMember, enableMember } from "@/features/network/actions";
 import { MEMBER_STATUS } from "@/lib/i18n/labels";
 import {
   CreateNetworkForm,
   InviteResellerForm,
 } from "@/features/network/components/factory-network-panel";
+import { MemberActiveSwitch } from "@/features/network/components/member-active-switch";
 import { PageHeader } from "@/components/molecules/page-header";
 import { StatCard } from "@/components/molecules/stat-card";
-import { Badge, Button } from "@/components/atoms";
+import { Badge } from "@/components/atoms";
 
 export const metadata: Metadata = { title: "Rede da fábrica" };
 
@@ -63,23 +63,14 @@ export default async function FactoryNetworkPage() {
                       {m.invited_email}
                     </p>
                   </div>
-                  <div className="flex shrink-0 items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-3">
                     <Badge tone={status.tone}>{status.label}</Badge>
-                    {m.status === "ACTIVE" && (
-                      <form action={disableMember}>
-                        <input type="hidden" name="memberId" value={m.id} />
-                        <Button type="submit" variant="ghost" size="sm">
-                          Desativar
-                        </Button>
-                      </form>
-                    )}
-                    {m.status === "DISABLED" && (
-                      <form action={enableMember}>
-                        <input type="hidden" name="memberId" value={m.id} />
-                        <Button type="submit" variant="secondary" size="sm">
-                          Reativar
-                        </Button>
-                      </form>
+                    {m.status !== "INVITED" && (
+                      <MemberActiveSwitch
+                        memberId={m.id}
+                        active={m.status === "ACTIVE"}
+                        resellerName={m.reseller?.name ?? m.invited_email}
+                      />
                     )}
                   </div>
                 </li>
