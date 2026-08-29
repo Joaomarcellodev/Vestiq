@@ -131,6 +131,15 @@ const config: Config = {
       maxWidth: {
         "app-mobile": "440px",
       },
+      keyframes: {
+        "toast-in": {
+          from: { opacity: "0", transform: "translateY(8px) scale(0.98)" },
+          to: { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
+      },
+      animation: {
+        "toast-in": "toast-in 200ms ease-out",
+      },
     },
   },
   plugins: [],

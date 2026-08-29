@@ -96,7 +96,7 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
   }
 
   revalidatePath("/produtos");
-  redirect(`/produtos/${product.id}`);
+  redirect(`/produtos/${product.id}?toast=product-created`);
 }
 
 const updateProductSchema = z.object({
@@ -138,7 +138,7 @@ export async function updateProduct(_prev: ActionState, formData: FormData): Pro
   }
   revalidatePath("/produtos");
   revalidatePath(`/produtos/${d.id}`);
-  redirect(`/produtos/${d.id}`);
+  redirect(`/produtos/${d.id}?toast=product-updated`);
 }
 
 export async function archiveProduct(formData: FormData): Promise<void> {
@@ -149,7 +149,7 @@ export async function archiveProduct(formData: FormData): Promise<void> {
   await supabase.from("products").update({ archived_at: now }).eq("id", id);
   await supabase.from("product_variants").update({ archived_at: now }).eq("product_id", id);
   revalidatePath("/produtos");
-  redirect("/produtos");
+  redirect("/produtos?toast=product-archived");
 }
 
 export async function unarchiveProduct(formData: FormData): Promise<void> {
@@ -160,5 +160,5 @@ export async function unarchiveProduct(formData: FormData): Promise<void> {
   await supabase.from("product_variants").update({ archived_at: null }).eq("product_id", id);
   revalidatePath("/produtos");
   revalidatePath(`/produtos/${id}`);
-  redirect(`/produtos/${id}`);
+  redirect(`/produtos/${id}?toast=product-unarchived`);
 }

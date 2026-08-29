@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { Switch } from "@/components/atoms";
+import { useToast } from "@/components/organisms/toast/toast-provider";
 import { setMemberActive } from "../actions";
 
 export function MemberActiveSwitch({
@@ -16,6 +17,7 @@ export function MemberActiveSwitch({
   resellerName: string;
 }) {
   const [pending, startTransition] = useTransition();
+  const { toast } = useToast();
 
   return (
     <Switch
@@ -27,7 +29,14 @@ export function MemberActiveSwitch({
         const fd = new FormData();
         fd.set("memberId", memberId);
         fd.set("active", String(next));
-        startTransition(() => setMemberActive(fd));
+        startTransition(async () => {
+          await setMemberActive(fd);
+          toast(
+            next
+              ? { message: `${resellerName} reativada.`, variant: "success" }
+              : { message: `${resellerName} desativada.`, variant: "info" },
+          );
+        });
       }}
     />
   );

@@ -31,7 +31,7 @@ export async function openNegotiation(
   if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
 
   revalidatePath("/negociacoes");
-  redirect(`/negociacoes/${(data as { id: string }).id}`);
+  redirect(`/negociacoes/${(data as { id: string }).id}?toast=negotiation-opened`);
 }
 
 export async function negotiationAction(formData: FormData): Promise<void> {
@@ -60,4 +60,14 @@ export async function negotiationAction(formData: FormData): Promise<void> {
   revalidatePath(`/negociacoes/${negotiationId}`);
   revalidatePath("/negociacoes");
   revalidatePath("/dashboard");
+
+  const toastCode: Record<string, string> = {
+    accept: "negotiation-accepted",
+    reject: "negotiation-rejected",
+    cancel: "negotiation-cancelled",
+    complete: "negotiation-completed",
+  };
+  if (toastCode[action]) {
+    redirect(`/negociacoes/${negotiationId}?toast=${toastCode[action]}`);
+  }
 }

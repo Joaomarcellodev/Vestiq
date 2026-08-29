@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { AppShell } from "@/components/templates/app-shell";
 import { RouteProgress } from "@/components/organisms/route-progress";
+import { FlashToaster } from "@/components/organisms/toast/flash-toaster";
 import { requireUser } from "@/features/auth/queries";
 import { getActiveOrganization } from "@/features/organizations/queries";
 
@@ -19,6 +20,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <>
       <Suspense fallback={null}>
         <RouteProgress />
+        <FlashToaster />
       </Suspense>
       <AppShell avatarUrl={avatarUrl} role={org?.role} orgName={org?.name} userName={userName}>
         {children}

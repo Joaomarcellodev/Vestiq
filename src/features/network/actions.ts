@@ -61,7 +61,7 @@ export async function acceptInvite(_prev: ActionState, formData: FormData): Prom
   });
   if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
 
-  redirect("/dashboard");
+  redirect("/dashboard?toast=network-joined");
 }
 
 /**

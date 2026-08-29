@@ -16,7 +16,8 @@ test("archive then unarchive a product", async ({ page }) => {
   await expect(page).toHaveURL(/\/produtos\/[0-9a-f-]{36}/);
 
   await page.getByRole("button", { name: "Arquivar" }).click();
-  await expect(page).toHaveURL(/\/produtos$/);
+  await expect(page).toHaveURL(/\/produtos(\?|$)/);
+  await expect(page.getByText("Produto arquivado.")).toBeVisible();
 
   // now visible under "Arquivados"
   await page.getByRole("link", { name: "Arquivados" }).click();
