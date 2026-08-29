@@ -23,10 +23,15 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      // vitest runs in Node — the `server-only` guard is a no-op here.
+      "server-only": fileURLToPath(new URL("./src/test/stubs/server-only.ts", import.meta.url)),
     },
   },
   test: {
     environment: "jsdom",
+    // Integration tests hit the real Supabase + Storage; run them in Node so
+    // `File`/`fetch` are the built-ins undici expects (jsdom's File breaks uploads).
+    environmentMatchGlobs: [["src/**/*.integration.test.{ts,tsx}", "node"]],
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     env: {
