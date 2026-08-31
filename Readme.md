@@ -216,11 +216,10 @@ Evoluções posteriores poderão incluir gestão de fornecedores, compras, inven
 **Tech Lead & Developer**
 [João Marcello](https://github.com/Joaomarcellodev)
 
-**Backend Developer**
+**Developer Software**
 [Wellyson Santos](https://github.com/wss124)
 
-**Backend Developer**
-[Guilherme](https://github.com/GuilhermeMede04)
+
 
 ---
 
