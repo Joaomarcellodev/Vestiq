@@ -21,8 +21,10 @@ export function ProfileForm({ profile }: { profile: MyProfile }) {
 
   const [state, action, pending] = useActionState<ProfileState, FormData>(async (prev, fd) => {
     // O input do DOM carrega o arquivo original; o que vai é o comprimido.
+    // Sem versão comprimida (handler ainda não rodou), o original do input
+    // segue — apagar aqui perderia a foto em silêncio. Na remoção o input já
+    // foi limpo, então não sobra nada para enviar.
     if (avatarFile.current) fd.set("avatar", avatarFile.current);
-    else fd.delete("avatar");
     return updateProfile(prev, fd);
   }, {});
 

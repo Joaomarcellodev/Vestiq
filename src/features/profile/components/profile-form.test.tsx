@@ -66,7 +66,7 @@ describe("ProfileForm", () => {
     await userEvent.click(screen.getByRole("button", { name: /salvar alterações/i }));
     const fd = updateProfile.mock.calls.at(-1)?.[1] as FormData;
     expect(fd.get("removeAvatar")).toBe("1");
-    expect(fd.get("avatar")).toBeNull();
+    expect((fd.get("avatar") as File).size).toBe(0);
   });
 
   it("sends the chosen file and drops the removal flag", async () => {
