@@ -57,6 +57,50 @@ d("profile actions + queries (SPEC-001)", () => {
     );
   });
 
+  it("updateProfile: replacing the avatar discards the previous file", async () => {
+    await updateProfile({}, pForm({ avatar: pngFile("first.png") }));
+    await updateProfile({}, pForm({ avatar: pngFile("second.png") }));
+
+    const { data } = await admin().storage.from("avatars").list(user.userId);
+    expect((data ?? []).filter((o) => o.name.startsWith("avatar-"))).toHaveLength(1);
+  });
+
+  it("updateProfile: removeAvatar clears the column and the bucket folder", async () => {
+    await updateProfile({}, pForm({ avatar: pngFile("me.png") }));
+
+    const state = await updateProfile({}, pForm({ removeAvatar: "1" }));
+    expect(state.ok).toBeTruthy();
+
+    const { data } = await admin()
+      .from("profiles")
+      .select("avatar_url")
+      .eq("id", user.userId)
+      .single();
+    expect(data?.avatar_url).toBeNull();
+
+    const { data: objects } = await admin().storage.from("avatars").list(user.userId);
+    expect((objects ?? []).filter((o) => o.name.startsWith("avatar-"))).toHaveLength(0);
+  });
+
+  it("getMyProfile: reports no avatar after the removal", async () => {
+    await updateProfile({}, pForm({ avatar: pngFile("me.png") }));
+    await updateProfile({}, pForm({ removeAvatar: "1" }));
+    expect((await getMyProfile()).avatarUrl).toBeNull();
+  });
+
+  it("updateProfile: a new file wins over the removal flag", async () => {
+    await updateProfile({}, pForm({ avatar: pngFile("me.png"), removeAvatar: "1" }));
+
+    const { data } = await admin()
+      .from("profiles")
+      .select("avatar_url")
+      .eq("id", user.userId)
+      .single();
+    expect(data?.avatar_url).toMatch(
+      new RegExp(`/storage/v1/object/public/avatars/${user.userId}/`),
+    );
+  });
+
   it("updateProfile: rejects a non-image avatar", async () => {
     expect((await updateProfile({}, pForm({ avatar: textFile() }))).error).toMatch(
       /JPG, PNG ou WebP/i,
