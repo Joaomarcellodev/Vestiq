@@ -20,7 +20,8 @@ for (const [i, spec] of pages.entries()) {
   const page = await ctx.newPage();
   await page.goto(`http://localhost:3000${path}`, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(1200);
-  const name = `/tmp/claude-1000/-home-joaomarcellodev-Vestiq/fd509cd0-2303-403f-b519-3b4ed7af003e/scratchpad/shot-${i}-${path.replace(/\W+/g, "_")}-${width}.png`;
+  const dir = process.env.SHOT_DIR ?? "/tmp";
+  const name = `${dir}/shot-${i}-${path.replace(/\W+/g, "_")}-${width}.png`;
   await page.screenshot({ path: name, fullPage: true });
   console.log(name);
   await ctx.close();

@@ -9,6 +9,16 @@ const nextConfig: NextConfig = {
   // typedRoutes: re-enable once the route surface stabilises (post Sprint 2).
   // Incremental route creation across sprints makes strict route typing noisy now.
   typedRoutes: false,
+  experimental: {
+    serverActions: {
+      // Padrão do Next: 1 MB — e uploads multipart passam pelo mesmo controle,
+      // então qualquer foto de celular estourava antes da validação do app.
+      // As imagens são comprimidas no navegador (src/lib/utils/image.ts); esta
+      // folga cobre o caso em que o navegador não tem canvas. Teto do runtime
+      // de funções do Netlify é 6 MB — não subir daqui.
+      bodySizeLimit: "6mb",
+    },
+  },
   images: {
     // Next 16 blocks the optimizer from fetching private IPs (SSRF guard). The
     // local Supabase Storage runs on 127.0.0.1, so allow it in dev only.

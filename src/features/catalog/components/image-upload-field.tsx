@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { Button, Icon } from "@/components/atoms";
-import { PRODUCT_IMAGE_MAX_COUNT, PRODUCT_IMAGE_TYPES } from "../validation";
+import { PRODUCT_COMPRESSION, compressImages } from "@/lib/utils/image";
+import {
+  PRODUCT_IMAGE_MAX_BYTES,
+  PRODUCT_IMAGE_MAX_COUNT,
+  PRODUCT_IMAGE_TYPES,
+} from "../validation";
 
 interface Props {
   /** Newly-picked files (create + edit). */
@@ -16,6 +21,8 @@ interface Props {
 
 export function ImageUploadField({ files, onFilesChange, existing = [], onExistingChange }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const previews = useMemo(() => files.map((f) => URL.createObjectURL(f)), [files]);
 
   useEffect(() => {
@@ -25,13 +32,24 @@ export function ImageUploadField({ files, onFilesChange, existing = [], onExisti
   const total = existing.length + files.length;
   const canAdd = total < PRODUCT_IMAGE_MAX_COUNT;
 
-  const addFiles = (picked: FileList | null) => {
+  const addFiles = async (picked: FileList | null) => {
     if (!picked) return;
     const room = PRODUCT_IMAGE_MAX_COUNT - total;
-    const next = Array.from(picked)
+    const chosen = Array.from(picked)
       .filter((f) => PRODUCT_IMAGE_TYPES.includes(f.type))
       .slice(0, Math.max(0, room));
-    if (next.length) onFilesChange([...files, ...next]);
+    if (!chosen.length) return;
+
+    setBusy(true);
+    try {
+      // Sem isso, cinco fotos de celular estouram o corpo do Server Action.
+      const optimized = await compressImages(chosen, PRODUCT_COMPRESSION);
+      const accepted = optimized.filter((f) => f.size <= PRODUCT_IMAGE_MAX_BYTES);
+      setNotice(accepted.length < optimized.length ? "Ignoramos as imagens acima de 5 MB." : null);
+      if (accepted.length) onFilesChange([...files, ...accepted]);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -69,8 +87,15 @@ export function ImageUploadField({ files, onFilesChange, existing = [], onExisti
       </div>
 
       <p className="font-label-md text-label-md text-on-surface-variant">
-        JPG, PNG ou WebP · até {PRODUCT_IMAGE_MAX_COUNT} imagens · 5 MB cada
+        {busy
+          ? "Otimizando as imagens…"
+          : `JPG, PNG ou WebP · até ${PRODUCT_IMAGE_MAX_COUNT} imagens · 5 MB cada`}
       </p>
+      {notice && (
+        <p role="status" className="font-label-md text-label-md text-error">
+          {notice}
+        </p>
+      )}
 
       <input
         ref={inputRef}
@@ -79,7 +104,7 @@ export function ImageUploadField({ files, onFilesChange, existing = [], onExisti
         multiple
         className="hidden"
         onChange={(e) => {
-          addFiles(e.target.files);
+          void addFiles(e.target.files);
           e.target.value = "";
         }}
       />
