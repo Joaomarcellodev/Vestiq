@@ -56,8 +56,11 @@ Só duas — ambas públicas (protegidas por RLS):
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://inixwmfxufnsxgpvlfku.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_LAjj9wuVIjtFz0GmLmP2KQ_68fEUzqM` |
 
-> `NEXT_PUBLIC_SITE_URL` **não** é necessária — o código usa a `URL` que o Netlify
-> injeta no build. Só defina se usar domínio próprio.
+> `NEXT_PUBLIC_SITE_URL` **deve** ser definida como
+> `https://vestiq-app.netlify.app`. O `src/lib/env.ts` cai no `process.env.URL`
+> injetado pelo Netlify, mas se essa variável não estiver disponível no runtime
+> da função o fallback vira o default `http://localhost:3000` — e os emails de
+> recuperação de senha saem apontando para localhost.
 >
 > `SUPABASE_SECRET_KEY` **não** é usada pelo app em produção (só em seeds/scripts).
 
@@ -65,15 +68,17 @@ Depois de adicionar as variáveis: **Deploys → Trigger deploy → Deploy site*
 
 ## 4. Configurar o Supabase para o domínio do Netlify
 
-> **Atenção:** `vestiq.netlify.app` **não é este projeto** — esse subdomínio já
-> pertence a outro site no Netlify. Use a URL que o Netlify realmente atribuiu
-> ao site (Site overview → o link no topo, algo como
-> `https://<nome-gerado>.netlify.app`), ou configure um domínio próprio.
+A URL do site é **`https://vestiq-app.netlify.app`**.
 
-Com a URL real em mãos, vá em **Supabase → Authentication → URL Configuration**:
+> **Atenção:** não confunda com `vestiq.netlify.app` (sem o `-app`) — esse
+> subdomínio pertence a um site de outra pessoa, sem relação com este projeto.
 
-- **Site URL:** `https://<sua-url>.netlify.app`
-- **Redirect URLs:** adicione `https://<sua-url>.netlify.app/**`
+Vá em **Supabase → Authentication → URL Configuration**:
+
+- **Site URL:** `https://vestiq-app.netlify.app`
+- **Redirect URLs:** adicione `https://vestiq-app.netlify.app/**`
+  (os dois asteriscos são obrigatórios; sem eles só a raiz é autorizada e o
+  retorno em `/auth/callback` é recusado)
 
 Sem isso o login por **email/senha funciona**, mas login social e recuperação de
 senha falham (redirect não autorizado).
