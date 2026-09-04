@@ -65,11 +65,15 @@ Depois de adicionar as variáveis: **Deploys → Trigger deploy → Deploy site*
 
 ## 4. Configurar o Supabase para o domínio do Netlify
 
-Anote a URL final (ex.: `https://vestiq.netlify.app`) e vá em
-**Supabase → Authentication → URL Configuration**:
+> **Atenção:** `vestiq.netlify.app` **não é este projeto** — esse subdomínio já
+> pertence a outro site no Netlify. Use a URL que o Netlify realmente atribuiu
+> ao site (Site overview → o link no topo, algo como
+> `https://<nome-gerado>.netlify.app`), ou configure um domínio próprio.
 
-- **Site URL:** `https://vestiq.netlify.app`
-- **Redirect URLs:** adicione `https://vestiq.netlify.app/**`
+Com a URL real em mãos, vá em **Supabase → Authentication → URL Configuration**:
+
+- **Site URL:** `https://<sua-url>.netlify.app`
+- **Redirect URLs:** adicione `https://<sua-url>.netlify.app/**`
 
 Sem isso o login por **email/senha funciona**, mas login social e recuperação de
 senha falham (redirect não autorizado).
@@ -93,4 +97,57 @@ npm i -g netlify-cli
 netlify login
 netlify link            # escolher o site já criado
 netlify deploy --prod
+```
+
+---
+
+## Troubleshooting — build falhando no Netlify
+
+O `npm run build` deste repo passa em ambiente limpo (clone sem `.env`, Node 20 e
+22, com as duas variáveis públicas definidas). Quando ele quebra **só no
+Netlify**, é sempre configuração do site. Os dois modos de falha reproduzíveis:
+
+### 1. `Cannot find module 'tailwindcss'`
+
+```
+./src/app/jakarta_*.module.css
+Error: Error evaluating Node.js code
+Error: Cannot find module 'tailwindcss'
+```
+
+`NODE_ENV=production` chegou ao passo de instalação, então o npm pulou as
+`devDependencies` — e `tailwindcss`, `postcss` e `typescript` moram lá, mas são
+carregados pelo `next build`.
+
+**Corrigido no repo:** `netlify.toml` agora define `NPM_FLAGS = "--include=dev"`,
+que força a instalação das devDependencies independentemente do `NODE_ENV`.
+Se ainda assim falhar, remova qualquer `NODE_ENV` definido em
+**Site configuration → Environment variables** (o Netlify não precisa dele).
+
+### 2. `Failed to collect page data for /auth/callback`
+
+Falta `NEXT_PUBLIC_SUPABASE_URL` e/ou `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` no
+build. O `src/lib/env.ts` valida no carregamento do módulo, e o `next build` lê
+esses módulos ao coletar page data — então o build inteiro morre.
+
+Confira em **Site configuration → Environment variables**, para cada variável:
+
+- **Scopes:** precisa incluir **Builds** (não só *Functions* / *Runtime*).
+- **Deploy contexts:** precisa cobrir o contexto sendo publicado — se estiver em
+  *Production* apenas, deploy previews e branch deploys quebram.
+
+O erro agora informa qual variável faltou, em vez do `ZodError` cru.
+
+### Versão do Node
+
+`.nvmrc` e `netlify.toml` estão em **22.11.0**. `@supabase/supabase-js` (2.112+)
+declara `engines.node: >=22` — no Node 20 ainda funciona, mas emite aviso de
+depreciação. Mantenha os dois arquivos em sincronia.
+
+### Como reproduzir localmente o que o Netlify faz
+
+```bash
+git clone . /tmp/repro && cd /tmp/repro   # clone limpo, sem .env
+npm ci --include=dev
+NEXT_PUBLIC_SUPABASE_URL=... NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=... npm run build
 ```

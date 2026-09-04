@@ -5,7 +5,15 @@
   command = "npm run build"
 
 [build.environment]
-  NODE_VERSION = "20.18.0"
+  # Keep in sync with .nvmrc. @supabase/supabase-js >= 2.112 declares
+  # `engines.node: >=22`; on Node 20 it only warns today, but the deprecation
+  # is announced and the toolchain (eslint, @napi-rs/lzma) already wants 22+.
+  NODE_VERSION = "22.11.0"
+  # `next build` loads tailwindcss/postcss/typescript, which live in
+  # devDependencies. If NODE_ENV=production reaches the install step, npm skips
+  # them and the build dies with "Cannot find module 'tailwindcss'". Forcing the
+  # flag makes the install immune to however NODE_ENV is set on the site.
+  NPM_FLAGS = "--include=dev"
   # Skip Playwright browser download during `npm install` on the build.
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
   NEXT_TELEMETRY_DISABLED = "1"
