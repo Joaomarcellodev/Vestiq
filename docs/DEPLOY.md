@@ -38,6 +38,12 @@ Confere que sumiu: `git log --all -S "sb_secret_" --oneline` deve ficar vazio.
 
 ## 2. Criar o site no Netlify (sem CLI)
 
+> **Estado atual:** o site `vestiq-app` **já existe** e **não está ligado ao
+> GitHub** — todos os deploys até hoje saíram da CLI (aparecem sem commit
+> associado no painel). Esta seção só vale se você for ligar o repositório
+> agora; para publicar no site como ele está, pule para
+> [Deploy pela CLI](#deploy-pela-cli-método-em-uso).
+
 1. [app.netlify.com](https://app.netlify.com) → **Add new site → Import an existing project → GitHub**
 2. Autorize e escolha o repositório **`Joaomarcellodev/Vestiq`**
 3. Configuração:
@@ -45,6 +51,9 @@ Confere que sumiu: `git log --all -S "sb_secret_" --oneline` deve ficar vazio.
    - **Build command:** `npm run build` *(já vem do `netlify.toml`)*
    - **Publish directory:** deixe em branco (detectado)
 4. **Deploy site**
+
+Ligar o repositório é o que faz `git push` na `main` publicar sozinho. Enquanto
+isso não for feito, **push não publica nada** — o deploy é sempre manual.
 
 ## 3. Variáveis de ambiente
 
@@ -57,10 +66,12 @@ Só duas — ambas públicas (protegidas por RLS):
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_LAjj9wuVIjtFz0GmLmP2KQ_68fEUzqM` |
 
 > `NEXT_PUBLIC_SITE_URL` **deve** ser definida como
-> `https://vestiq-app.netlify.app`. O `src/lib/env.ts` cai no `process.env.URL`
-> injetado pelo Netlify, mas se essa variável não estiver disponível no runtime
-> da função o fallback vira o default `http://localhost:3000` — e os emails de
-> recuperação de senha saem apontando para localhost.
+> `https://vestiq-app.netlify.app`, com escopo **Builds**. O `src/lib/env.ts`
+> cai no `process.env.URL` injetado pelo Netlify, mas se essa variável não
+> estiver disponível o fallback vira o default `http://localhost:3000` — e os
+> emails de recuperação de senha saem apontando para localhost. Ela é ainda
+> mais importante no deploy pela CLI: veja a armadilha do `.env.local` em
+> [Deploy pela CLI](#deploy-pela-cli-método-em-uso).
 >
 > `SUPABASE_SECRET_KEY` **não** é usada pelo app em produção (só em seeds/scripts).
 
@@ -90,19 +101,54 @@ Secret de Google e Apple.
 
 ## Pronto
 
-- Cada `git push` na `main` dispara um novo deploy.
+- **Push na `main` não publica nada** enquanto o site não estiver ligado ao
+  repositório (ver seção 2). Hoje o deploy é manual, pela CLI.
 - Usuários de teste (senha `vestiq123`): `revenda@vestiq.dev`, `revenda2@vestiq.dev`,
   `fabrica@vestiq.dev` — já existem no banco hospedado (seed).
 - Schema: migrations 0001–0015 aplicadas ao projeto hospedado (tabelas e os buckets
   `avatars` e `product-images` verificados em 2026-09-04).
 
-## Deploy pela CLI (alternativa)
+## Deploy pela CLI (método em uso)
+
+O site já está vinculado localmente (`.netlify/state.json`, fora do git) e o
+token fica em `~/.netlify-token`. Da raiz do repo:
 
 ```bash
-npm i -g netlify-cli
-netlify login
-netlify link            # escolher o site já criado
-netlify deploy --prod
+mv .env.local .env.local.bak
+NETLIFY_AUTH_TOKEN="$(cat ~/.netlify-token)" npx --yes netlify-cli deploy --build --prod
+mv .env.local.bak .env.local
+```
+
+O `--build` é obrigatório: sem ele a CLI publica o conteúdo de `.next` como
+estiver, sem compilar.
+
+> **Por que mover o `.env.local`.** Ao contrário do build git-linked, o
+> `--build` **compila na sua máquina** — e o `.env.local` de desenvolvimento
+> define `NEXT_PUBLIC_SITE_URL=http://localhost:3000`, que em `src/lib/env.ts`
+> tem prioridade sobre o fallback do Netlify. Se essa variável não estiver
+> definida no painel do site, o valor de localhost vai gravado no bundle de
+> produção e os emails de recuperação de senha saem apontando para a sua
+> máquina. As duas variáveis do Supabase não correm esse risco: elas estão
+> definidas no painel, e o Netlify injeta no ambiente do build valores que o
+> `@next/env` não sobrescreve.
+>
+> Se você confirmar que `NEXT_PUBLIC_SITE_URL` está definida em
+> **Site configuration → Environment variables** com escopo **Builds**, os dois
+> `mv` deixam de ser necessários.
+
+Primeira vez em outra máquina:
+
+```bash
+npx netlify-cli login
+npx netlify-cli link     # escolher o site vestiq-app
+```
+
+### Depois de publicar
+
+Vale conferir que o bundle não levou `localhost` junto:
+
+```bash
+curl -s https://vestiq-app.netlify.app/login | grep -c "localhost:3000"   # esperado: 0
 ```
 
 ---
