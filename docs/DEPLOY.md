@@ -88,7 +88,8 @@ Secret de Google e Apple.
 - Cada `git push` na `main` dispara um novo deploy.
 - Usuários de teste (senha `vestiq123`): `revenda@vestiq.dev`, `revenda2@vestiq.dev`,
   `fabrica@vestiq.dev` — já existem no banco hospedado (seed).
-- Schema: migrations 0001–0013 já aplicadas ao projeto hospedado.
+- Schema: migrations 0001–0015 aplicadas ao projeto hospedado (tabelas e os buckets
+  `avatars` e `product-images` verificados em 2026-09-04).
 
 ## Deploy pela CLI (alternativa)
 
