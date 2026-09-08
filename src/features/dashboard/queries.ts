@@ -25,6 +25,35 @@ function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
+export type TopProductsPeriod = 7 | 30 | 90;
+
+/** Top 5 products by units sold (confirmed sales) in the last `days` days. */
+export async function getTopProducts(
+  days: TopProductsPeriod = 30,
+): Promise<{ name: string; units: number }[]> {
+  const supabase = await createClient();
+  const since = new Date();
+  since.setDate(since.getDate() - (days - 1));
+  since.setHours(0, 0, 0, 0);
+
+  const { data } = await supabase
+    .from("sale_items")
+    .select("quantity, product_variants(products(name)), sales!inner(status, created_at)")
+    .eq("sales.status", "CONFIRMED")
+    .gte("sales.created_at", since.toISOString());
+
+  const unitsByProduct = new Map<string, number>();
+  for (const it of data ?? []) {
+    const name = it.product_variants?.products?.name;
+    if (!name) continue;
+    unitsByProduct.set(name, (unitsByProduct.get(name) ?? 0) + it.quantity);
+  }
+  return [...unitsByProduct.entries()]
+    .map(([name, units]) => ({ name, units }))
+    .sort((a, b) => b.units - a.units || a.name.localeCompare(b.name))
+    .slice(0, 5);
+}
+
 export async function getResellerDashboard(): Promise<ResellerDashboard> {
   const org = await requireActiveOrganization();
   const supabase = await createClient();
