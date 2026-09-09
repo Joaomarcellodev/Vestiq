@@ -64,7 +64,7 @@ export async function getResellerDashboard(): Promise<ResellerDashboard> {
   trendStart.setDate(trendStart.getDate() - 13);
   trendStart.setHours(0, 0, 0, 0);
 
-  const [salesRes, variantsRes, offersRes, negRes, itemsRes] = await Promise.all([
+  const [salesRes, variantsRes, offersRes, negRes, topProducts] = await Promise.all([
     supabase
       .from("sales")
       .select("total, created_at")
@@ -76,6 +76,7 @@ export async function getResellerDashboard(): Promise<ResellerDashboard> {
       .is("archived_at", null),
     supabase.from("offers").select("id").in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"]),
     supabase.from("negotiations").select("id, status"),
+    getTopProducts(30),
     supabase
       .from("sale_items")
       .select("quantity, product_variants(products(name)), sales!inner(status)")
@@ -105,18 +106,6 @@ export async function getResellerDashboard(): Promise<ResellerDashboard> {
     }),
     total: Math.round(total * 100) / 100,
   }));
-
-  // top products
-  const unitsByProduct = new Map<string, number>();
-  for (const it of itemsRes.data ?? []) {
-    const name = it.product_variants?.products?.name;
-    if (!name) continue;
-    unitsByProduct.set(name, (unitsByProduct.get(name) ?? 0) + it.quantity);
-  }
-  const topProducts = [...unitsByProduct.entries()]
-    .map(([name, units]) => ({ name, units }))
-    .sort((a, b) => b.units - a.units || a.name.localeCompare(b.name))
-    .slice(0, 5);
 
   const variants = variantsRes.data ?? [];
   const stockUnits = variants.reduce((a, v) => a + v.stock_on_hand, 0);
