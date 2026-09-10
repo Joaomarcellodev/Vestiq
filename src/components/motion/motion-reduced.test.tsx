@@ -1,12 +1,22 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, beforeAll } from "vitest";
 import { render, screen } from "@testing-library/react";
 
-vi.mock("motion/react", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("motion/react")>();
-  return { ...actual, useReducedMotion: () => true };
+beforeAll(() => {
+  // Os componentes agora leem `window.matchMedia` direto (ver index.tsx),
+  // não mais o `useReducedMotion` do motion/react — simula a preferência
+  // do jeito que o hook novo realmente lê.
+  window.matchMedia = ((query: string) => ({
+    matches: true,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  })) as unknown as typeof window.matchMedia;
 });
 
-// Imported after the mock so the primitives see `useReducedMotion() === true`.
 const { CountUp, Reveal, RevealList, RevealItem, RevealGroup, RevealCell } =
   await import("./index");
 const { PageTransition } = await import("./page-transition");
