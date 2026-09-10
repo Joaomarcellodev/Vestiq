@@ -1,7 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useReducedMotion } from "./index";
 
 /** Subtle fade/slide when the route changes. */
 export function PageTransition({ children }: { children: React.ReactNode }) {

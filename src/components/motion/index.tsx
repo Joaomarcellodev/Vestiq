@@ -6,17 +6,33 @@
  * reduced motion.
  */
 
-import { useEffect, useRef, useState } from "react";
-import {
-  motion,
-  useInView,
-  useMotionValue,
-  useReducedMotion,
-  useSpring,
-  type Variants,
-} from "motion/react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { motion, useInView, useMotionValue, useSpring, type Variants } from "motion/react";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
+function subscribeToReducedMotion(onChange: () => void) {
+  const mql = window.matchMedia(REDUCED_MOTION_QUERY);
+  mql.addEventListener("change", onChange);
+  return () => mql.removeEventListener("change", onChange);
+}
+
+/**
+ * Hydration-safe reduced-motion check. O `useReducedMotion` da lib lê a
+ * preferência do sistema de forma síncrona já na primeira renderização do
+ * cliente, mas o servidor nunca sabe essa preferência — o `getServerSnapshot`
+ * abaixo garante que os dois concordam (`false`) na primeira renderização,
+ * evitando o descompasso de `useId()` no formulário de login.
+ */
+export function useReducedMotion(): boolean {
+  return useSyncExternalStore(
+    subscribeToReducedMotion,
+    () => window.matchMedia(REDUCED_MOTION_QUERY).matches,
+    () => false,
+  );
+}
 
 /** Fade + rise on mount. */
 export function Reveal({

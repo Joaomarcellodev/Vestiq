@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { ToastProvider } from "@/components/organisms/toast/toast-provider";
 import { THEME_COOKIE, THEME_SCRIPT } from "@/lib/theme";
 import "./globals.css";
+import Script from "next/script";
 
 const jakarta = localFont({
   src: [
@@ -45,7 +46,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         {/* Runs before paint to set the theme class — no manual <head> (App
             Router owns it) so hydration stays consistent. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <Script id="theme-init" strategy="beforeInteractive">
+          {THEME_SCRIPT}
+        </Script>
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
