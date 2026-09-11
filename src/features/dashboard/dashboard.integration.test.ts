@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { makeOrg, makeProduct, makeUser, makeVariant, supabaseUp } from "@/test/supabase";
+import { admin, makeOrg, makeProduct, makeUser, makeVariant, supabaseUp } from "@/test/supabase";
 import {
   addMember,
   clearTestClient,
@@ -11,6 +11,7 @@ import {
 } from "@/test/actions";
 import { confirmSale } from "@/features/sales/actions";
 import { publishOffer } from "@/features/offers/actions";
+import { fetchTopProducts } from "./actions";
 import { getResellerDashboard } from "./queries";
 import { getFactoryNetworkOverview } from "@/features/network/queries";
 
@@ -61,6 +62,49 @@ d("dashboard + factory overview queries", () => {
       pendingNegotiations: 0,
     });
     expect(dash.lowStock).toEqual([]);
+  });
+
+  it("fetchTopProducts ranks only the sales inside the picked period", async () => {
+    const u = await makeUser();
+    const org = await makeOrg(u.userId, "RESELLER", "RESELLER");
+    const older = await makeVariant((await makeProduct(org.id, { name: "Antiga" })).id, {
+      retail_price: 100,
+    });
+    const recent = await makeVariant((await makeProduct(org.id, { name: "Recente" })).id, {
+      retail_price: 100,
+    });
+    await stockUp(u.client, older.id, 10);
+    await stockUp(u.client, recent.id, 10);
+    setTestClient(u.client);
+
+    const sell = (variantId: string, quantity: number) =>
+      expectRedirect(
+        () =>
+          confirmSale(
+            {},
+            formData({
+              paymentMethod: "PIX",
+              items: JSON.stringify([{ variantId, quantity, unitPrice: 100 }]),
+            }),
+          ),
+        /sale-confirmed/,
+      );
+
+    await sell(older.id, 3);
+    const tenDaysAgo = new Date();
+    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+    const { error } = await admin()
+      .from("sales")
+      .update({ created_at: tenDaysAgo.toISOString() })
+      .eq("organization_id", org.id);
+    expect(error).toBeNull();
+    await sell(recent.id, 2);
+
+    expect(await fetchTopProducts(7)).toEqual([{ name: "Recente", units: 2 }]);
+    expect(await fetchTopProducts(30)).toEqual([
+      { name: "Antiga", units: 3 },
+      { name: "Recente", units: 2 },
+    ]);
   });
 
   it("getFactoryNetworkOverview: members, offers and utilisation", async () => {
