@@ -15,7 +15,7 @@ import {
 import { formatBRL } from "@/lib/utils/currency";
 import { fetchTopProducts } from "@/features/dashboard/actions";
 import type { TopProductsPeriod } from "@/features/dashboard/queries";
-import { cn } from "@//lib/utils/cn";
+import { cn } from "@/lib/utils/cn";
 
 interface ChartColors {
   primary: string;
@@ -133,22 +133,37 @@ const PERIODS: { value: TopProductsPeriod; label: string }[] = [
   { value: 90, label: "90 dias" },
 ];
 
+/** The period the server renders the dashboard with (`getTopProducts` default). */
+const DEFAULT_PERIOD: TopProductsPeriod = 30;
+
 export function TopProductsChart({
-  data: initialData,
+  data: serverData,
 }: {
   data: { name: string; units: number }[];
 }) {
   const { primary: PRIMARY, grid: GRID, axis: AXIS, surface: SURFACE } = useChartColors();
-  const [period, setPeriod] = useState<TopProductsPeriod>(30);
-  const [data, setData] = useState(initialData);
+  // Period and data live together so a response can check that its period is
+  // still the one on screen — a slower, earlier request must not overwrite it.
+  const [{ period, data }, setView] = useState<{
+    period: TopProductsPeriod;
+    data: typeof serverData;
+  }>({ period: DEFAULT_PERIOD, data: serverData });
   const [isPending, startTransition] = useTransition();
+
+  // Fresh server data (a refresh or revalidation) is always for the default
+  // period, so it replaces the picked one; responses for other periods get dropped.
+  const [lastServerData, setLastServerData] = useState(serverData);
+  if (serverData !== lastServerData) {
+    setLastServerData(serverData);
+    setView({ period: DEFAULT_PERIOD, data: serverData });
+  }
 
   function handlePeriodChange(next: TopProductsPeriod) {
     if (next === period) return;
-    setPeriod(next);
+    setView((view) => ({ ...view, period: next }));
     startTransition(async () => {
       const result = await fetchTopProducts(next);
-      setData(result);
+      setView((view) => (view.period === next ? { period: next, data: result } : view));
     });
   }
 
