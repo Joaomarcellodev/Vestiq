@@ -19,6 +19,12 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "6mb",
     },
   },
+  // Netlify serves `next/image` from its Image CDN — `/_next/image` never reaches
+  // the server function — so the optimizer's `sharp` + libvips binaries (19 MB
+  // of the 43 MB function bundle) only made every cold start slower.
+  outputFileTracingExcludes: {
+    "*": ["node_modules/sharp/**", "node_modules/@img/**"],
+  },
   images: {
     // Next 16 blocks the optimizer from fetching private IPs (SSRF guard). The
     // local Supabase Storage runs on 127.0.0.1, so allow it in dev only.
