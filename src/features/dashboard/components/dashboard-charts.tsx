@@ -15,7 +15,7 @@ import {
 import { formatBRL } from "@/lib/utils/currency";
 import { fetchTopProducts } from "@/features/dashboard/actions";
 import type { TopProductsPeriod } from "@/features/dashboard/queries";
-import { cn } from "@//lib/utils/cn";
+import { cn } from "@/lib/utils/cn";
 
 interface ChartColors {
   primary: string;
