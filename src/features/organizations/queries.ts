@@ -3,7 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { requireUser } from "@/features/auth/queries";
+import { requireUserId } from "@/features/auth/queries";
 import type { Database } from "@/types/database";
 
 export type MemberRole = Database["public"]["Enums"]["member_role"];
@@ -19,16 +19,17 @@ export interface ActiveOrg {
 /**
  * The current user's memberships (ACTIVE). Empty array => "aguardando convite".
  * `cache()`d — the layout and every feature query resolve the active org from
- * this within one render, so it must not re-query per call.
+ * this within one render, so it must not re-query per call. Keyed on the JWT
+ * subject (`requireUserId`), so it doesn't wait for the `getUser()` round-trip.
  */
 export const listMyOrganizations = cache(async (): Promise<ActiveOrg[]> => {
-  const user = await requireUser();
+  const userId = await requireUserId();
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("organization_members")
     .select("role, organizations(id, name, type)")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("status", "ACTIVE");
 
   if (error) throw error;
