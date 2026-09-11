@@ -13,6 +13,9 @@ export interface ProductListItem {
   totalStock: number;
   minPrice: number | null;
   archived: boolean;
+  /** Wholesale conditions (factory products — RF-PROD-007). */
+  minOrderQuantity: number;
+  sizeGrid: string[];
 }
 
 export async function listProducts(
@@ -25,7 +28,7 @@ export async function listProducts(
   let query = supabase
     .from("products")
     .select(
-      "id, name, brand, internal_sku, image_urls, archived_at, product_variants(retail_price, stock_on_hand, archived_at)",
+      "id, name, brand, internal_sku, image_urls, archived_at, min_order_quantity, size_grid, product_variants(retail_price, stock_on_hand, archived_at)",
     )
     .order("created_at", { ascending: false });
 
@@ -52,6 +55,8 @@ export async function listProducts(
       totalStock: variants.reduce((a, v) => a + v.stock_on_hand, 0),
       minPrice: prices.length ? Math.min(...prices) : null,
       archived: p.archived_at !== null,
+      minOrderQuantity: p.min_order_quantity,
+      sizeGrid: p.size_grid ?? [],
     };
   });
 }
