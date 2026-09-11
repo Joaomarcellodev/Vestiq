@@ -107,6 +107,15 @@ d("dashboard + factory overview queries", () => {
     ]);
   });
 
+  it("fetchTopProducts rejects a period the chart does not offer", async () => {
+    const u = await makeUser();
+    setTestClient(u.client);
+    // What a tampered client could send — the TypeScript type is not enforced at runtime.
+    for (const days of [365, 0, "30"]) {
+      await expect(fetchTopProducts(days as never)).rejects.toThrow(/período inválido/i);
+    }
+  });
+
   it("getFactoryNetworkOverview: members, offers and utilisation", async () => {
     const factory = await makeUser();
     const factoryOrg = await makeOrg(factory.userId, "FACTORY", "FACTORY_ADMIN", "Fábrica Dash");
