@@ -139,16 +139,20 @@ export function TopProductsChart({
   data: { name: string; units: number }[];
 }) {
   const { primary: PRIMARY, grid: GRID, axis: AXIS, surface: SURFACE } = useChartColors();
-  const [period, setPeriod] = useState<TopProductsPeriod>(30);
-  const [data, setData] = useState(initialData);
+  // Period and data live together so a response can check that its period is
+  // still the one on screen — a slower, earlier request must not overwrite it.
+  const [{ period, data }, setView] = useState<{
+    period: TopProductsPeriod;
+    data: typeof initialData;
+  }>({ period: 30, data: initialData });
   const [isPending, startTransition] = useTransition();
 
   function handlePeriodChange(next: TopProductsPeriod) {
     if (next === period) return;
-    setPeriod(next);
+    setView((view) => ({ ...view, period: next }));
     startTransition(async () => {
       const result = await fetchTopProducts(next);
-      setData(result);
+      setView((view) => (view.period === next ? { period: next, data: result } : view));
     });
   }
 
