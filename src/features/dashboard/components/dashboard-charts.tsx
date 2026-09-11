@@ -133,8 +133,11 @@ const PERIODS: { value: TopProductsPeriod; label: string }[] = [
   { value: 90, label: "90 dias" },
 ];
 
+/** The period the server renders the dashboard with (`getTopProducts` default). */
+const DEFAULT_PERIOD: TopProductsPeriod = 30;
+
 export function TopProductsChart({
-  data: initialData,
+  data: serverData,
 }: {
   data: { name: string; units: number }[];
 }) {
@@ -143,9 +146,17 @@ export function TopProductsChart({
   // still the one on screen — a slower, earlier request must not overwrite it.
   const [{ period, data }, setView] = useState<{
     period: TopProductsPeriod;
-    data: typeof initialData;
-  }>({ period: 30, data: initialData });
+    data: typeof serverData;
+  }>({ period: DEFAULT_PERIOD, data: serverData });
   const [isPending, startTransition] = useTransition();
+
+  // Fresh server data (a refresh or revalidation) is always for the default
+  // period, so it replaces the picked one; responses for other periods get dropped.
+  const [lastServerData, setLastServerData] = useState(serverData);
+  if (serverData !== lastServerData) {
+    setLastServerData(serverData);
+    setView({ period: DEFAULT_PERIOD, data: serverData });
+  }
 
   function handlePeriodChange(next: TopProductsPeriod) {
     if (next === period) return;

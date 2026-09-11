@@ -81,4 +81,19 @@ describe("dashboard charts", () => {
     expect(screen.getByText(/nenhuma venda confirmada nesse período/i)).toBeInTheDocument();
     expect(container.querySelector(".recharts-responsive-container")).not.toBeInTheDocument();
   });
+
+  it("TopProductsChart resets to fresh server data on the default period", async () => {
+    dashboardActions.fetchTopProducts.mockResolvedValueOnce([]);
+    const user = userEvent.setup();
+    const { container, rerender } = render(
+      <TopProductsChart data={[{ name: "Camisa", units: 4 }]} />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "7 dias" }));
+    expect(await screen.findByText(/nenhuma venda confirmada nesse período/i)).toBeInTheDocument();
+
+    rerender(<TopProductsChart data={[{ name: "Regata", units: 2 }]} />);
+    expect(screen.getByRole("button", { name: "30 dias" })).toHaveAttribute("aria-pressed", "true");
+    expect(container.querySelector(".recharts-responsive-container")).toBeInTheDocument();
+  });
 });
