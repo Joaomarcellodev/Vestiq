@@ -68,3 +68,45 @@ curl -s -o /dev/null -w "TTFB %{time_starttransfer}s  total %{time_total}s\n" \
 
 Em produção, DevTools → Network → recarregar `/dashboard` → coluna "Waiting
 (TTFB)" do documento.
+
+## Medição em produção — 2026-09-11
+
+Script autenticado (`revenda@vestiq.dev`) contra `vestiq-app.netlify.app`:
+
+| Requisição | TTFB |
+| --- | --- |
+| primeiro `/dashboard` (cold start) | 7,5 s |
+| páginas autenticadas, função aquecida (dashboard, produtos, vendas, clientes, rede, negociações) | 0,78–1,1 s |
+| `/api/notifications` (só 2 consultas) | 0,9–1,3 s |
+| `/login` (nenhuma consulta) | 0,5–0,8 s |
+
+### Causas
+
+1. **Região.** A conta do Netlify está no plano **Free**: as funções rodam em
+   `us-east-2` (Ohio) e o plano não permite trocar a região (recurso de Pro/
+   Enterprise). O banco está em `sa-east-1`. Cada ida e volta função → Supabase
+   custa ~250 ms, e uma página fazia 3 ondas em série (Auth `getUser` → vínculo com
+   a organização → dados da tela).
+2. **Cold start.** O bundle da função tinha 43 MB, 19 MB deles de `sharp`/libvips —
+   que nunca roda lá, porque o Netlify serve `/_next/image` pelo Image CDN
+   (resposta com `netlify-vary: …Netlify-Image-Accept`).
+
+### Feito no código
+
+- `next.config.ts` → `outputFileTracingExcludes` tira `sharp` e `@img/*` da função.
+- O projeto hospedado já assina JWTs com chave assimétrica (ES256 em
+  `/auth/v1/.well-known/jwks.json`). `getCurrentUserId()` lê o `sub` via
+  `getClaims()` — verificação local, JWKS em cache no processo — e
+  `listMyOrganizations` não espera mais o `getUser()`. O layout `(app)` dispara
+  usuário, organização e notificações em paralelo. Uma onda de ~250 ms a menos por
+  página, por navegação e por prefetch.
+
+### Decisão pendente (infra)
+
+O ganho grande só vem com função e banco na mesma região:
+
+1. **Netlify Pro** → *Project configuration → Build & deploy → Continuous
+   deployment → Functions region* → **South America (São Paulo)**. Cada consulta
+   cai de ~250 ms para poucos ms.
+2. **ou** recriar o projeto Supabase em `us-east-2` (sem custo, mas exige migrar
+   os dados e trocar URL/chaves).
