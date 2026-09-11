@@ -2,18 +2,23 @@
 
 ## Matriz de rastreabilidade
 
-| RF          | AC                | TC         | Nível                   |
-| ----------- | ----------------- | ---------- | ----------------------- |
-| RF-PROD-001 | AC-PROD-001-01    | TC-PROD-01 | integration             |
-| RF-PROD-001 | AC-PROD-001-02    | TC-PROD-02 | integration             |
-| RF-PROD-002 | AC-PROD-002-01    | TC-PROD-03 | integration + e2e       |
-| RF-PROD-003 | AC-PROD-003-01    | TC-PROD-04 | component + integration |
-| RF-PROD-004 | AC-PROD-004-01    | TC-PROD-05 | integration             |
-| RF-PROD-005 | AC-PROD-005-01    | TC-PROD-06 | integration             |
-| RF-PROD-006 | AC-PROD-006-01    | TC-PROD-07 | integration             |
-| RF-PROD-006 | AC-PROD-006-02    | TC-PROD-08 | integration             |
-| RF-PROD-005 | AC-PROD-05-margem | TC-PROD-09 | unit                    |
-| RF-PROD-002 | AC-PROD-rls       | TC-PROD-10 | integration (2 tenants) |
+| RF          | AC                | TC         | Nível                          |
+| ----------- | ----------------- | ---------- | ------------------------------ |
+| RF-PROD-001 | AC-PROD-001-01    | TC-PROD-01 | integration                    |
+| RF-PROD-001 | AC-PROD-001-02    | TC-PROD-02 | integration                    |
+| RF-PROD-002 | AC-PROD-002-01    | TC-PROD-03 | integration + e2e              |
+| RF-PROD-003 | AC-PROD-003-01    | TC-PROD-04 | component + integration        |
+| RF-PROD-004 | AC-PROD-004-01    | TC-PROD-05 | integration                    |
+| RF-PROD-005 | AC-PROD-005-01    | TC-PROD-06 | integration                    |
+| RF-PROD-006 | AC-PROD-006-01    | TC-PROD-07 | integration                    |
+| RF-PROD-006 | AC-PROD-006-02    | TC-PROD-08 | integration                    |
+| RF-PROD-005 | AC-PROD-05-margem | TC-PROD-09 | unit                           |
+| RF-PROD-002 | AC-PROD-rls       | TC-PROD-10 | integration (2 tenants)        |
+| RF-PROD-007 | AC-PROD-007-01    | TC-PROD-11 | unit + component + integration |
+| RF-PROD-007 | AC-PROD-007-02    | TC-PROD-12 | component + integration        |
+| RF-PROD-007 | AC-PROD-007-03    | TC-PROD-11 | unit + integration             |
+| RF-PROD-007 | AC-PROD-007-04    | TC-PROD-13 | integration                    |
+| RF-PROD-007 | AC-PROD-007-04    | TC-PROD-14 | integration (trigger)          |
 
 ## Casos de teste
 
@@ -57,6 +62,22 @@ unit · não-crítica · `margin(60,100)=0.4`; `margin(x,0)=null`.
 
 integration (2 tenants) · **crítica (isolamento)** · A não lê/edita produtos, categorias ou variações de B.
 
+### TC-PROD-11 — Condições de atacado da fábrica
+
+unit + component + integration · não-crítica · pedido mínimo e grade gravados e editáveis; grade normalizada (`wholesale.test.ts`, `wholesale-fields.test.tsx`, `wholesale.integration.test.ts`).
+
+### TC-PROD-12 — Variações geradas pela grade
+
+component + integration · não-crítica · botão "Gerar variantes pela grade"; sem variações → uma por tamanho.
+
+### TC-PROD-13 — Revendedora não define condições
+
+integration · **crítica (autorização)** · campos enviados pela revendedora são ignorados.
+
+### TC-PROD-14 — Trigger de condições só para fábrica
+
+integration · **crítica (autorização)** · `update` direto de `min_order_quantity`/`size_grid` em produto de revendedora → erro.
+
 ## Cobertura de RF
 
-`RF-PROD-001..006` ✔
+`RF-PROD-001..007` ✔
