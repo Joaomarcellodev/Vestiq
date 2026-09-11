@@ -7,6 +7,7 @@ import { archiveProduct, unarchiveProduct } from "@/features/catalog/actions";
 import { BackButton } from "@/components/molecules/back-button";
 import { classifyStock, DEFAULT_LOW_STOCK_THRESHOLD } from "@/features/inventory/classify";
 import { StockControls } from "@/features/inventory/components/stock-controls";
+import { WholesaleSummary } from "@/features/catalog/components/wholesale-summary";
 import { PageHeader } from "@/components/molecules/page-header";
 import { StockBadge } from "@/components/molecules/stock-badge";
 import { Button, Icon } from "@/components/atoms";
@@ -85,6 +86,13 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
       {product.description && (
         <p className="font-body-md text-body-md text-on-surface-variant">{product.description}</p>
+      )}
+
+      {(product.min_order_quantity > 1 || product.size_grid.length > 0) && (
+        <WholesaleSummary
+          minOrderQuantity={product.min_order_quantity}
+          sizeGrid={product.size_grid}
+        />
       )}
 
       <section className="space-y-md">
