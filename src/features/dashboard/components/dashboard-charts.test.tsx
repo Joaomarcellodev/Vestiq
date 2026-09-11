@@ -30,7 +30,7 @@ describe("dashboard charts", () => {
 
   it("TopProductsChart shows an empty state and a populated state", () => {
     const { rerender, container } = render(<TopProductsChart data={[]} />);
-    expect(screen.getByText(/nenhuma venda confirmada ainda/i)).toBeInTheDocument();
+    expect(screen.getByText(/nenhuma venda confirmada nesse período/i)).toBeInTheDocument();
     rerender(<TopProductsChart data={[{ name: "Camisa", units: 4 }]} />);
     expect(container.querySelector(".recharts-responsive-container")).toBeInTheDocument();
   });
