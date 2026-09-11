@@ -642,8 +642,10 @@ export type Database = {
           id: string
           image_urls: string[]
           internal_sku: string | null
+          min_order_quantity: number
           name: string
           organization_id: string
+          size_grid: string[]
           updated_at: string
         }
         Insert: {
@@ -655,8 +657,10 @@ export type Database = {
           id?: string
           image_urls?: string[]
           internal_sku?: string | null
+          min_order_quantity?: number
           name: string
           organization_id: string
+          size_grid?: string[]
           updated_at?: string
         }
         Update: {
@@ -668,8 +672,10 @@ export type Database = {
           id?: string
           image_urls?: string[]
           internal_sku?: string | null
+          min_order_quantity?: number
           name?: string
           organization_id?: string
+          size_grid?: string[]
           updated_at?: string
         }
         Relationships: [

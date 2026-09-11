@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { Button, TextField } from "@/components/atoms";
 import { updateProduct, type ActionState } from "../actions";
 import { ImageUploadField } from "./image-upload-field";
+import { WholesaleFields } from "./wholesale-fields";
 
 interface Product {
   id: string;
@@ -13,14 +14,19 @@ interface Product {
   internal_sku: string | null;
   description: string | null;
   image_urls: string[];
+  min_order_quantity?: number;
+  size_grid?: string[];
 }
 
 export function EditProductForm({
   product,
   categories,
+  isFactory = false,
 }: {
   product: Product;
   categories: { id: string; name: string }[];
+  /** Shows the wholesale conditions (minimum order + size grid) — RF-PROD-007. */
+  isFactory?: boolean;
 }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(updateProduct, {});
   const [images, setImages] = useState<File[]>([]);
@@ -80,6 +86,12 @@ export function EditProductForm({
           className="field-focus-ring w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3 font-body-md text-body-md"
         />
       </div>
+      {isFactory && (
+        <WholesaleFields
+          defaultMinOrderQuantity={product.min_order_quantity ?? 1}
+          defaultSizeGrid={product.size_grid ?? []}
+        />
+      )}
       <div>
         <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
           Fotos

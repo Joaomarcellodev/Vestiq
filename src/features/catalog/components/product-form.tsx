@@ -5,6 +5,7 @@ import { Button, Icon, TextField } from "@/components/atoms";
 import { estimatedMargin, formatPercent } from "@/lib/utils/currency";
 import { createProduct, type ActionState } from "../actions";
 import { ImageUploadField } from "./image-upload-field";
+import { WholesaleFields } from "./wholesale-fields";
 
 interface VariantRow {
   size: string;
@@ -24,13 +25,28 @@ const emptyVariant: VariantRow = {
   initialStock: "0",
 };
 
-export function ProductForm({ categories }: { categories: { id: string; name: string }[] }) {
+export function ProductForm({
+  categories,
+  isFactory = false,
+}: {
+  categories: { id: string; name: string }[];
+  /** Shows the wholesale conditions (minimum order + size grid) — RF-PROD-007. */
+  isFactory?: boolean;
+}) {
   const [state, action, pending] = useActionState<ActionState, FormData>(createProduct, {});
   const [variants, setVariants] = useState<VariantRow[]>([{ ...emptyVariant }]);
   const [images, setImages] = useState<File[]>([]);
+  const [sizeGrid, setSizeGrid] = useState<string[]>([]);
 
   const update = (i: number, patch: Partial<VariantRow>) =>
     setVariants((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+
+  // BR-CAT-14: one row per grid size, keeping the first row's colour and prices.
+  const generateFromGrid = () =>
+    setVariants((rows) => {
+      const base = rows[0] ?? emptyVariant;
+      return sizeGrid.map((size) => ({ ...base, size, sku: "", initialStock: "0" }));
+    });
 
   return (
     <form
@@ -102,6 +118,15 @@ export function ProductForm({ categories }: { categories: { id: string; name: st
         </div>
       </section>
 
+      {isFactory && (
+        <section className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
+          <h2 className="font-headline-md text-headline-md text-on-surface">
+            Condições de atacado
+          </h2>
+          <WholesaleFields onSizeGridChange={setSizeGrid} />
+        </section>
+      )}
+
       <section className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
         <h2 className="font-headline-md text-headline-md text-on-surface">Fotos</h2>
         <ImageUploadField files={images} onFilesChange={setImages} />
@@ -110,15 +135,22 @@ export function ProductForm({ categories }: { categories: { id: string; name: st
       <section className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
         <div className="flex items-center justify-between">
           <h2 className="font-headline-md text-headline-md text-on-surface">Variantes & estoque</h2>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setVariants((r) => [...r, { ...emptyVariant, size: "" }])}
-          >
-            <Icon name="add" size={16} />
-            Adicionar
-          </Button>
+          <div className="flex flex-wrap justify-end gap-2">
+            {isFactory && sizeGrid.length > 0 && (
+              <Button type="button" variant="secondary" size="sm" onClick={generateFromGrid}>
+                Gerar variantes pela grade
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setVariants((r) => [...r, { ...emptyVariant, size: "" }])}
+            >
+              <Icon name="add" size={16} />
+              Adicionar
+            </Button>
+          </div>
         </div>
 
         {variants.map((v, i) => {

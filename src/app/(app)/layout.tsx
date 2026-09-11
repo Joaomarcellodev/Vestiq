@@ -7,8 +7,10 @@ import { getActiveOrganization } from "@/features/organizations/queries";
 import { countUnreadNotifications, listNotifications } from "@/features/notifications/queries";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const user = await requireUser();
-  const [org, notifications, unreadCount] = await Promise.all([
+  // Independent lookups: the org query keys on the JWT subject, so none of these
+  // waits for the Auth server round-trip behind `requireUser()`.
+  const [user, org, notifications, unreadCount] = await Promise.all([
+    requireUser(),
     getActiveOrganization(),
     listNotifications(20),
     countUnreadNotifications(),

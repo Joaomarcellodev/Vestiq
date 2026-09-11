@@ -58,6 +58,32 @@
 **Então** a margem exibida é 40%.
 **E dado** venda R$ 0,00, a margem exibida é "--".
 
+## AC-PROD-007-01 — Fábrica define as condições de atacado
+
+**Dado** uma fábrica autenticada
+**Quando** ela cadastra "Vestido Midi" com pedido mínimo 12 e grade "P, M, G, GG"
+**Então** o produto guarda pedido mínimo 12 e a grade P, M, G, GG, nessa ordem
+**E** o detalhe do produto mostra "Pedido mínimo: 12 peças" e os tamanhos da grade.
+
+## AC-PROD-007-02 — Variações a partir da grade
+
+**Dado** uma fábrica que informou a grade "36, 38, 40" e nenhuma variação
+**Quando** ela salva o produto
+**Então** são criadas as variações 36, 38 e 40.
+
+## AC-PROD-007-03 — Pedido mínimo inválido
+
+**Dado** o formulário da fábrica
+**Quando** o pedido mínimo é 0 ou fracionado
+**Então** o produto não é salvo e a mensagem explica o limite.
+
+## AC-PROD-007-04 — Só a fábrica define
+
+**Dado** uma revendedora
+**Quando** ela cadastra um produto (mesmo enviando pedido mínimo/grade)
+**Então** o produto fica sem pedido mínimo e sem grade
+**E** gravar esses campos direto no banco é recusado.
+
 ## AC-PROD-rls — Isolamento
 
 **Dado** as revendedoras A e B

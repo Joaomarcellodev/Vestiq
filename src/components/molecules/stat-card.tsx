@@ -28,7 +28,7 @@ export function StatCard({ label, value, format = "int", hint, accent, className
   return (
     <div
       className={cn(
-        "rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface",
+        "flex h-full flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface",
         className,
       )}
     >

@@ -8,14 +8,13 @@ import { BackButton } from "@/components/molecules/back-button";
 export const metadata: Metadata = { title: "Novo produto" };
 
 export default async function NewProductPage() {
-  await requireActiveOrganization();
-  const categories = await listCategories();
+  const [org, categories] = await Promise.all([requireActiveOrganization(), listCategories()]);
 
   return (
     <div className="space-y-lg">
       <BackButton fallback="/produtos" label="Inventário" />
       <PageHeader title="Novo produto" description="Cadastre uma peça e suas variações." />
-      <ProductForm categories={categories} />
+      <ProductForm categories={categories} isFactory={org.type === "FACTORY"} />
     </div>
   );
 }

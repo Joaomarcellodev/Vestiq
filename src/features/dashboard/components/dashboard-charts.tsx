@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   Area,
   AreaChart,
@@ -13,6 +13,9 @@ import {
   YAxis,
 } from "recharts";
 import { formatBRL } from "@/lib/utils/currency";
+import { fetchTopProducts } from "@/features/dashboard/actions";
+import type { TopProductsPeriod } from "@/features/dashboard/queries";
+import { cn } from "@/lib/utils/cn";
 
 interface ChartColors {
   primary: string;
@@ -124,17 +127,79 @@ export function SalesTrendChart({ data }: { data: { label: string; total: number
   );
 }
 
-export function TopProductsChart({ data }: { data: { name: string; units: number }[] }) {
+const PERIODS: { value: TopProductsPeriod; label: string }[] = [
+  { value: 7, label: "7 dias" },
+  { value: 30, label: "30 dias" },
+  { value: 90, label: "90 dias" },
+];
+
+/** The period the server renders the dashboard with (`getTopProducts` default). */
+const DEFAULT_PERIOD: TopProductsPeriod = 30;
+
+export function TopProductsChart({
+  data: serverData,
+}: {
+  data: { name: string; units: number }[];
+}) {
   const { primary: PRIMARY, grid: GRID, axis: AXIS, surface: SURFACE } = useChartColors();
+  // Period and data live together so a response can check that its period is
+  // still the one on screen — a slower, earlier request must not overwrite it.
+  const [{ period, data }, setView] = useState<{
+    period: TopProductsPeriod;
+    data: typeof serverData;
+  }>({ period: DEFAULT_PERIOD, data: serverData });
+  const [isPending, startTransition] = useTransition();
+
+  // Fresh server data (a refresh or revalidation) is always for the default
+  // period, so it replaces the picked one; responses for other periods get dropped.
+  const [lastServerData, setLastServerData] = useState(serverData);
+  if (serverData !== lastServerData) {
+    setLastServerData(serverData);
+    setView({ period: DEFAULT_PERIOD, data: serverData });
+  }
+
+  function handlePeriodChange(next: TopProductsPeriod) {
+    if (next === period) return;
+    setView((view) => ({ ...view, period: next }));
+    startTransition(async () => {
+      const result = await fetchTopProducts(next);
+      setView((view) => (view.period === next ? { period: next, data: result } : view));
+    });
+  }
+
   return (
     <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
-      <h2 className="font-title-lg text-title-lg text-on-surface">Mais vendidos</h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="font-title-lg text-title-lg text-on-surface">Mais vendidos</h2>
+        <div
+          role="group"
+          aria-label="Período do gráfico de mais vendidos"
+          className="flex gap-1 rounded-lg bg-surface-container p-1"
+        >
+          {PERIODS.map((p) => (
+            <button
+              key={p.value}
+              type="button"
+              onClick={() => handlePeriodChange(p.value)}
+              aria-pressed={period === p.value}
+              className={cn(
+                "rounded-md px-2.5 py-1 font-label-md text-label-md transition-colors",
+                period === p.value
+                  ? "bg-primary-container text-on-primary-container"
+                  : "text-on-surface-variant hover:text-on-surface",
+              )}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
       {data.length === 0 ? (
         <p className="mt-sm font-body-md text-body-md text-on-surface-variant">
-          Nenhuma venda confirmada ainda.
+          Nenhuma venda confirmada nesse período.
         </p>
       ) : (
-        <div className="mt-md h-56">
+        <div className={cn("mt-md h-56 transition-opacity", isPending && "opacity-50")}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}

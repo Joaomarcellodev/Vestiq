@@ -14,6 +14,7 @@ import {
   PRODUCT_IMAGE_TYPES,
   productSchema,
 } from "./validation";
+import { parseWholesaleForm, type WholesaleInput } from "./wholesale";
 
 export type ActionState = { error?: string; ok?: boolean };
 
@@ -48,6 +49,28 @@ async function uploadProductImages(
     urls.push(supabase.storage.from(IMAGE_BUCKET).getPublicUrl(path).data.publicUrl);
   }
   return { urls };
+}
+
+/**
+ * RF-PROD-007 / BR-CAT-13: only a factory sets wholesale conditions. A
+ * reseller's form never posts them, and anything posted anyway is ignored.
+ */
+function readWholesale(
+  orgType: string,
+  formData: FormData,
+): { wholesale: WholesaleInput | null; error?: string } {
+  if (orgType !== "FACTORY") return { wholesale: null };
+  const parsed = parseWholesaleForm(formData);
+  if (!parsed.success) {
+    return { wholesale: null, error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  }
+  return { wholesale: parsed.data };
+}
+
+function wholesaleColumns(wholesale: WholesaleInput | null) {
+  return wholesale
+    ? { min_order_quantity: wholesale.minOrderQuantity, size_grid: wholesale.sizeGrid }
+    : {};
 }
 
 function readImageFiles(formData: FormData): File[] {
@@ -90,6 +113,8 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
   const parsed = productSchema.safeParse(raw);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
   const input = parsed.data;
+  const { wholesale, error: wholesaleError } = readWholesale(org.type, formData);
+  if (wholesaleError) return { error: wholesaleError };
 
   const supabase = await createClient();
   const { data: product, error } = await supabase
@@ -101,6 +126,7 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
       category_id: input.categoryId || null,
       internal_sku: input.internalSku || null,
       description: input.description || null,
+      ...wholesaleColumns(wholesale),
     })
     .select("id")
     .single();
@@ -126,10 +152,15 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
     await supabase.from("products").update({ image_urls: urls }).eq("id", product.id);
   }
 
+  // BR-CAT-03 / BR-CAT-14: at least one variant — one per grid size when the
+  // factory gave a grid, otherwise a single "Único".
+  const blank = { retailPrice: 0, costPrice: 0, initialStock: 0, color: "", sku: "" };
   const variants =
     input.variants.length > 0
       ? input.variants
-      : [{ size: "Único", retailPrice: 0, costPrice: 0, initialStock: 0, color: "", sku: "" }];
+      : wholesale?.sizeGrid.length
+        ? wholesale.sizeGrid.map((size) => ({ ...blank, size }))
+        : [{ ...blank, size: "Único" }];
 
   for (const v of variants) {
     const { data: variant, error: vErr } = await supabase
@@ -183,6 +214,8 @@ export async function updateProduct(_prev: ActionState, formData: FormData): Pro
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
   const d = parsed.data;
+  const { wholesale, error: wholesaleError } = readWholesale(org.type, formData);
+  if (wholesaleError) return { error: wholesaleError };
 
   const supabase = await createClient();
 
@@ -211,6 +244,7 @@ export async function updateProduct(_prev: ActionState, formData: FormData): Pro
       internal_sku: d.internalSku || null,
       description: d.description || null,
       image_urls: imageUrls,
+      ...wholesaleColumns(wholesale),
     })
     .eq("id", d.id);
 
