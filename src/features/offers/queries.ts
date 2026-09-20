@@ -9,7 +9,7 @@ export async function listNetworkOffers() {
   const { data, error } = await supabase
     .from("offers")
     .select(
-      "id, quantity_remaining, transfer_price, note, status, organization_id, organizations(name), product_variants(size, color, products(name, brand))",
+      "id, quantity_remaining, transfer_price, note, status, organization_id, organizations(name), product_variants(size, color, products(name, brand, image_urls))",
     )
     .in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"])
     .order("created_at", { ascending: false });
@@ -24,6 +24,7 @@ export async function listNetworkOffers() {
     sellerName: o.organizations?.name ?? "—",
     productName: o.product_variants?.products?.name ?? "—",
     brand: o.product_variants?.products?.brand ?? null,
+    imageUrl: o.product_variants?.products?.image_urls?.[0] ?? null,
     descriptor:
       [o.product_variants?.color, o.product_variants?.size].filter(Boolean).join(" / ") || "Único",
   }));
@@ -35,7 +36,7 @@ export async function getOffer(id: string) {
   const { data, error } = await supabase
     .from("offers")
     .select(
-      "*, organizations(name), product_variants(size, color, sku, products(name, brand, description))",
+      "*, organizations(name), product_variants(size, color, sku, products(name, brand, description, image_urls))",
     )
     .eq("id", id)
     .single();
