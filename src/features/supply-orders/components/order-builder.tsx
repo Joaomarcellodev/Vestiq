@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { Badge, Button, Icon } from "@/components/atoms";
 import { cn } from "@/lib/utils/cn";
@@ -47,6 +47,22 @@ export function OrderBuilder({
   const [state, action, pending] = useActionState<ActionState, FormData>(placeSupplyOrder, {});
   const [quantities, setQuantities] = useState<Quantities>({});
   const [filter, setFilter] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // Quantities typed before hydration live only in the DOM — adopt them once
+  // React takes over, so the summary and the payload match what's on screen.
+  useEffect(() => {
+    const typed: Quantities = {};
+    formRef.current
+      ?.querySelectorAll<HTMLInputElement>("input[data-variant-id]")
+      .forEach((input) => {
+        const q = parseQuantity(input.value);
+        if (q > 0) typed[input.dataset.variantId!] = q;
+      });
+    // One-off sync from the DOM (an external system here) — runs once, on mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (Object.keys(typed).length > 0) setQuantities((prev) => ({ ...typed, ...prev }));
+  }, []);
 
   const summary = useMemo(() => summarizeOrder(catalog, quantities), [catalog, quantities]);
   const byProduct = new Map(summary.products.map((p) => [p.productId, p]));
@@ -77,7 +93,7 @@ export function OrderBuilder({
   }
 
   return (
-    <form action={action} className="space-y-lg">
+    <form ref={formRef} action={action} className="space-y-lg">
       <input type="hidden" name="supplierId" value={supplierId} />
       <input type="hidden" name="items" value={JSON.stringify(toOrderItems(quantities))} />
 
@@ -186,6 +202,7 @@ export function OrderBuilder({
                             <td key={size}>
                               <input
                                 type="number"
+                                data-variant-id={variant.id}
                                 inputMode="numeric"
                                 min={0}
                                 step={1}
