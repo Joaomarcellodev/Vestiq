@@ -25,9 +25,14 @@ if (!SECRET || !PUBLISHABLE) {
 const db = createClient(URL, SECRET, { auth: { persistSession: false } });
 
 async function ensureUser(email, password, fullName) {
-  const { data: list } = await db.auth.admin.listUsers();
-  const existing = list?.users?.find((u) => u.email === email);
-  if (existing) return existing.id;
+  // listUsers is paginated — integration tests leave hundreds of users behind.
+  for (let page = 1; ; page++) {
+    const { data: list, error } = await db.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error) throw error;
+    const existing = list.users.find((u) => u.email === email);
+    if (existing) return existing.id;
+    if (list.users.length < 1000) break;
+  }
   const { data, error } = await db.auth.admin.createUser({
     email,
     password,
