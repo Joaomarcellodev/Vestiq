@@ -286,6 +286,27 @@ públicas. `execute` só para `authenticated`.
 Busca: `search_matches(haystack, query)` exige todas as palavras, sem diferenciar
 maiúsculas nem acentos (`unaccent`), com `%`/`_` tratados como literais.
 
+## Pedidos de abastecimento (SPEC-012)
+
+Migrations `0018` (tipos de notificação) e `0019`. A revenda compra direto de um
+fornecedor das suas redes. As tabelas só têm policy de `select` (membro da revenda
+ou do fornecedor); toda escrita passa pelas funções abaixo.
+
+| Tabela | Colunas principais |
+| --- | --- |
+| `supply_orders` | `reseller_id`, `supplier_id`, `status supply_order_status` (`PENDING`/`CONFIRMED`/`REJECTED`/`CANCELLED`), `note`, `response_note`, `cancel_reason`, `total_quantity`, `total_amount numeric(18,2)`, `responded_at`, `cancelled_at` |
+| `supply_order_items` | `order_id`, `product_id`, `variant_id` + snapshot `product_name`, `color`, `size`, `sku`, `unit_price`; `quantity`; `line_total` (gerada). Único `(order_id, variant_id)` |
+
+| Função | Garante |
+| --- | --- |
+| `list_supplier_order_catalog(p_supplier_id)` | variações ativas do fornecedor, só colunas públicas (sem custo nem saldo) |
+| `place_supply_order(p_reseller_id, p_supplier_id, p_items jsonb, p_note)` | usuária membro da revenda; fornecedor da revenda (`is_supplier_of`); itens ativos, com preço, do fornecedor; soma variações repetidas; pedido mínimo por produto; grava o pedido com preço congelado |
+| `respond_supply_order(p_order_id, 'confirm'\|'reject', p_note)` | `FACTORY_ADMIN`/`PLATFORM_ADMIN` do fornecedor; só a partir de `PENDING` |
+| `cancel_supply_order(p_order_id, p_reason)` | membro da revenda; só a partir de `PENDING` |
+
+O trigger `supply_orders_notify` avisa a fábrica de um novo pedido e de um
+cancelamento, e avisa a revenda de uma confirmação ou recusa (link `/pedidos/<id>`).
+
 ## Índices principais
 
 ```sql
