@@ -101,7 +101,7 @@ export async function getSupplyOrder(id: string): Promise<SupplyOrderDetail | nu
   const { data: o, error } = await supabase
     .from("supply_orders")
     .select(
-      `${ORDER_COLUMNS}, note, response_note, cancel_reason, responded_at, cancelled_at, supply_order_items(id, product_id, product_name, color, size, sku, unit_price, quantity, line_total)`,
+      `${ORDER_COLUMNS}, note, response_note, cancel_reason, responded_at, cancelled_at, supply_order_items(id, product_id, product_name, color, size, sku, unit_price, quantity, line_total, position)`,
     )
     .eq("id", id)
     .maybeSingle();
@@ -126,7 +126,8 @@ export async function getSupplyOrder(id: string): Promise<SupplyOrderDetail | nu
     createdAt: o.created_at,
     respondedAt: o.responded_at,
     cancelledAt: o.cancelled_at,
-    items: (o.supply_order_items ?? [])
+    items: [...(o.supply_order_items ?? [])]
+      .sort((a, b) => a.position - b.position)
       .map((i) => ({
         id: i.id,
         productId: i.product_id,
@@ -137,7 +138,6 @@ export async function getSupplyOrder(id: string): Promise<SupplyOrderDetail | nu
         unitPrice: Number(i.unit_price),
         quantity: i.quantity,
         lineTotal: Number(i.line_total),
-      }))
-      .sort((a, b) => a.productName.localeCompare(b.productName, "pt-BR")),
+      })),
   };
 }

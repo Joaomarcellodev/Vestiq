@@ -43,6 +43,8 @@ create table public.supply_order_items (
   sku text,
   unit_price numeric(12, 2) not null check (unit_price > 0),
   quantity integer not null check (quantity between 1 and 100000),
+  -- display order: product, colour, then the product's size grid
+  position integer not null default 0,
   line_total numeric(18, 2) generated always as (unit_price * quantity) stored,
   created_at timestamptz not null default now(),
   unique (order_id, variant_id)
@@ -267,9 +269,14 @@ begin
   returning * into v_order;
 
   insert into public.supply_order_items (
-    order_id, product_id, variant_id, product_name, color, size, sku, unit_price, quantity
+    order_id, product_id, variant_id, product_name, color, size, sku, unit_price, quantity, position
   )
-  select v_order.id, p.id, pv.id, p.name, pv.color, pv.size, pv.sku, pv.retail_price, r.quantity
+  select
+    v_order.id, p.id, pv.id, p.name, pv.color, pv.size, pv.sku, pv.retail_price, r.quantity,
+    row_number() over (
+      order by p.name, p.id, pv.color nulls first,
+        array_position(p.size_grid, pv.size) nulls last, pv.size, pv.id
+    )
   from jsonb_to_recordset(v_req) as r(variant_id uuid, quantity integer)
   join public.product_variants pv on pv.id = r.variant_id
   join public.products p on p.id = pv.product_id;

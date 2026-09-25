@@ -851,6 +851,7 @@ export type Database = {
           id: string
           line_total: number | null
           order_id: string
+          position: number
           product_id: string | null
           product_name: string
           quantity: number
@@ -865,6 +866,7 @@ export type Database = {
           id?: string
           line_total?: number | null
           order_id: string
+          position?: number
           product_id?: string | null
           product_name: string
           quantity: number
@@ -879,6 +881,7 @@ export type Database = {
           id?: string
           line_total?: number | null
           order_id?: string
+          position?: number
           product_id?: string | null
           product_name?: string
           quantity?: number
