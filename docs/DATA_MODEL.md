@@ -268,6 +268,24 @@ Ver [ADR-0004](./adr/0004-atomic-operations-via-postgres-functions.md).
 Todas `security definer`, `set search_path = ''`, e revalidam a associação do
 usuário à organização antes de escrever.
 
+## Funções de leitura — Fornecedores (SPEC-011)
+
+Migration `0017`. A revendedora lê o catálogo das fábricas das suas redes sem
+abrir a RLS de `products`/`product_variants`: uma policy de `select` exporia a
+linha inteira, com `cost_price` e `stock_on_hand`. As funções abaixo são
+`security definer`, filtram por `auth_supplier_ids()` e devolvem só colunas
+públicas. `execute` só para `authenticated`.
+
+| Função | Devolve |
+| --- | --- |
+| `auth_supplier_ids()` | fábricas ativas donas de redes ativas em que a org da usuária é membro `ACTIVE` |
+| `list_suppliers(p_query text)` | fornecedores + nomes das redes + nº de produtos ativos (RF-SUP-001) |
+| `search_supplier_products(p_query text, p_supplier_id uuid)` | até 100 produtos ativos com faixa de preço, pedido mínimo, grade e `in_stock` (RF-SUP-002) |
+| `get_supplier_product(p_product_id uuid)` / `list_supplier_product_variants(p_product_id uuid)` | detalhe e variações com preço e `in_stock` (RF-SUP-003) |
+
+Busca: `search_matches(haystack, query)` exige todas as palavras, sem diferenciar
+maiúsculas nem acentos (`unaccent`), com `%`/`_` tratados como literais.
+
 ## Índices principais
 
 ```sql
