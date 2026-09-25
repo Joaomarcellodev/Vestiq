@@ -906,6 +906,7 @@ export type Database = {
       }
       auth_network_ids: { Args: never; Returns: string[] }
       auth_org_ids: { Args: never; Returns: string[] }
+      auth_supplier_ids: { Args: never; Returns: string[] }
       can_access_negotiation: { Args: { neg_id: string }; Returns: boolean }
       cancel_sale: {
         Args: { p_reason: string; p_sale_id: string }
@@ -983,6 +984,21 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_supplier_product: {
+        Args: { p_product_id: string }
+        Returns: {
+          brand: string
+          category_name: string
+          description: string
+          id: string
+          image_urls: string[]
+          min_order_quantity: number
+          name: string
+          size_grid: string[]
+          supplier_id: string
+          supplier_name: string
+        }[]
+      }
       has_org_role: {
         Args: {
           org: string
@@ -991,6 +1007,26 @@ export type Database = {
         Returns: boolean
       }
       is_org_member: { Args: { org: string }; Returns: boolean }
+      list_supplier_product_variants: {
+        Args: { p_product_id: string }
+        Returns: {
+          color: string
+          id: string
+          in_stock: boolean
+          price: number
+          size: string
+          sku: string
+        }[]
+      }
+      list_suppliers: {
+        Args: { p_query?: string }
+        Returns: {
+          id: string
+          name: string
+          network_names: string[]
+          product_count: number
+        }[]
+      }
       negotiation_transition: {
         Args: { p_action: string; p_message?: string; p_negotiation_id: string }
         Returns: {
@@ -1091,6 +1127,29 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      search_matches: {
+        Args: { haystack: string; p_query: string }
+        Returns: boolean
+      }
+      search_normalize: { Args: { t: string }; Returns: string }
+      search_supplier_products: {
+        Args: { p_query?: string; p_supplier_id?: string }
+        Returns: {
+          brand: string
+          category_name: string
+          id: string
+          image_url: string
+          in_stock: boolean
+          max_price: number
+          min_order_quantity: number
+          min_price: number
+          name: string
+          size_grid: string[]
+          supplier_id: string
+          supplier_name: string
+          variant_count: number
+        }[]
       }
       shares_network: {
         Args: { org_a: string; org_b: string }
