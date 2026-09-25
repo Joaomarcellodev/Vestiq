@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupplier, searchSupplierProducts } from "@/features/suppliers/queries";
 import { SupplierProductCard } from "@/features/suppliers/components/supplier-product-card";
@@ -6,6 +7,7 @@ import { SupplierSearchForm } from "@/features/suppliers/components/supplier-sea
 import { BackButton } from "@/components/molecules/back-button";
 import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
+import { Button, Icon } from "@/components/atoms";
 import { RevealList, RevealItem } from "@/components/motion";
 
 export const metadata: Metadata = { title: "Fornecedor" };
@@ -34,6 +36,16 @@ export default async function SupplierPage({
           `${supplier.productCount} produto${supplier.productCount === 1 ? "" : "s"}`,
           ...supplier.networkNames,
         ].join(" · ")}
+        action={
+          supplier.productCount > 0 ? (
+            <Link href={`/fornecedores/${supplier.id}/pedido`} className="block">
+              <Button size="md" className="w-full sm:w-auto">
+                <Icon name="receipt_long" size={18} />
+                Fazer pedido
+              </Button>
+            </Link>
+          ) : undefined
+        }
       />
 
       <SupplierSearchForm query={query} placeholder="Buscar neste catálogo..." />

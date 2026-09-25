@@ -29,12 +29,22 @@ export default async function SupplierProductPage({ params }: { params: Promise<
         title={product.name}
         description={[product.brand, product.categoryName].filter(Boolean).join(" · ")}
         action={
-          <Link href={`/fornecedores/${product.supplierId}`}>
-            <Button variant="secondary" size="sm">
-              <Icon name="factory" size={16} />
-              {product.supplierName}
-            </Button>
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href={`/fornecedores/${product.supplierId}`}>
+              <Button variant="secondary" size="sm">
+                <Icon name="factory" size={16} />
+                {product.supplierName}
+              </Button>
+            </Link>
+            {product.variants.length > 0 && (
+              <Link href={`/fornecedores/${product.supplierId}/pedido?produto=${product.id}`}>
+                <Button size="sm">
+                  <Icon name="receipt_long" size={16} />
+                  Fazer pedido
+                </Button>
+              </Link>
+            )}
+          </div>
         }
       />
 
