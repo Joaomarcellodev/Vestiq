@@ -21,6 +21,7 @@ export const PRIMARY_NAV: NavItem[] = [
     match: "/fornecedores",
     roles: ["RESELLER"],
   },
+  { href: "/pedidos", label: "Pedidos", icon: "receipt_long", match: "/pedidos" },
   { href: "/negociacoes", label: "Negociações", icon: "swap_horiz", match: "/negociacoes" },
   {
     href: "/rede-fabrica",
