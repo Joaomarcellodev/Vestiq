@@ -36,7 +36,7 @@ export default async function SupplierPage({
         ].join(" · ")}
       />
 
-      <SupplierSearchForm query={query} placeholder={`Buscar no catálogo de ${supplier.name}...`} />
+      <SupplierSearchForm query={query} placeholder="Buscar neste catálogo..." />
 
       {products.length === 0 ? (
         <EmptyState
