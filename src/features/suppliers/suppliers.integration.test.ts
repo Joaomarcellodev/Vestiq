@@ -26,9 +26,9 @@ d("supplier search (SPEC-011)", () => {
     const resellerOrg = await makeOrg(reseller.userId, "RESELLER", "RESELLER", "Loja Busca");
 
     // Two suppliers the reseller buys from.
-    const modah = await makeFactory("Fábrica Modah");
-    const modahNet = await makeNetwork(modah.org.id, "Rede Modah");
-    await addMember(modahNet.id, resellerOrg.id);
+    const aurora = await makeFactory("Confecção Aurora");
+    const auroraNet = await makeNetwork(aurora.org.id, "Rede Aurora");
+    await addMember(auroraNet.id, resellerOrg.id);
 
     const sul = await makeFactory("Malharia Sul");
     const sulNet = await makeNetwork(sul.org.id, "Rede Sul");
@@ -42,10 +42,10 @@ d("supplier search (SPEC-011)", () => {
     const disabled = await makeFactory("Fábrica Desativada");
     await addMember((await makeNetwork(disabled.org.id)).id, resellerOrg.id, "DISABLED");
 
-    const dresses = await makeCategory(modah.org.id, "Vestidos");
-    const dress = await makeProduct(modah.org.id, {
+    const dresses = await makeCategory(aurora.org.id, "Vestidos");
+    const dress = await makeProduct(aurora.org.id, {
       name: "Vestido Midi",
-      brand: "Modah",
+      brand: "Aurora",
       category_id: dresses.id,
       min_order_quantity: 12,
       size_grid: ["P", "M", "G"],
@@ -74,10 +74,10 @@ d("supplier search (SPEC-011)", () => {
       archived_at: new Date().toISOString(),
     });
 
-    const pants = await makeProduct(modah.org.id, { name: "Calça Wide" });
+    const pants = await makeProduct(aurora.org.id, { name: "Calça Wide" });
     await makeVariant(pants.id, { color: "Bege", retail_price: 120, stock_on_hand: 0 });
 
-    const archived = await makeProduct(modah.org.id, {
+    const archived = await makeProduct(aurora.org.id, {
       name: "Vestido Antigo",
       archived_at: new Date().toISOString(),
     });
@@ -93,7 +93,7 @@ d("supplier search (SPEC-011)", () => {
 
     return {
       reseller,
-      modah,
+      aurora,
       sul,
       stranger,
       dress,
@@ -114,10 +114,10 @@ d("supplier search (SPEC-011)", () => {
 
   it("lists the suppliers of the reseller's active networks (TC-SUP-01)", async () => {
     const suppliers = await listSuppliers();
-    expect(suppliers.map((s) => s.name)).toEqual(["Fábrica Modah", "Malharia Sul"]);
-    const modah = suppliers.find((s) => s.id === ctx.modah.org.id)!;
-    expect(modah.networkNames).toEqual(["Rede Modah"]);
-    expect(modah.productCount).toBe(2); // the archived product is not counted
+    expect(suppliers.map((s) => s.name)).toEqual(["Confecção Aurora", "Malharia Sul"]);
+    const aurora = suppliers.find((s) => s.id === ctx.aurora.org.id)!;
+    expect(aurora.networkNames).toEqual(["Rede Aurora"]);
+    expect(aurora.productCount).toBe(2); // the archived product is not counted
   });
 
   it("hides factories outside the networks, pending invites and disabled memberships (TC-SUP-02)", async () => {
@@ -133,8 +133,8 @@ d("supplier search (SPEC-011)", () => {
   });
 
   it("searches suppliers by name, ignoring case and accents (TC-SUP-03)", async () => {
-    expect((await listSuppliers("MODAH")).map((s) => s.name)).toEqual(["Fábrica Modah"]);
-    expect((await listSuppliers("fabrica")).map((s) => s.name)).toEqual(["Fábrica Modah"]);
+    expect((await listSuppliers("AURORA")).map((s) => s.name)).toEqual(["Confecção Aurora"]);
+    expect((await listSuppliers("confeccao")).map((s) => s.name)).toEqual(["Confecção Aurora"]);
     expect(await listSuppliers("inexistente")).toEqual([]);
   });
 
@@ -143,9 +143,9 @@ d("supplier search (SPEC-011)", () => {
     expect(results.map((p) => p.name)).toEqual(["Vestido Midi"]);
     const [dress] = results;
     expect(dress).toMatchObject({
-      supplierId: ctx.modah.org.id,
-      supplierName: "Fábrica Modah",
-      brand: "Modah",
+      supplierId: ctx.aurora.org.id,
+      supplierName: "Confecção Aurora",
+      brand: "Aurora",
       categoryName: "Vestidos",
       imageUrl: "https://example.test/vestido.jpg",
       minOrderQuantity: 12,
@@ -184,8 +184,8 @@ d("supplier search (SPEC-011)", () => {
   });
 
   it("filters by supplier and resolves only visible suppliers (TC-SUP-07)", async () => {
-    const modahOnly = await searchSupplierProducts(undefined, ctx.modah.org.id);
-    expect(modahOnly.map((p) => p.name)).toEqual(["Calça Wide", "Vestido Midi"]);
+    const auroraOnly = await searchSupplierProducts(undefined, ctx.aurora.org.id);
+    expect(auroraOnly.map((p) => p.name)).toEqual(["Calça Wide", "Vestido Midi"]);
     expect(await searchSupplierProducts(undefined, ctx.stranger.org.id)).toEqual([]);
     expect(await searchSupplierProducts(undefined, "not-a-uuid")).toEqual([]);
 
@@ -198,7 +198,7 @@ d("supplier search (SPEC-011)", () => {
     const product = await getSupplierProduct(ctx.dress.id);
     expect(product).toMatchObject({
       name: "Vestido Midi",
-      supplierName: "Fábrica Modah",
+      supplierName: "Confecção Aurora",
       categoryName: "Vestidos",
       minOrderQuantity: 12,
       sizeGrid: ["P", "M", "G"],
@@ -266,14 +266,14 @@ d("supplier search (SPEC-011)", () => {
   });
 
   it("gives a factory admin no suppliers of their own", async () => {
-    setTestClient(ctx.modah.user.client);
+    setTestClient(ctx.aurora.user.client);
     expect(await listSuppliers()).toEqual([]);
     expect(await searchSupplierProducts()).toEqual([]);
     // sanity: the admin API still sees the factory's catalog
     const { count } = await admin()
       .from("products")
       .select("id", { count: "exact", head: true })
-      .eq("organization_id", ctx.modah.org.id);
+      .eq("organization_id", ctx.aurora.org.id);
     expect(count).toBe(3);
   });
 });
