@@ -97,3 +97,27 @@ mensagem opcional e status.
 **Dado** uma negociação `PENDING`
 **Quando** se tenta `PENDING → COMPLETED` diretamente
 **Então** a operação é recusada.
+
+## AC-NEG-010-01 — Mensagem chega na hora
+
+**Dado** que a vendedora e a compradora estão com a negociação aberta
+**Quando** a compradora envia "Consegue entregar sexta?"
+**Então** a mensagem aparece para ela imediatamente
+**E** aparece para a vendedora em poucos segundos, sem recarregar a página
+
+## AC-NEG-010-02 — Terceiros não recebem
+
+**Dado** uma revendedora que não participa da negociação
+**Quando** ela assina o canal da negociação
+**Então** não recebe nenhuma mensagem
+
+## AC-NEG-010-03 — Mensagem inválida
+
+**Quando** envio uma mensagem vazia, com mais de 1.000 caracteres, ou numa negociação encerrada
+**Então** recebo o erro e nada é gravado
+
+## AC-NEG-011-01 — Status ao vivo
+
+**Dado** que a compradora está com a negociação aberta
+**Quando** a vendedora aceita a proposta
+**Então** a compradora vê o status "Aceita" e o evento no chat, sem recarregar
