@@ -33,6 +33,7 @@ type IconName =
   | "point_of_sale"
   | "receipt_long"
   | "search"
+  | "send"
   | "swap_horiz"
   | "visibility"
   | "visibility_off"
@@ -163,6 +164,12 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3Z" />
       <path d="M9 8h6M9 12h6" />
+    </>
+  ),
+  send: (
+    <>
+      <path d="M21 3 10.5 13.5" />
+      <path d="m21 3-6.5 18-4-7.5L3 9.5 21 3Z" />
     </>
   ),
   search: (
