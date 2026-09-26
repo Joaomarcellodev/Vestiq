@@ -71,6 +71,12 @@ Cada feature: `SPEC → ACCEPTANCE → TESTS` (em `specs/<feature>/`) → migrat
 → `queries.ts`/`actions.ts` → componentes → composição da página → testes → PR
 (checklist SDD §42).
 
+## Fase 5 — Evoluções pós-MVP (SDD §6 "possíveis evoluções")
+
+| # | Feature | RF | Telas | Depende de | Status |
+| --- | --- | --- | --- | --- | --- |
+| 12 | **suppliers** — busca de fornecedores e produtos (SPEC-011) | RF-SUP-001..004 | `/fornecedores`, fornecedor, produto do fornecedor | network, catalog (RF-PROD-007) | ✅ |
+
 ## Fase 4 — Estabilização (Sprint 7)
 
 | Item | Ref |

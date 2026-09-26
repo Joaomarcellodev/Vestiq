@@ -25,9 +25,14 @@ if (!SECRET || !PUBLISHABLE) {
 const db = createClient(URL, SECRET, { auth: { persistSession: false } });
 
 async function ensureUser(email, password, fullName) {
-  const { data: list } = await db.auth.admin.listUsers();
-  const existing = list?.users?.find((u) => u.email === email);
-  if (existing) return existing.id;
+  // listUsers is paginated — integration tests leave hundreds of users behind.
+  for (let page = 1; ; page++) {
+    const { data: list, error } = await db.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error) throw error;
+    const existing = list.users.find((u) => u.email === email);
+    if (existing) return existing.id;
+    if (list.users.length < 1000) break;
+  }
   const { data, error } = await db.auth.admin.createUser({
     email,
     password,
@@ -237,6 +242,93 @@ async function main() {
       p_note: "Nunca usada, plásticos de proteção nas ferragens.",
     });
     if (error) console.warn("offer:", error.message);
+  }
+
+  // --- factory wholesale catalog (SPEC-011 — Fornecedores) ---------------
+  const asFactory = createClient(URL, PUBLISHABLE, { auth: { persistSession: false } });
+  await asFactory.auth.signInWithPassword({ email: "fabrica@vestiq.dev", password: "vestiq123" });
+
+  const factoryCatalog = [
+    {
+      category: "Vestidos",
+      name: "Vestido Midi Canelado",
+      description: "Malha canelada com elastano, caimento justo. Comprimento midi.",
+      min_order_quantity: 12,
+      size_grid: ["P", "M", "G", "GG"],
+      colors: { Preto: 30, Terracota: 0 },
+      sku: "MDH-VMC",
+      cost: 32,
+      price: 79.9,
+    },
+    {
+      category: "Calças",
+      name: "Calça Wide Leg Alfaiataria",
+      description: "Cintura alta, pregas frontais e bolsos faca.",
+      min_order_quantity: 6,
+      size_grid: ["36", "38", "40", "42", "44"],
+      colors: { Preto: 18, Bege: 12 },
+      sku: "MDH-CWL",
+      cost: 48,
+      price: 119.9,
+    },
+    {
+      category: "Camisas",
+      name: "Camisa de Linho Oversized",
+      description: "Linho com viscose, modelagem ampla e botões de madrepérola.",
+      min_order_quantity: 10,
+      size_grid: ["P", "M", "G"],
+      colors: { Branco: 0 },
+      sku: "MDH-CLO",
+      cost: 41,
+      price: 99.9,
+    },
+  ];
+  for (const item of factoryCatalog) {
+    const cat = await insert(
+      "categories",
+      { organization_id: factory.id, name: item.category },
+      { organization_id: factory.id, name: item.category },
+    );
+    const prod = await insert(
+      "products",
+      {
+        organization_id: factory.id,
+        category_id: cat.id,
+        name: item.name,
+        brand: "Modah",
+        description: item.description,
+        internal_sku: item.sku,
+        min_order_quantity: item.min_order_quantity,
+        size_grid: item.size_grid,
+      },
+      { organization_id: factory.id, name: item.name },
+    );
+    for (const [color, stock] of Object.entries(item.colors)) {
+      for (const size of item.size_grid) {
+        const sku = `${item.sku}-${color.slice(0, 3).toUpperCase()}-${size}`;
+        const vr = await insert(
+          "product_variants",
+          {
+            organization_id: factory.id,
+            product_id: prod.id,
+            color,
+            size,
+            sku,
+            cost_price: item.cost,
+            retail_price: item.price,
+          },
+          { organization_id: factory.id, sku },
+        );
+        if (stock > 0 && vr.stock_on_hand === 0) {
+          const { error } = await asFactory.rpc("record_inventory_entry", {
+            p_variant_id: vr.id,
+            p_quantity: stock,
+            p_note: "estoque inicial (seed)",
+          });
+          if (error) console.warn("factory entry:", error.message);
+        }
+      }
+    }
   }
 
   console.log("\n✅ Seed concluído.\n");

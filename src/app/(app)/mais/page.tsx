@@ -15,6 +15,9 @@ export default async function MorePage() {
     { href: "/perfil", label: "Meu perfil", icon: "person" },
     { href: "/clientes", label: "Clientes", icon: "group" },
     { href: "/negociacoes", label: "Negociações", icon: "swap_horiz" },
+    ...(org?.role === "RESELLER"
+      ? [{ href: "/fornecedores", label: "Fornecedores", icon: "factory" }]
+      : []),
     ...(isFactory ? [{ href: "/rede-fabrica", label: "Rede da fábrica", icon: "factory" }] : []),
   ];
 
