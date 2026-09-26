@@ -264,9 +264,17 @@ Ver [ADR-0004](./adr/0004-atomic-operations-via-postgres-functions.md).
 | `complete_negotiation(negotiation_id uuid)` | valida estado `ACCEPTED` + saldo na origem; grava `TRANSFERENCIA_SAIDA` e `TRANSFERENCIA_ENTRADA`; atualiza os dois `stock_on_hand` e `offers.quantity_remaining`; tudo ou nada (RF-NEG-007/008) |
 | `adjust_inventory(variant_id uuid, delta int, note text)` | movimento `AJUSTE`, bloqueia saldo negativo (RF-INV-005) |
 | `record_inventory_entry(variant_id uuid, qty int, note text)` | movimento `ENTRADA` |
+| `send_negotiation_message(p_negotiation_id uuid, p_body text)` | evento `MESSAGE` (1–1.000 caracteres, só as partes, negociação aberta); devolve o evento (ADR-0010) |
 
 Todas `security definer`, `set search_path = ''`, e revalidam a associação do
 usuário à organização antes de escrever.
+
+## Tempo real — chat de negociação (ADR-0010)
+
+Migration `0020`: `negotiation_events` e `negotiations` estão na publicação
+`supabase_realtime`. A tela de negociação assina `INSERT` de eventos e `UPDATE` da
+negociação filtrando pelo id. O Realtime aplica as mesmas policies de `select`
+(`can_access_negotiation`), então só as duas partes recebem as mudanças.
 
 ## Funções de leitura — Fornecedores (SPEC-011)
 
