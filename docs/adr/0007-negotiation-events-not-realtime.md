@@ -1,6 +1,6 @@
 # ADR-0007 — "Chat" de negociação como timeline de eventos (sem realtime)
 
-- **Status:** Aceito
+- **Status:** Aceito — a parte "sem realtime" foi substituída pela [ADR-0010](./0010-realtime-negotiation-chat.md) (o modelo de eventos continua)
 - **Data:** 2026-08-28
 - **Requisitos:** RF-NEG-009, SDD §6 (fora do escopo: "chat em tempo real")
 

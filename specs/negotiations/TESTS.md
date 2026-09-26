@@ -19,6 +19,10 @@
 | RF-NEG-008 | AC-NEG-008-01    | TC-NEG-13 | integration (fault injection) | sim                 |
 | RF-NEG-008 | AC-NEG-008-02    | TC-NEG-14 | integration (concorrência)    | sim                 |
 | RF-NEG-009 | AC-NEG-009-01    | TC-NEG-15 | integration                   | sim (auditoria)     |
+| RF-NEG-010 | AC-NEG-010-01    | TC-NEG-16 | integration + component + e2e | não                 |
+| RF-NEG-010 | AC-NEG-010-02    | TC-NEG-17 | integration                   | sim (isolamento)    |
+| RF-NEG-010 | AC-NEG-010-03    | TC-NEG-18 | integration                   | não                 |
+| RF-NEG-011 | AC-NEG-011-01    | TC-NEG-19 | component + e2e               | não                 |
 
 ## Casos de teste
 
@@ -85,3 +89,23 @@ integration · **crítica (RF-NEG-009)** · após `COMPLETED`, todos os eventos 
 ## Cobertura de RF
 
 `RF-NEG-001..009` ✔ — a maioria é **regra crítica** (SDD §38).
+
+### TC-NEG-16 — Envio e recebimento em tempo real
+
+integration + component + e2e · `send_negotiation_message` devolve o evento; o chat
+mostra a mensagem otimista e a troca pelo evento real; em duas sessões abertas, a
+mensagem aparece na outra sem reload (`e2e/negotiation-chat.spec.ts`).
+
+### TC-NEG-17 — Terceiro não recebe
+
+integration · **crítica** · um cliente Realtime de uma revenda fora da negociação,
+inscrito no filtro da negociação, não recebe o `INSERT`; a RPC de envio nega acesso.
+
+### TC-NEG-18 — Validação da mensagem
+
+integration · vazia, só espaços, > 1.000 caracteres e negociação encerrada → erro; nada gravado.
+
+### TC-NEG-19 — Status ao vivo
+
+component + e2e · evento de status ou `UPDATE` da negociação → `router.refresh()`; a
+outra parte vê "Aceita" sem recarregar.

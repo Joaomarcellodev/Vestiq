@@ -51,6 +51,8 @@ Fluxo completo de negociação com máquina de estados, timeline de eventos
 | RF-NEG-007 | Conclusão gera TRANSFERENCIA_SAIDA (origem) e TRANSFERENCIA_ENTRADA (destino)                  |
 | RF-NEG-008 | Operação transacional: se uma movimentação falhar, nenhuma persiste                            |
 | RF-NEG-009 | Histórico da negociação permanece armazenado                                                   |
+| RF-NEG-010 | Mensagens chegam à outra parte em tempo real, sem recarregar a página (ADR-0010)               |
+| RF-NEG-011 | Mudanças de status aparecem para a outra parte em tempo real                                   |
 
 ## User Stories
 
@@ -76,6 +78,8 @@ Fluxo completo de negociação com máquina de estados, timeline de eventos
 | BR-NEG-07 | A variação no destino: se a compradora já tem a mesma `product_variant` (mesmo produto/tamanho/cor)? No MVP, cria-se uma variação no catálogo da compradora vinculada ao produto correspondente (ou novo produto "recebido via rede") — decisão detalhada em `ADR.md` local                                                                                                           |
 | BR-NEG-08 | Toda ação e mensagem gera um `negotiation_events` (append-only) — o histórico é a própria trilha (RF-NEG-009)                                                                                                                                                                                                                                                                         |
 | BR-NEG-09 | Negociação em estado terminal (`REJECTED`, `CANCELLED`, `COMPLETED`) é imutável, exceto novas mensagens? Não: após terminal, sem novas mensagens                                                                                                                                                                                                                                      |
+| BR-NEG-11 | Mensagem: texto de 1 a 1.000 caracteres (sem espaços nas pontas); só as duas partes enviam; negociação encerrada não aceita mensagens                                                                                                                                                                                                                                                 |
+| BR-NEG-12 | Tempo real via Supabase Realtime (`postgres_changes`) respeitando a RLS; a tela rebusca os eventos a cada (re)conexão e deduplica por `id`                                                                                                                                                                                                                                            |
 | BR-NEG-10 | Se `stock_on_hand(origem) < quantity` na conclusão (venda local no meio), a conclusão falha com mensagem clara e a negociação continua `ACCEPTED`                                                                                                                                                                                                                                     |
 
 ## Fluxos
@@ -99,6 +103,9 @@ Ver máquina em `docs/DATA_MODEL.md` (§ Máquina de estados — negotiations).
   `seller_org_id` ou `buyer_org_id`.
 - Ações verificam o papel (vendedora vs compradora) além da associação.
 - `complete_negotiation` `security definer`, transacional, revalida tudo.
+- Realtime (ADR-0010): `negotiation_events` e `negotiations` na publicação
+  `supabase_realtime`. O Realtime aplica as mesmas policies de `select`, então um
+  terceiro que assine o canal não recebe nada.
 
 ## Casos de Erro
 

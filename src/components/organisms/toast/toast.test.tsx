@@ -71,7 +71,7 @@ describe("FlashToaster", () => {
       </ToastProvider>,
     );
     expect(await screen.findByRole("status")).toHaveTextContent("Produto cadastrado.");
-    expect(replaceState).toHaveBeenCalledWith(null, "", "/produtos/abc?foo=1");
+    expect(replaceState).toHaveBeenCalledWith(window.history.state, "", "/produtos/abc?foo=1");
     // no router navigation — it would refetch the page (see FlashToaster)
     expect(routerSpy.replace).not.toHaveBeenCalled();
     replaceState.mockRestore();

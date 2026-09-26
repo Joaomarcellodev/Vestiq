@@ -1408,6 +1408,24 @@ export type Database = {
           variant_count: number
         }[]
       }
+      send_negotiation_message: {
+        Args: { p_body: string; p_negotiation_id: string }
+        Returns: {
+          actor_id: string | null
+          body: string | null
+          created_at: string
+          id: string
+          negotiation_id: string
+          payload: Json | null
+          type: Database["public"]["Enums"]["negotiation_event_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "negotiation_events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       shares_network: {
         Args: { org_a: string; org_b: string }
         Returns: boolean
