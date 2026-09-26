@@ -18,6 +18,7 @@ export default async function MorePage() {
     ...(org?.role === "RESELLER"
       ? [{ href: "/fornecedores", label: "Fornecedores", icon: "factory" }]
       : []),
+    { href: "/pedidos", label: "Pedidos de abastecimento", icon: "receipt_long" },
     ...(isFactory ? [{ href: "/rede-fabrica", label: "Rede da fábrica", icon: "factory" }] : []),
   ];
 

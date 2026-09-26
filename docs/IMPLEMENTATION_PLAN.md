@@ -76,6 +76,7 @@ Cada feature: `SPEC → ACCEPTANCE → TESTS` (em `specs/<feature>/`) → migrat
 | # | Feature | RF | Telas | Depende de | Status |
 | --- | --- | --- | --- | --- | --- |
 | 12 | **suppliers** — busca de fornecedores e produtos (SPEC-011) | RF-SUP-001..004 | `/fornecedores`, fornecedor, produto do fornecedor | network, catalog (RF-PROD-007) | ✅ |
+| 13 | **supply-orders** — pedido de abastecimento ao fornecedor (SPEC-012) | RF-ORD-001..006 | pedido (grade cor × tamanho), `/pedidos`, detalhe | suppliers | ✅ pedido + resposta da fábrica; despacho/recebimento/entrada no estoque pendentes |
 
 ## Fase 4 — Estabilização (Sprint 7)
 
