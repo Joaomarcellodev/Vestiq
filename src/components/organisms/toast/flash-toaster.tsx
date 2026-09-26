@@ -31,7 +31,9 @@ export function FlashToaster() {
     const next = new URLSearchParams(searchParams);
     next.delete("toast");
     const qs = next.toString();
-    window.history.replaceState(null, "", qs ? `${pathname}?${qs}` : pathname);
+    // Keep Next's own history state: dropping it makes the next router.refresh()
+    // fall back to a full page load.
+    window.history.replaceState(window.history.state, "", qs ? `${pathname}?${qs}` : pathname);
   }, [searchParams, pathname, toast]);
 
   return null;
