@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BackButton } from "@/components/molecules/back-button";
 import { getNegotiation } from "@/features/negotiations/queries";
+import { requireUserId } from "@/features/auth/queries";
+import { NegotiationChat } from "@/features/negotiations/components/negotiation-chat";
+import { toChatEvent } from "@/features/negotiations/chat";
 import { negotiationAction } from "@/features/negotiations/actions";
 import { transition } from "@/features/negotiations/state-machine";
 import type {
@@ -12,7 +15,7 @@ import type {
 import { PageHeader } from "@/components/molecules/page-header";
 import { Badge, Button } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
-import { NEGOTIATION_EVENT, NEGOTIATION_STATUS } from "@/lib/i18n/labels";
+import { NEGOTIATION_STATUS } from "@/lib/i18n/labels";
 
 export const metadata: Metadata = { title: "Negociação" };
 
@@ -33,7 +36,10 @@ export default async function NegotiationDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const result = await getNegotiation(id).catch(() => null);
+  const [result, userId] = await Promise.all([
+    getNegotiation(id).catch(() => null),
+    requireUserId(),
+  ]);
   if (!result?.negotiation) notFound();
   const { negotiation: n, events, party } = result;
   const variant = n.offers?.product_variants;
@@ -66,26 +72,6 @@ export default async function NegotiationDetailPage({
         </div>
       </div>
 
-      <section className="space-y-sm">
-        <h2 className="font-headline-md text-headline-md text-on-surface">Histórico</h2>
-        <ul className="space-y-sm">
-          {events.map((e) => (
-            <li
-              key={e.id}
-              className="rounded-lg border border-outline-variant bg-surface-container-lowest p-3"
-            >
-              <p className="font-body-md text-body-md font-semibold text-on-surface-variant">
-                {NEGOTIATION_EVENT[e.type]}
-                <span className="ml-2 font-normal">
-                  {new Date(e.created_at).toLocaleString("pt-BR")}
-                </span>
-              </p>
-              {e.body && <p className="mt-1 font-body-md text-body-md text-on-surface">{e.body}</p>}
-            </li>
-          ))}
-        </ul>
-      </section>
-
       {available.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {available.map((a) => (
@@ -100,21 +86,13 @@ export default async function NegotiationDetailPage({
         </div>
       )}
 
-      {!["REJECTED", "CANCELLED", "COMPLETED"].includes(n.status) && (
-        <form action={negotiationAction} className="flex gap-2">
-          <input type="hidden" name="negotiationId" value={n.id} />
-          <input type="hidden" name="action" value="message" />
-          <input
-            name="message"
-            required
-            placeholder="Enviar mensagem..."
-            className="field-focus-ring w-full rounded-lg border border-outline-variant px-4 py-3 font-body-md text-body-md"
-          />
-          <Button type="submit" variant="secondary">
-            Enviar
-          </Button>
-        </form>
-      )}
+      <NegotiationChat
+        negotiationId={n.id}
+        currentUserId={userId}
+        counterpartyName={(party === "seller" ? n.buyer?.name : n.seller?.name) ?? "Outra parte"}
+        initialEvents={events.map(toChatEvent)}
+        open={!["REJECTED", "CANCELLED", "COMPLETED"].includes(n.status)}
+      />
     </div>
   );
 }

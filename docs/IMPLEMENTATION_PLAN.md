@@ -71,6 +71,14 @@ Cada feature: `SPEC → ACCEPTANCE → TESTS` (em `specs/<feature>/`) → migrat
 → `queries.ts`/`actions.ts` → componentes → composição da página → testes → PR
 (checklist SDD §42).
 
+## Fase 5 — Evoluções pós-MVP (SDD §6 "possíveis evoluções")
+
+| # | Feature | RF | Telas | Depende de | Status |
+| --- | --- | --- | --- | --- | --- |
+| 12 | **suppliers** — busca de fornecedores e produtos (SPEC-011) | RF-SUP-001..004 | `/fornecedores`, fornecedor, produto do fornecedor | network, catalog (RF-PROD-007) | ✅ |
+| 13 | **supply-orders** — pedido de abastecimento ao fornecedor (SPEC-012) | RF-ORD-001..006 | pedido (grade cor × tamanho), `/pedidos`, detalhe | suppliers | ✅ pedido + resposta da fábrica; despacho/recebimento/entrada no estoque pendentes |
+| 14 | **negotiations** — chat em tempo real (ADR-0010) | RF-NEG-010..011 | chat de negociação | negotiations | ✅ Supabase Realtime + envio otimista; sino de notificações ainda por polling |
+
 ## Fase 4 — Estabilização (Sprint 7)
 
 | Item | Ref |
@@ -93,3 +101,4 @@ Cada feature: `SPEC → ACCEPTANCE → TESTS` (em `specs/<feature>/`) → migrat
 | Supabase | Projeto único | 0003 |
 | Branching | `develop` primeiro, depois `main` | CONTRIBUTING |
 | Moeda | Real (BRL), sem multi-moeda | 0008 |
+| Chat de negociação | Tempo real via Supabase Realtime (substitui o "sem realtime" da 0007) | 0010 |

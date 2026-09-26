@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { listNetworkOffers } from "@/features/offers/queries";
 import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
@@ -39,8 +40,22 @@ export default async function NetworkPage() {
               key={o.id}
               className="flex flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-surface"
             >
-              <div className="flex items-start justify-between">
-                <div>
+              +{" "}
+              <div className="flex items-start justify-between gap-3">
+                <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-lg bg-surface-container text-outline">
+                  {o.imageUrl ? (
+                    <Image
+                      src={o.imageUrl}
+                      alt=""
+                      width={64}
+                      height={64}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <Icon name="inventory_2" size={22} />
+                  )}
+                </span>
+                <div className="min-w-0 flex-1">
                   <p className="font-title-lg text-title-lg text-on-surface">{o.productName}</p>
                   <p className="font-body-md text-body-md text-on-surface-variant">
                     {[o.brand, o.descriptor].filter(Boolean).join(" · ")}

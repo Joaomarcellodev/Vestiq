@@ -264,9 +264,56 @@ Ver [ADR-0004](./adr/0004-atomic-operations-via-postgres-functions.md).
 | `complete_negotiation(negotiation_id uuid)` | valida estado `ACCEPTED` + saldo na origem; grava `TRANSFERENCIA_SAIDA` e `TRANSFERENCIA_ENTRADA`; atualiza os dois `stock_on_hand` e `offers.quantity_remaining`; tudo ou nada (RF-NEG-007/008) |
 | `adjust_inventory(variant_id uuid, delta int, note text)` | movimento `AJUSTE`, bloqueia saldo negativo (RF-INV-005) |
 | `record_inventory_entry(variant_id uuid, qty int, note text)` | movimento `ENTRADA` |
+| `send_negotiation_message(p_negotiation_id uuid, p_body text)` | evento `MESSAGE` (1–1.000 caracteres, só as partes, negociação aberta); devolve o evento (ADR-0010) |
 
 Todas `security definer`, `set search_path = ''`, e revalidam a associação do
 usuário à organização antes de escrever.
+
+## Tempo real — chat de negociação (ADR-0010)
+
+Migration `0020`: `negotiation_events` e `negotiations` estão na publicação
+`supabase_realtime`. A tela de negociação assina `INSERT` de eventos e `UPDATE` da
+negociação filtrando pelo id. O Realtime aplica as mesmas policies de `select`
+(`can_access_negotiation`), então só as duas partes recebem as mudanças.
+
+## Funções de leitura — Fornecedores (SPEC-011)
+
+Migration `0017`. A revendedora lê o catálogo das fábricas das suas redes sem
+abrir a RLS de `products`/`product_variants`: uma policy de `select` exporia a
+linha inteira, com `cost_price` e `stock_on_hand`. As funções abaixo são
+`security definer`, filtram por `auth_supplier_ids()` e devolvem só colunas
+públicas. `execute` só para `authenticated`.
+
+| Função | Devolve |
+| --- | --- |
+| `auth_supplier_ids()` | fábricas ativas donas de redes ativas em que a org da usuária é membro `ACTIVE` |
+| `list_suppliers(p_query text)` | fornecedores + nomes das redes + nº de produtos ativos (RF-SUP-001) |
+| `search_supplier_products(p_query text, p_supplier_id uuid)` | até 100 produtos ativos com faixa de preço, pedido mínimo, grade e `in_stock` (RF-SUP-002) |
+| `get_supplier_product(p_product_id uuid)` / `list_supplier_product_variants(p_product_id uuid)` | detalhe e variações com preço e `in_stock` (RF-SUP-003) |
+
+Busca: `search_matches(haystack, query)` exige todas as palavras, sem diferenciar
+maiúsculas nem acentos (`unaccent`), com `%`/`_` tratados como literais.
+
+## Pedidos de abastecimento (SPEC-012)
+
+Migrations `0018` (tipos de notificação) e `0019`. A revenda compra direto de um
+fornecedor das suas redes. As tabelas só têm policy de `select` (membro da revenda
+ou do fornecedor); toda escrita passa pelas funções abaixo.
+
+| Tabela | Colunas principais |
+| --- | --- |
+| `supply_orders` | `reseller_id`, `supplier_id`, `status supply_order_status` (`PENDING`/`CONFIRMED`/`REJECTED`/`CANCELLED`), `note`, `response_note`, `cancel_reason`, `total_quantity`, `total_amount numeric(18,2)`, `responded_at`, `cancelled_at` |
+| `supply_order_items` | `order_id`, `product_id`, `variant_id` + snapshot `product_name`, `color`, `size`, `sku`, `unit_price`; `quantity`; `line_total` (gerada). Único `(order_id, variant_id)` |
+
+| Função | Garante |
+| --- | --- |
+| `list_supplier_order_catalog(p_supplier_id)` | variações ativas do fornecedor, só colunas públicas (sem custo nem saldo) |
+| `place_supply_order(p_reseller_id, p_supplier_id, p_items jsonb, p_note)` | usuária membro da revenda; fornecedor da revenda (`is_supplier_of`); itens ativos, com preço, do fornecedor; soma variações repetidas; pedido mínimo por produto; grava o pedido com preço congelado |
+| `respond_supply_order(p_order_id, 'confirm'\|'reject', p_note)` | `FACTORY_ADMIN`/`PLATFORM_ADMIN` do fornecedor; só a partir de `PENDING` |
+| `cancel_supply_order(p_order_id, p_reason)` | membro da revenda; só a partir de `PENDING` |
+
+O trigger `supply_orders_notify` avisa a fábrica de um novo pedido e de um
+cancelamento, e avisa a revenda de uma confirmação ou recusa (link `/pedidos/<id>`).
 
 ## Índices principais
 

@@ -844,6 +844,159 @@ export type Database = {
           },
         ]
       }
+      supply_order_items: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          line_total: number | null
+          order_id: string
+          position: number
+          product_id: string | null
+          product_name: string
+          quantity: number
+          size: string | null
+          sku: string | null
+          unit_price: number
+          variant_id: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          line_total?: number | null
+          order_id: string
+          position?: number
+          product_id?: string | null
+          product_name: string
+          quantity: number
+          size?: string | null
+          sku?: string | null
+          unit_price: number
+          variant_id?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          line_total?: number | null
+          order_id?: string
+          position?: number
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          size?: string | null
+          sku?: string | null
+          unit_price?: number
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supply_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "supply_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_order_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supply_orders: {
+        Row: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          reseller_id: string
+          responded_at: string | null
+          responded_by: string | null
+          response_note: string | null
+          status: Database["public"]["Enums"]["supply_order_status"]
+          supplier_id: string
+          total_amount: number
+          total_quantity: number
+          updated_at: string
+        }
+        Insert: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          reseller_id: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_note?: string | null
+          status?: Database["public"]["Enums"]["supply_order_status"]
+          supplier_id: string
+          total_amount: number
+          total_quantity: number
+          updated_at?: string
+        }
+        Update: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          reseller_id?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_note?: string | null
+          status?: Database["public"]["Enums"]["supply_order_status"]
+          supplier_id?: string
+          total_amount?: number
+          total_quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supply_orders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_orders_reseller_id_fkey"
+            columns: ["reseller_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_orders_responded_by_fkey"
+            columns: ["responded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -906,6 +1059,7 @@ export type Database = {
       }
       auth_network_ids: { Args: never; Returns: string[] }
       auth_org_ids: { Args: never; Returns: string[] }
+      auth_supplier_ids: { Args: never; Returns: string[] }
       can_access_negotiation: { Args: { neg_id: string }; Returns: boolean }
       cancel_sale: {
         Args: { p_reason: string; p_sale_id: string }
@@ -927,6 +1081,32 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "sales"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      cancel_supply_order: {
+        Args: { p_order_id: string; p_reason?: string }
+        Returns: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          reseller_id: string
+          responded_at: string | null
+          responded_by: string | null
+          response_note: string | null
+          status: Database["public"]["Enums"]["supply_order_status"]
+          supplier_id: string
+          total_amount: number
+          total_quantity: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "supply_orders"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -983,6 +1163,21 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_supplier_product: {
+        Args: { p_product_id: string }
+        Returns: {
+          brand: string
+          category_name: string
+          description: string
+          id: string
+          image_urls: string[]
+          min_order_quantity: number
+          name: string
+          size_grid: string[]
+          supplier_id: string
+          supplier_name: string
+        }[]
+      }
       has_org_role: {
         Args: {
           org: string
@@ -991,6 +1186,47 @@ export type Database = {
         Returns: boolean
       }
       is_org_member: { Args: { org: string }; Returns: boolean }
+      is_supplier_of: {
+        Args: { p_reseller_id: string; p_supplier_id: string }
+        Returns: boolean
+      }
+      list_supplier_order_catalog: {
+        Args: { p_supplier_id: string }
+        Returns: {
+          brand: string
+          color: string
+          image_url: string
+          in_stock: boolean
+          min_order_quantity: number
+          price: number
+          product_id: string
+          product_name: string
+          size: string
+          size_grid: string[]
+          sku: string
+          variant_id: string
+        }[]
+      }
+      list_supplier_product_variants: {
+        Args: { p_product_id: string }
+        Returns: {
+          color: string
+          id: string
+          in_stock: boolean
+          price: number
+          size: string
+          sku: string
+        }[]
+      }
+      list_suppliers: {
+        Args: { p_query?: string }
+        Returns: {
+          id: string
+          name: string
+          network_names: string[]
+          product_count: number
+        }[]
+      }
       negotiation_transition: {
         Args: { p_action: string; p_message?: string; p_negotiation_id: string }
         Returns: {
@@ -1038,6 +1274,37 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "negotiations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      place_supply_order: {
+        Args: {
+          p_items: Json
+          p_note?: string
+          p_reseller_id: string
+          p_supplier_id: string
+        }
+        Returns: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          reseller_id: string
+          responded_at: string | null
+          responded_by: string | null
+          response_note: string | null
+          status: Database["public"]["Enums"]["supply_order_status"]
+          supplier_id: string
+          total_amount: number
+          total_quantity: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "supply_orders"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1092,6 +1359,73 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      respond_supply_order: {
+        Args: { p_decision: string; p_note?: string; p_order_id: string }
+        Returns: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          reseller_id: string
+          responded_at: string | null
+          responded_by: string | null
+          response_note: string | null
+          status: Database["public"]["Enums"]["supply_order_status"]
+          supplier_id: string
+          total_amount: number
+          total_quantity: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "supply_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      search_matches: {
+        Args: { haystack: string; p_query: string }
+        Returns: boolean
+      }
+      search_normalize: { Args: { t: string }; Returns: string }
+      search_supplier_products: {
+        Args: { p_query?: string; p_supplier_id?: string }
+        Returns: {
+          brand: string
+          category_name: string
+          id: string
+          image_url: string
+          in_stock: boolean
+          max_price: number
+          min_order_quantity: number
+          min_price: number
+          name: string
+          size_grid: string[]
+          supplier_id: string
+          supplier_name: string
+          variant_count: number
+        }[]
+      }
+      send_negotiation_message: {
+        Args: { p_body: string; p_negotiation_id: string }
+        Returns: {
+          actor_id: string | null
+          body: string | null
+          created_at: string
+          id: string
+          negotiation_id: string
+          payload: Json | null
+          type: Database["public"]["Enums"]["negotiation_event_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "negotiation_events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       shares_network: {
         Args: { org_a: string; org_b: string }
         Returns: boolean
@@ -1130,6 +1464,10 @@ export type Database = {
         | "NEGOTIATION_REJECTED"
         | "NEGOTIATION_CANCELLED"
         | "NEGOTIATION_COMPLETED"
+        | "SUPPLY_ORDER_PLACED"
+        | "SUPPLY_ORDER_CONFIRMED"
+        | "SUPPLY_ORDER_REJECTED"
+        | "SUPPLY_ORDER_CANCELLED"
       offer_status:
         | "ACTIVE"
         | "PARTIALLY_NEGOTIATED"
@@ -1139,6 +1477,7 @@ export type Database = {
       organization_type: "FACTORY" | "RESELLER" | "PLATFORM"
       payment_method: "PIX" | "CARTAO" | "DINHEIRO"
       sale_status: "CONFIRMED" | "CANCELLED"
+      supply_order_status: "PENDING" | "CONFIRMED" | "REJECTED" | "CANCELLED"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1304,6 +1643,10 @@ export const Constants = {
         "NEGOTIATION_REJECTED",
         "NEGOTIATION_CANCELLED",
         "NEGOTIATION_COMPLETED",
+        "SUPPLY_ORDER_PLACED",
+        "SUPPLY_ORDER_CONFIRMED",
+        "SUPPLY_ORDER_REJECTED",
+        "SUPPLY_ORDER_CANCELLED",
       ],
       offer_status: [
         "ACTIVE",
@@ -1315,6 +1658,7 @@ export const Constants = {
       organization_type: ["FACTORY", "RESELLER", "PLATFORM"],
       payment_method: ["PIX", "CARTAO", "DINHEIRO"],
       sale_status: ["CONFIRMED", "CANCELLED"],
+      supply_order_status: ["PENDING", "CONFIRMED", "REJECTED", "CANCELLED"],
     },
   },
 } as const

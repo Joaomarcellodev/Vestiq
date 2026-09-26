@@ -30,6 +30,10 @@ describe("SidebarNav", () => {
     setPathname("/dashboard");
     render(<SidebarNav role="RESELLER" orgName="Loja" userName="Ana" />);
     expect(screen.queryByRole("link", { name: /rede da fábrica/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^Fornecedores$/ })).toHaveAttribute(
+      "href",
+      "/fornecedores",
+    );
     expect(screen.getByRole("link", { name: /^Dashboard$/ })).toHaveAttribute(
       "aria-current",
       "page",
@@ -37,8 +41,10 @@ describe("SidebarNav", () => {
   });
 
   it("shows factory items for a factory admin", () => {
-    setPathname("/rede-fabrica");
+    setPathname("/pedidos/123");
     render(<SidebarNav role="FACTORY_ADMIN" orgName="Fábrica" userName="Ana" />);
     expect(screen.getByRole("link", { name: /rede da fábrica/i })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^Fornecedores$/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^Pedidos$/ })).toHaveAttribute("aria-current", "page");
   });
 });

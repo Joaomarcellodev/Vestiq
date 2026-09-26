@@ -15,6 +15,10 @@ const ICON: Record<NotificationType, string> = {
   NEGOTIATION_REJECTED: "warning",
   NEGOTIATION_CANCELLED: "warning",
   NEGOTIATION_COMPLETED: "check_circle",
+  SUPPLY_ORDER_PLACED: "receipt_long",
+  SUPPLY_ORDER_CONFIRMED: "check_circle",
+  SUPPLY_ORDER_REJECTED: "warning",
+  SUPPLY_ORDER_CANCELLED: "warning",
 };
 
 const POLL_MS = 60_000;

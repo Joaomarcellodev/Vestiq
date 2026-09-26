@@ -64,24 +64,30 @@ describe("FlashToaster", () => {
   it("turns a ?toast=<code> param into a toast and strips it from the URL", async () => {
     setPathname("/produtos/abc");
     setSearchParams("toast=product-created&foo=1");
+    const replaceState = vi.spyOn(window.history, "replaceState");
     render(
       <ToastProvider>
         <FlashToaster />
       </ToastProvider>,
     );
     expect(await screen.findByRole("status")).toHaveTextContent("Produto cadastrado.");
-    expect(routerSpy.replace).toHaveBeenCalledWith("/produtos/abc?foo=1", { scroll: false });
+    expect(replaceState).toHaveBeenCalledWith(window.history.state, "", "/produtos/abc?foo=1");
+    // no router navigation — it would refetch the page (see FlashToaster)
+    expect(routerSpy.replace).not.toHaveBeenCalled();
+    replaceState.mockRestore();
   });
 
   it("does nothing without the param", () => {
     setPathname("/produtos");
     setSearchParams("");
+    const replaceState = vi.spyOn(window.history, "replaceState");
     render(
       <ToastProvider>
         <FlashToaster />
       </ToastProvider>,
     );
     expect(screen.queryByRole("status")).toBeNull();
-    expect(routerSpy.replace).not.toHaveBeenCalled();
+    expect(replaceState).not.toHaveBeenCalled();
+    replaceState.mockRestore();
   });
 });

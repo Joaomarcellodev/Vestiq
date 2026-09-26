@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { BackButton } from "@/components/molecules/back-button";
 import { getOffer } from "@/features/offers/queries";
 import { cancelOffer } from "@/features/offers/actions";
 import { ProposeForm } from "@/features/negotiations/components/propose-form";
 import { PageHeader } from "@/components/molecules/page-header";
-import { Badge, Button } from "@/components/atoms";
+import { Badge, Button, Icon } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { OFFER_STATUS } from "@/lib/i18n/labels";
 
@@ -17,6 +18,7 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
   if (!result?.offer) notFound();
   const { offer, isMine } = result;
   const variant = offer.product_variants;
+  const images = variant?.products?.image_urls ?? [];
 
   return (
     <div className="space-y-lg">
@@ -33,7 +35,29 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
           <Badge tone={OFFER_STATUS[offer.status].tone}>{OFFER_STATUS[offer.status].label}</Badge>
         }
       />
-
+      +{" "}
+      {images.length > 0 ? (
+        <div className="flex gap-3 overflow-x-auto pb-1">
+          {images.map((url) => (
+            <div
+              key={url}
+              className="h-40 w-40 shrink-0 overflow-hidden rounded-xl bg-surface-container"
+            >
+              <Image
+                src={url}
+                alt=""
+                width={160}
+                height={160}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid h-40 w-40 place-items-center rounded-xl bg-surface-container text-outline">
+          <Icon name="inventory_2" size={32} />
+        </div>
+      )}
       <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
         <p className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
           Preço de transferência (B2B)
@@ -49,7 +73,6 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
           <p className="mt-3 font-body-md text-body-md text-on-surface">{offer.note}</p>
         )}
       </div>
-
       {isMine ? (
         offer.status !== "CANCELLED" && (
           <form action={cancelOffer}>

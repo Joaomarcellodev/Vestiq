@@ -12,3 +12,17 @@ export const negotiationActionSchema = z.object({
   action: z.enum(["accept", "reject", "cancel", "message", "complete"]),
   message: z.string().trim().max(1000).optional().or(z.literal("")),
 });
+
+export const MESSAGE_MAX_LENGTH = 1000;
+
+export const sendMessageSchema = z.object({
+  negotiationId: z.string().uuid("Negociação inválida"),
+  body: z
+    .string()
+    .trim()
+    .min(1, "Escreva uma mensagem")
+    .max(
+      MESSAGE_MAX_LENGTH,
+      `A mensagem pode ter até ${MESSAGE_MAX_LENGTH.toLocaleString("pt-BR")} caracteres`,
+    ),
+});

@@ -39,6 +39,13 @@ export const NEGOTIATION_EVENT: Record<
   COMPLETED: "Transferência concluída",
 };
 
+export const SUPPLY_ORDER_STATUS: LabelMap<Database["public"]["Enums"]["supply_order_status"]> = {
+  PENDING: { label: "Pendente", tone: "warning" },
+  CONFIRMED: { label: "Confirmado", tone: "success" },
+  REJECTED: { label: "Recusado", tone: "error" },
+  CANCELLED: { label: "Cancelado", tone: "neutral" },
+};
+
 export const SALE_STATUS: Record<Database["public"]["Enums"]["sale_status"], string> = {
   CONFIRMED: "Confirmada",
   CANCELLED: "Cancelada",
