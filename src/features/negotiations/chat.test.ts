@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { dayLabel, isStatusEvent, mergeEvents, toChatEvent, type ChatEvent } from "./chat";
+import {
+  dayLabel,
+  isStatusEvent,
+  mergeEvents,
+  timeLabel,
+  toChatEvent,
+  type ChatEvent,
+} from "./chat";
 
 const ev = (id: string, createdAt: string, over: Partial<ChatEvent> = {}): ChatEvent => ({
   id,
@@ -28,12 +35,17 @@ describe("mergeEvents", () => {
     expect(merged.map((e) => e.id)).toEqual(["realtime", "rest"]);
   });
 
+  it("keeps an optimistic event pending until the server version replaces it", () => {
+    const pending = ev("tmp", "2026-09-25T10:00:00Z", { pending: true });
+    expect(mergeEvents([ev("a", "2026-09-25T09:00:00Z")], [pending])[1]!.pending).toBe(true);
+  });
+
   it("clears the pending flag once the server version arrives", () => {
     const merged = mergeEvents(
       [ev("a", "2026-09-25T10:00:00Z", { pending: true })],
       [ev("a", "2026-09-25T10:00:00Z")],
     );
-    expect(merged[0]!.pending).toBe(false);
+    expect(merged[0]!.pending).toBeFalsy();
   });
 });
 
@@ -47,12 +59,20 @@ describe("isStatusEvent", () => {
   });
 });
 
-describe("dayLabel", () => {
-  const now = new Date(2026, 8, 25, 15, 0);
+describe("dayLabel / timeLabel (São Paulo time on server and browser)", () => {
+  const now = new Date("2026-09-25T18:00:00Z"); // 15:00 in São Paulo
+
   it("names today and yesterday, dates otherwise", () => {
-    expect(dayLabel(new Date(2026, 8, 25, 8, 0).toISOString(), now)).toBe("Hoje");
-    expect(dayLabel(new Date(2026, 8, 24, 23, 0).toISOString(), now)).toBe("Ontem");
-    expect(dayLabel(new Date(2026, 8, 12, 9, 0).toISOString(), now)).toBe("12/09/2026");
+    expect(dayLabel("2026-09-25T11:00:00Z", now)).toBe("Hoje");
+    expect(dayLabel("2026-09-24T12:00:00Z", now)).toBe("Ontem");
+    expect(dayLabel("2026-09-12T12:00:00Z", now)).toBe("12/09/2026");
+  });
+
+  it("uses the São Paulo calendar day, not UTC", () => {
+    // 01:30 UTC on the 26th is still 22:30 on the 25th in São Paulo
+    expect(dayLabel("2026-09-26T01:30:00Z", new Date("2026-09-26T02:00:00Z"))).toBe("Hoje");
+    expect(dayLabel("2026-09-26T01:30:00Z", new Date("2026-09-26T12:00:00Z"))).toBe("Ontem");
+    expect(timeLabel("2026-09-26T01:30:00Z")).toBe("22:30");
   });
 });
 

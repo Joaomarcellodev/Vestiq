@@ -44,23 +44,46 @@ export function isStatusEvent(type: NegotiationEventType): boolean {
  */
 export function mergeEvents(current: ChatEvent[], incoming: ChatEvent[]): ChatEvent[] {
   const byId = new Map(current.map((e) => [e.id, e]));
-  for (const e of incoming) byId.set(e.id, { ...e, pending: false });
+  // the incoming copy wins — a server event replaces an optimistic one with the same id
+  for (const e of incoming) byId.set(e.id, e);
   // Compare instants, not strings: REST and Realtime may format timestamps differently.
   return [...byId.values()].sort(
     (a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt) || a.id.localeCompare(b.id),
   );
 }
 
+/**
+ * The chat renders on the server (UTC on Netlify) and in the browser; a fixed
+ * zone keeps both outputs identical, avoiding hydration mismatches. Vestiq is
+ * Brazil-only (BRL — ADR-0008).
+ */
+export const CHAT_TIME_ZONE = "America/Sao_Paulo";
+
+const ymd = new Intl.DateTimeFormat("en-CA", {
+  timeZone: CHAT_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+function dayNumber(date: Date): number {
+  const [y, m, d] = ymd.format(date).split("-").map(Number);
+  return Date.UTC(y!, m! - 1, d!) / 86_400_000;
+}
+
 /** "Hoje", "Ontem" or "12/09/2026" — day separators in the chat. */
 export function dayLabel(iso: string, now = new Date()): string {
-  const d = new Date(iso);
-  const startOf = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
-  const diff = Math.round((startOf(now) - startOf(d)) / 86_400_000);
+  const date = new Date(iso);
+  const diff = dayNumber(now) - dayNumber(date);
   if (diff === 0) return "Hoje";
   if (diff === 1) return "Ontem";
-  return d.toLocaleDateString("pt-BR");
+  return date.toLocaleDateString("pt-BR", { timeZone: CHAT_TIME_ZONE });
 }
 
 export function timeLabel(iso: string): string {
-  return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: CHAT_TIME_ZONE,
+  });
 }
