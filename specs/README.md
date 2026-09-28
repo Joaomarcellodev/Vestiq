@@ -19,7 +19,8 @@ specs/
 ├── negotiations/
 ├── dashboard/
 ├── suppliers/
-└── supply-orders/
+├── supply-orders/
+└── notifications/
 ```
 
 Cada feature: `SPEC.md` (o quê e por quê), `ACCEPTANCE.md` (critérios em
@@ -55,6 +56,7 @@ RF-NEG-007 → US-NEG-04 → AC-NEG-07-01 / AC-NEG-07-02 → TC-NEG-07-01 / TC-N
 | [dashboard](./dashboard/) | RF-DASH-001; RF-FACTORY-DASH-001 | 3→6 | ⬜ |
 | [suppliers](./suppliers/) | RF-SUP-001..004 (pós-MVP) | — | ✅ implementada |
 | [supply-orders](./supply-orders/) | RF-ORD-001..006 (pós-MVP) | — | ✅ implementada |
+| [notifications](./notifications/) | RF-NOTIF-001..003 | 3 | ✅ implementada |
 
 Cobertura de todos os RF do SDD §9–§18: ✅ mapeados. Nenhum RF do MVP sem feature.
 

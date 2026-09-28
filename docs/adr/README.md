@@ -15,3 +15,4 @@ Decisões técnicas transversais do Vestiq. Formato definido em
 | [0008](./0008-currency-brl.md) | Moeda única: Real (BRL) | Aceito |
 | [0009](./0009-nextjs-16-app-router.md) | Next.js 16 (App Router) + Server Actions | Aceito |
 | [0010](./0010-realtime-negotiation-chat.md) | Chat de negociação em tempo real (Supabase Realtime) | Aceito |
+| [0011](./0011-realtime-notifications.md) | Notificações em tempo real e alertas do navegador | Aceito |

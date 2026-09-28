@@ -276,6 +276,13 @@ Migration `0020`: `negotiation_events` e `negotiations` estão na publicação
 negociação filtrando pelo id. O Realtime aplica as mesmas policies de `select`
 (`can_access_negotiation`), então só as duas partes recebem as mudanças.
 
+## Tempo real — notificações (ADR-0011)
+
+Migration `0021`: `notifications` entra na publicação `supabase_realtime`. O sino
+assina `INSERT` filtrando por `organization_id`. A policy `notifications_select`
+(`is_org_member`) garante que só membros da organização destinatária recebam as
+linhas. Nenhuma coluna ou policy nova, e a escrita continua exclusiva dos triggers.
+
 ## Funções de leitura — Fornecedores (SPEC-011)
 
 Migration `0017`. A revendedora lê o catálogo das fábricas das suas redes sem
