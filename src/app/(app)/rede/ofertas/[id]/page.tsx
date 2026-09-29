@@ -17,28 +17,20 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
   const result = await getOffer(id).catch(() => null);
   if (!result?.offer) notFound();
   const { offer, isMine } = result;
-  const variant = offer.product_variants;
-  const images = variant?.products?.image_urls ?? [];
 
   return (
     <div className="space-y-lg">
       <BackButton fallback="/rede" label="Rede" />
       <PageHeader
-        title={variant?.products?.name ?? "Oferta"}
-        description={[
-          variant?.products?.brand,
-          [variant?.color, variant?.size].filter(Boolean).join(" / "),
-        ]
-          .filter(Boolean)
-          .join(" · ")}
+        title={offer.productName}
+        description={[offer.brand, offer.descriptor].filter(Boolean).join(" · ")}
         action={
           <Badge tone={OFFER_STATUS[offer.status].tone}>{OFFER_STATUS[offer.status].label}</Badge>
         }
       />
-      +{" "}
-      {images.length > 0 ? (
+      {offer.imageUrls.length > 0 ? (
         <div className="flex gap-3 overflow-x-auto pb-1">
-          {images.map((url) => (
+          {offer.imageUrls.map((url) => (
             <div
               key={url}
               className="h-40 w-40 shrink-0 overflow-hidden rounded-xl bg-surface-container"
@@ -63,11 +55,11 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
           Preço de transferência (B2B)
         </p>
         <p className="mt-1 font-headline-lg-mobile text-headline-lg-mobile text-primary-container">
-          {formatBRL(Number(offer.transfer_price))}
+          {formatBRL(offer.price)}
         </p>
         <p className="mt-2 font-body-md text-body-md text-on-surface-variant">
-          {offer.organizations?.name} · {offer.quantity_remaining} disponíve
-          {offer.quantity_remaining === 1 ? "l" : "is"}
+          {offer.sellerName} · {offer.remaining} disponíve
+          {offer.remaining === 1 ? "l" : "is"}
         </p>
         {offer.note && (
           <p className="mt-3 font-body-md text-body-md text-on-surface">{offer.note}</p>
@@ -83,7 +75,7 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
           </form>
         )
       ) : (
-        <ProposeForm offerId={offer.id} remaining={offer.quantity_remaining} />
+        <ProposeForm offerId={offer.id} remaining={offer.remaining} />
       )}
     </div>
   );

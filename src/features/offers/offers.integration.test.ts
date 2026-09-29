@@ -291,5 +291,15 @@ d("offers actions + queries (SPEC-008)", () => {
       .single();
     const result = await getOffer(offer!.id);
     expect(result.isMine).toBe(true);
+    expect(result.offer.productName).toBe("Vestido");
+
+    // A peer gets the same product details, without owning it.
+    setTestClient(ctx.peer.client);
+    const peer = await getOffer(offer!.id);
+    expect(peer.isMine).toBe(false);
+    expect(peer.offer).toMatchObject({ productName: "Vestido", brand: "Zara", remaining: 1 });
+
+    setTestClient(ctx.outsider.client);
+    await expect(getOffer(offer!.id)).rejects.toBeTruthy();
   });
 });
