@@ -40,7 +40,6 @@ export default async function NetworkPage() {
               key={o.id}
               className="flex flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-surface"
             >
-              +{" "}
               <div className="flex items-start justify-between gap-3">
                 <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-lg bg-surface-container text-outline">
                   {o.imageUrl ? (
