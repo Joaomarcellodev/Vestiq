@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { SupplierProductCard } from "./supplier-product-card";
 import { SupplierCard } from "./supplier-card";
-import { SupplierSearchForm } from "./supplier-search-form";
 
 const product = {
   id: "p1",
@@ -70,24 +69,5 @@ describe("SupplierCard", () => {
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/fornecedores/s1");
     expect(link).toHaveTextContent("1 produto · Rede Modah");
-  });
-});
-
-describe("SupplierSearchForm", () => {
-  it("keeps the current query and the hidden params", () => {
-    const { container } = render(
-      <SupplierSearchForm
-        query="vestido"
-        placeholder="Buscar fornecedores..."
-        hidden={{ view: "fornecedores", empty: undefined }}
-      />,
-    );
-    expect(screen.getByRole("searchbox", { name: "Buscar fornecedores..." })).toHaveValue(
-      "vestido",
-    );
-    const hidden = container.querySelectorAll("input[type=hidden]");
-    expect(hidden).toHaveLength(1);
-    expect(hidden[0]).toHaveAttribute("name", "view");
-    expect(hidden[0]).toHaveAttribute("value", "fornecedores");
   });
 });

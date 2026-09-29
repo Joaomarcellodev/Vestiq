@@ -1227,6 +1227,26 @@ export type Database = {
           product_count: number
         }[]
       }
+      list_visible_offers: {
+        Args: { p_offer_id?: string }
+        Returns: {
+          brand: string
+          color: string
+          created_at: string
+          description: string
+          id: string
+          image_urls: string[]
+          network_id: string
+          note: string
+          organization_id: string
+          product_name: string
+          quantity_remaining: number
+          seller_name: string
+          size: string
+          status: Database["public"]["Enums"]["offer_status"]
+          transfer_price: number
+        }[]
+      }
       negotiation_transition: {
         Args: { p_action: string; p_message?: string; p_negotiation_id: string }
         Returns: {

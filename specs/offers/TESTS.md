@@ -14,6 +14,8 @@
 | RF-OFFER-006     | AC-OFFER-006-02      | TC-OFFER-08 | integration           | não               |
 | RF-OFFER-007     | AC-OFFER-007-01      | TC-OFFER-09 | integration           | sim               |
 | RF-OFFER-003     | AC-OFFER-arquivada   | TC-OFFER-10 | integration           | não               |
+| RF-OFFER-004     | AC-OFFER-004-02      | TC-OFFER-11 | integration           | sim (privacidade) |
+| RF-OFFER-004     | AC-OFFER-busca       | TC-OFFER-12 | unit + e2e            | não               |
 
 ## Casos de teste
 
@@ -56,6 +58,14 @@ integration · **crítica** · concluir 3 de 4 → remaining 1, `PARTIALLY_NEGOT
 ### TC-OFFER-10 — Variação arquivada cancela oferta
 
 integration · arquivar variação → oferta `CANCELLED`.
+
+### TC-OFFER-11 — Projeção pública da oferta
+
+integration · **crítica (SDD §8)** · `list_visible_offers` como peer devolve nome, marca, descrição, cor/tamanho e fotos, sem `cost_price`, `retail_price`, `stock_on_hand` nem `sku`; outsider → nada; oferta `CANCELLED` some para peers e continua para a dona. `listNetworkOffers`/`getOffer` como peer trazem o produto.
+
+### TC-OFFER-12 — Busca do feed
+
+unit · `matchesOfferQuery`: todas as palavras, sem caixa/acentos, em produto, marca, cor/tamanho ou revendedora · unit · `OfferCard` mostra a foto ou o ícone · e2e · peer busca "chanel PRETO" → acha a bolsa; busca sem resultado → estado vazio.
 
 ## Cobertura de RF
 

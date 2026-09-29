@@ -8,6 +8,7 @@ import { EmptyState } from "./empty-state";
 import { StockBadge } from "./stock-badge";
 import { BackButton } from "./back-button";
 import { StatCard } from "./stat-card";
+import { SearchForm } from "./search-form";
 
 describe("FilterTabs", () => {
   it("marks the current tab and builds hrefs preserving extra params", () => {
@@ -96,5 +97,24 @@ describe("StatCard", () => {
   it("renders a numeric value through CountUp (final value)", async () => {
     render(<StatCard label="Vendas" value={1234} format="int" />);
     expect(await screen.findByText("1234", {}, { timeout: 2000 })).toBeInTheDocument();
+  });
+});
+
+describe("SearchForm", () => {
+  it("keeps the current query and the hidden params", () => {
+    const { container } = render(
+      <SearchForm
+        query="vestido"
+        placeholder="Buscar fornecedores..."
+        hidden={{ view: "fornecedores", empty: undefined }}
+      />,
+    );
+    expect(screen.getByRole("searchbox", { name: "Buscar fornecedores..." })).toHaveValue(
+      "vestido",
+    );
+    const hidden = container.querySelectorAll("input[type=hidden]");
+    expect(hidden).toHaveLength(1);
+    expect(hidden[0]).toHaveAttribute("name", "view");
+    expect(hidden[0]).toHaveAttribute("value", "fornecedores");
   });
 });

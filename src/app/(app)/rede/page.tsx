@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { listNetworkOffers } from "@/features/offers/queries";
+import { cleanOfferQuery } from "@/features/offers/search";
+import { OfferCard } from "@/features/offers/components/offer-card";
 import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
-import { Badge, Button, Icon } from "@/components/atoms";
-import { formatBRL } from "@/lib/utils/currency";
+import { SearchForm } from "@/components/molecules/search-form";
+import { Button, Icon } from "@/components/atoms";
 
 export const metadata: Metadata = { title: "Rede" };
 
-export default async function NetworkPage() {
-  const offers = await listNetworkOffers();
+export default async function NetworkPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const query = cleanOfferQuery((await searchParams).q);
+  const offers = await listNetworkOffers(query);
 
   return (
     <div className="space-y-lg">
@@ -27,58 +33,37 @@ export default async function NetworkPage() {
         }
       />
 
+      <SearchForm query={query} placeholder="Buscar peças, marcas, cores..." />
+
       {offers.length === 0 ? (
-        <EmptyState
-          icon="hub"
-          title="Nenhuma oferta ativa"
-          description="Publique uma peça parada ou aguarde ofertas de parceiros."
-        />
+        query ? (
+          <EmptyState
+            icon="search"
+            title="Nenhuma oferta encontrada"
+            description="Tente outras palavras, como o nome da peça, a marca, a cor ou a revendedora."
+          />
+        ) : (
+          <EmptyState
+            icon="hub"
+            title="Nenhuma oferta ativa"
+            description="Publique uma peça parada ou aguarde ofertas de parceiros."
+          />
+        )
       ) : (
-        <ul className="grid gap-md sm:grid-cols-2">
-          {offers.map((o) => (
-            <li
-              key={o.id}
-              className="flex flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-surface"
-            >
-              +{" "}
-              <div className="flex items-start justify-between gap-3">
-                <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-lg bg-surface-container text-outline">
-                  {o.imageUrl ? (
-                    <Image
-                      src={o.imageUrl}
-                      alt=""
-                      width={64}
-                      height={64}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <Icon name="inventory_2" size={22} />
-                  )}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="font-title-lg text-title-lg text-on-surface">{o.productName}</p>
-                  <p className="font-body-md text-body-md text-on-surface-variant">
-                    {[o.brand, o.descriptor].filter(Boolean).join(" · ")}
-                  </p>
-                </div>
-                {o.isMine ? <Badge tone="primary">Sua oferta</Badge> : <Badge>Oferta</Badge>}
-              </div>
-              <p className="mt-2 font-body-md text-body-md text-on-surface-variant">
-                {o.sellerName} · {o.remaining} disponíve{o.remaining === 1 ? "l" : "is"}
-              </p>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="font-title-lg text-title-lg text-primary-container">
-                  {formatBRL(o.price)}
-                </span>
-                <Link href={`/rede/ofertas/${o.id}`}>
-                  <Button variant="secondary" size="sm">
-                    Ver detalhes
-                  </Button>
-                </Link>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <>
+          {query && (
+            <p className="font-body-md text-body-md text-on-surface-variant" aria-live="polite">
+              {offers.length} oferta{offers.length === 1 ? "" : "s"} para “{query}”
+            </p>
+          )}
+          <ul className="grid gap-md sm:grid-cols-2">
+            {offers.map((o) => (
+              <li key={o.id}>
+                <OfferCard offer={o} />
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );

@@ -2,47 +2,81 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrganization, requireActiveOrganization } from "@/features/organizations/queries";
+import type { Database } from "@/types/database";
+import { matchesOfferQuery } from "./search";
 
-export async function listNetworkOffers() {
+export type NetworkOffer = {
+  id: string;
+  remaining: number;
+  price: number;
+  note: string | null;
+  isMine: boolean;
+  sellerName: string;
+  productName: string;
+  brand: string | null;
+  imageUrl: string | null;
+  descriptor: string;
+};
+
+export type OfferDetail = {
+  id: string;
+  status: Database["public"]["Enums"]["offer_status"];
+  remaining: number;
+  price: number;
+  note: string | null;
+  sellerName: string;
+  productName: string;
+  brand: string | null;
+  descriptor: string;
+  imageUrls: string[];
+};
+
+/**
+ * Active offers of the reseller's networks, optionally narrowed by a search query.
+ * Reads the public projection (migration 0022) so peers get the product too.
+ */
+export async function listNetworkOffers(query?: string): Promise<NetworkOffer[]> {
   const org = await requireActiveOrganization();
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("offers")
-    .select(
-      "id, quantity_remaining, transfer_price, note, status, organization_id, organizations(name), product_variants(size, color, products(name, brand, image_urls))",
-    )
-    .in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"])
-    .order("created_at", { ascending: false });
+    .rpc("list_visible_offers")
+    .in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"]);
   if (error) throw error;
 
-  return (data ?? []).map((o) => ({
+  const offers = (data ?? []).map((o) => ({
     id: o.id,
     remaining: o.quantity_remaining,
     price: Number(o.transfer_price),
-    note: o.note,
+    note: o.note ?? null,
     isMine: o.organization_id === org.id,
-    sellerName: o.organizations?.name ?? "—",
-    productName: o.product_variants?.products?.name ?? "—",
-    brand: o.product_variants?.products?.brand ?? null,
-    imageUrl: o.product_variants?.products?.image_urls?.[0] ?? null,
-    descriptor:
-      [o.product_variants?.color, o.product_variants?.size].filter(Boolean).join(" / ") || "Único",
+    sellerName: o.seller_name,
+    productName: o.product_name,
+    brand: o.brand ?? null,
+    imageUrl: o.image_urls?.[0] ?? null,
+    descriptor: [o.color, o.size].filter(Boolean).join(" / ") || "Único",
   }));
+  return offers.filter((o) => matchesOfferQuery(o, query));
 }
 
 export async function getOffer(id: string) {
   await requireActiveOrganization();
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("offers")
-    .select(
-      "*, organizations(name), product_variants(size, color, sku, products(name, brand, description, image_urls))",
-    )
-    .eq("id", id)
-    .single();
+  const { data, error } = await supabase.rpc("list_visible_offers", { p_offer_id: id }).single();
   if (error) throw error;
   const active = await getActiveOrganization();
-  return { offer: data, isMine: data.organization_id === active?.id };
+  const offer: OfferDetail = {
+    id: data.id,
+    status: data.status,
+    remaining: data.quantity_remaining,
+    price: Number(data.transfer_price),
+    note: data.note ?? null,
+    sellerName: data.seller_name,
+    productName: data.product_name,
+    brand: data.brand ?? null,
+    descriptor: [data.color, data.size].filter(Boolean).join(" / "),
+    imageUrls: data.image_urls ?? [],
+  };
+  return { offer, isMine: data.organization_id === active?.id };
 }
 
 /** Reseller's own variants + the networks they belong to, for the publish form. */

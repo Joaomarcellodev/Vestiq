@@ -135,18 +135,104 @@ d("offers actions + queries (SPEC-008)", () => {
     const mineOffer = mine.find((o) => o.isMine && o.price === 250);
     expect(mineOffer?.productName).toBe("Vestido");
 
-    // Peer sees the offer row (seller + price + remaining). NOTE: product name is
-    // "—" for peers today because `products`/`product_variants` RLS is org-only
-    // — a real limitation of the network marketplace worth revisiting.
+    // Peer sees the offer with its product, through the public projection (0022).
     setTestClient(ctx.peer.client);
     const peerView = await listNetworkOffers();
     const peerOffer = peerView.find((o) => !o.isMine && o.price === 250);
-    expect(peerOffer).toBeTruthy();
-    expect(peerOffer?.sellerName).toBe("Vendedora O");
-    expect(peerOffer?.remaining).toBe(2);
+    expect(peerOffer).toMatchObject({
+      sellerName: "Vendedora O",
+      remaining: 2,
+      productName: "Vestido",
+      brand: "Zara",
+      descriptor: "M",
+    });
+    expect((await listNetworkOffers("zara")).some((o) => o.id === peerOffer!.id)).toBe(true);
+    expect((await listNetworkOffers("gucci")).some((o) => o.id === peerOffer!.id)).toBe(false);
 
     setTestClient(ctx.outsider.client);
     expect((await listNetworkOffers()).some((o) => o.price === 250)).toBe(false);
+  });
+
+  it("list_visible_offers: peers get the product's public fields only; outsiders get nothing", async () => {
+    await admin()
+      .from("products")
+      .update({ description: "Linho", image_urls: ["https://x.supabase.co/a.jpg"] })
+      .eq("name", "Vestido")
+      .eq("organization_id", ctx.sellerOrg.id);
+    await expectRedirect(
+      () =>
+        publishOffer(
+          {},
+          pForm({
+            variantId: ctx.variant.id,
+            networkId: ctx.network.id,
+            quantity: 2,
+            transferPrice: 260,
+          }),
+        ),
+      /offer-published/,
+    );
+
+    const { data: peerRows, error } = await ctx.peer.client.rpc("list_visible_offers");
+    expect(error).toBeNull();
+    const row = peerRows?.find((r) => Number(r.transfer_price) === 260);
+    expect(row).toMatchObject({
+      seller_name: "Vendedora O",
+      product_name: "Vestido",
+      brand: "Zara",
+      description: "Linho",
+      size: "M",
+      image_urls: ["https://x.supabase.co/a.jpg"],
+      quantity_remaining: 2,
+    });
+    // SDD §8 — nothing private crosses the network boundary.
+    for (const key of ["cost_price", "retail_price", "stock_on_hand", "sku"]) {
+      expect(row).not.toHaveProperty(key);
+    }
+
+    const { data: one } = await ctx.peer.client.rpc("list_visible_offers", {
+      p_offer_id: row!.id,
+    });
+    expect(one).toHaveLength(1);
+
+    const { data: outsiderRows } = await ctx.outsider.client.rpc("list_visible_offers");
+    expect(outsiderRows?.some((r) => r.id === row!.id)).toBe(false);
+    const { data: outsiderOne } = await ctx.outsider.client.rpc("list_visible_offers", {
+      p_offer_id: row!.id,
+    });
+    expect(outsiderOne).toEqual([]);
+  });
+
+  it("list_visible_offers: a cancelled offer disappears for peers but not for its owner", async () => {
+    await expectRedirect(
+      () =>
+        publishOffer(
+          {},
+          pForm({
+            variantId: ctx.variant.id,
+            networkId: ctx.network.id,
+            quantity: 1,
+            transferPrice: 270,
+          }),
+        ),
+      /offer-published/,
+    );
+    const { data: offer } = await admin()
+      .from("offers")
+      .select("id")
+      .eq("transfer_price", 270)
+      .eq("organization_id", ctx.sellerOrg.id)
+      .single();
+    await admin().from("offers").update({ status: "CANCELLED" }).eq("id", offer!.id);
+
+    const { data: peerOne } = await ctx.peer.client.rpc("list_visible_offers", {
+      p_offer_id: offer!.id,
+    });
+    expect(peerOne).toEqual([]);
+    const { data: ownerOne } = await ctx.seller.client.rpc("list_visible_offers", {
+      p_offer_id: offer!.id,
+    });
+    expect(ownerOne?.[0]?.status).toBe("CANCELLED");
   });
 
   it("cancelOffer: only the owner can cancel; status guarded", async () => {
@@ -205,5 +291,15 @@ d("offers actions + queries (SPEC-008)", () => {
       .single();
     const result = await getOffer(offer!.id);
     expect(result.isMine).toBe(true);
+    expect(result.offer.productName).toBe("Vestido");
+
+    // A peer gets the same product details, without owning it.
+    setTestClient(ctx.peer.client);
+    const peer = await getOffer(offer!.id);
+    expect(peer.isMine).toBe(false);
+    expect(peer.offer).toMatchObject({ productName: "Vestido", brand: "Zara", remaining: 1 });
+
+    setTestClient(ctx.outsider.client);
+    await expect(getOffer(offer!.id)).rejects.toBeTruthy();
   });
 });
