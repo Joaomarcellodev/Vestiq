@@ -3,6 +3,8 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrganization, requireActiveOrganization } from "@/features/organizations/queries";
 
+export type NetworkOffer = Awaited<ReturnType<typeof listNetworkOffers>>[number];
+
 export async function listNetworkOffers() {
   const org = await requireActiveOrganization();
   const supabase = await createClient();
