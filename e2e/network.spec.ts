@@ -80,6 +80,22 @@ test("offer → negotiation → accept → complete transfer", async ({ browser 
   await buyerCtx.close();
 });
 
+test("searching the offer feed narrows it and says when nothing matches", async ({ page }) => {
+  await login(page, "revenda2@vestiq.dev");
+  await page.goto("/rede");
+
+  const search = page.getByRole("searchbox", { name: /buscar peças/i });
+  await search.fill("chanel PRETO");
+  await page.getByRole("button", { name: "Buscar" }).click();
+  await expect(page).toHaveURL(/\/rede\?q=chanel\+PRETO/);
+  await expect(page.getByText("Bolsa Chanel Classic Flap").first()).toBeVisible();
+  await expect(page.getByText(/ofertas? para “chanel PRETO”/)).toBeVisible();
+
+  await search.fill("nenhuma-peca-assim");
+  await page.getByRole("button", { name: "Buscar" }).click();
+  await expect(page.getByText("Nenhuma oferta encontrada")).toBeVisible();
+});
+
 test("factory admin toggles a member with the on/off switch", async ({ page }) => {
   await login(page, "fabrica@vestiq.dev");
   await page.goto("/rede-fabrica");
