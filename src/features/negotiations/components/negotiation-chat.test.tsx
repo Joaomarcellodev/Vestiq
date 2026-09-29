@@ -91,14 +91,21 @@ beforeEach(() => {
 
 describe("NegotiationChat", () => {
   it("shows the counterparty's and my messages, status events and day separators", () => {
-    renderChat();
-    const log = screen.getByRole("log", { name: "Mensagens" });
-    expect(within(log).getByText("Proposta enviada · Clara Boutique · 10:00")).toBeInTheDocument();
-    expect(within(log).getByText("Tenho interesse").className).toContain("rounded-bl-sm");
-    expect(within(log).getByText("Consigo sexta").className).toContain("rounded-br-sm");
-    expect(
-      within(log).getAllByText("Hoje").length + within(log).queryAllByText(/\d\d\/\d\d/).length,
-    ).toBe(1);
+    // Same day as the fixtures, so the separator reads "Hoje" whatever day the suite runs.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(at(30));
+    try {
+      renderChat();
+      const log = screen.getByRole("log", { name: "Mensagens" });
+      expect(
+        within(log).getByText("Proposta enviada · Clara Boutique · 10:00"),
+      ).toBeInTheDocument();
+      expect(within(log).getByText("Tenho interesse").className).toContain("rounded-bl-sm");
+      expect(within(log).getByText("Consigo sexta").className).toContain("rounded-br-sm");
+      expect(within(log).getAllByText("Hoje")).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("subscribes to the negotiation, goes live and refetches to fill gaps", async () => {

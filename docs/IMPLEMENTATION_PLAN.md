@@ -77,7 +77,8 @@ Cada feature: `SPEC → ACCEPTANCE → TESTS` (em `specs/<feature>/`) → migrat
 | --- | --- | --- | --- | --- | --- |
 | 12 | **suppliers** — busca de fornecedores e produtos (SPEC-011) | RF-SUP-001..004 | `/fornecedores`, fornecedor, produto do fornecedor | network, catalog (RF-PROD-007) | ✅ |
 | 13 | **supply-orders** — pedido de abastecimento ao fornecedor (SPEC-012) | RF-ORD-001..006 | pedido (grade cor × tamanho), `/pedidos`, detalhe | suppliers | ✅ pedido + resposta da fábrica; despacho/recebimento/entrada no estoque pendentes |
-| 14 | **negotiations** — chat em tempo real (ADR-0010) | RF-NEG-010..011 | chat de negociação | negotiations | ✅ Supabase Realtime + envio otimista; sino de notificações ainda por polling |
+| 14 | **negotiations** — chat em tempo real (ADR-0010) | RF-NEG-010..011 | chat de negociação | negotiations | ✅ Supabase Realtime + envio otimista |
+| 15 | **notifications** — sino em tempo real + alertas do navegador (SPEC-013, ADR-0011) | RF-NOTIF-001..003 | sino de notificações | negotiations, offers | ✅ Realtime + alerta com aba em segundo plano + contador no título; Web Push (navegador fechado) pendente |
 
 ## Fase 4 — Estabilização (Sprint 7)
 
@@ -102,3 +103,4 @@ Cada feature: `SPEC → ACCEPTANCE → TESTS` (em `specs/<feature>/`) → migrat
 | Branching | `develop` primeiro, depois `main` | CONTRIBUTING |
 | Moeda | Real (BRL), sem multi-moeda | 0008 |
 | Chat de negociação | Tempo real via Supabase Realtime (substitui o "sem realtime" da 0007) | 0010 |
+| Notificações | Sino via Supabase Realtime + Notification API com opt-in; Web Push depois | 0011 |

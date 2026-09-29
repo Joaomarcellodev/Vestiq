@@ -36,6 +36,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         userName={userName}
         notifications={notifications}
         unreadCount={unreadCount}
+        organizationId={org?.id}
       >
         {children}
       </AppShell>
