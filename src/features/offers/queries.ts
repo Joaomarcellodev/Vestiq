@@ -2,10 +2,12 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrganization, requireActiveOrganization } from "@/features/organizations/queries";
+import { matchesOfferQuery } from "./search";
 
 export type NetworkOffer = Awaited<ReturnType<typeof listNetworkOffers>>[number];
 
-export async function listNetworkOffers() {
+/** Active offers of the reseller's networks, optionally narrowed by a search query. */
+export async function listNetworkOffers(query?: string) {
   const org = await requireActiveOrganization();
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -17,7 +19,7 @@ export async function listNetworkOffers() {
     .order("created_at", { ascending: false });
   if (error) throw error;
 
-  return (data ?? []).map((o) => ({
+  const offers = (data ?? []).map((o) => ({
     id: o.id,
     remaining: o.quantity_remaining,
     price: Number(o.transfer_price),
@@ -30,6 +32,7 @@ export async function listNetworkOffers() {
     descriptor:
       [o.product_variants?.color, o.product_variants?.size].filter(Boolean).join(" / ") || "Único",
   }));
+  return offers.filter((o) => matchesOfferQuery(o, query));
 }
 
 export async function getOffer(id: string) {
