@@ -135,15 +135,19 @@ d("offers actions + queries (SPEC-008)", () => {
     const mineOffer = mine.find((o) => o.isMine && o.price === 250);
     expect(mineOffer?.productName).toBe("Vestido");
 
-    // Peer sees the offer row (seller + price + remaining). NOTE: product name is
-    // "—" for peers today because `products`/`product_variants` RLS is org-only
-    // — a real limitation of the network marketplace worth revisiting.
+    // Peer sees the offer with its product, through the public projection (0022).
     setTestClient(ctx.peer.client);
     const peerView = await listNetworkOffers();
     const peerOffer = peerView.find((o) => !o.isMine && o.price === 250);
-    expect(peerOffer).toBeTruthy();
-    expect(peerOffer?.sellerName).toBe("Vendedora O");
-    expect(peerOffer?.remaining).toBe(2);
+    expect(peerOffer).toMatchObject({
+      sellerName: "Vendedora O",
+      remaining: 2,
+      productName: "Vestido",
+      brand: "Zara",
+      descriptor: "M",
+    });
+    expect((await listNetworkOffers("zara")).some((o) => o.id === peerOffer!.id)).toBe(true);
+    expect((await listNetworkOffers("gucci")).some((o) => o.id === peerOffer!.id)).toBe(false);
 
     setTestClient(ctx.outsider.client);
     expect((await listNetworkOffers()).some((o) => o.price === 250)).toBe(false);
