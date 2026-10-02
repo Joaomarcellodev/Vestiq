@@ -186,6 +186,48 @@ d("catalog actions + queries (SPEC-004)", () => {
     expect(data?.product_variants[0]?.archived_at).toBeNull();
   });
 
+  it("archiveProduct: archives every variant in the same instant as the product", async () => {
+    const product = await makeProduct(orgId);
+    await makeVariant(product.id, { size: "P" });
+    await makeVariant(product.id, { size: "M" });
+
+    await expectRedirect(
+      () => archiveProduct(formData({ id: product.id })),
+      /toast=product-archived/,
+    );
+    const { data } = await admin()
+      .from("products")
+      .select("archived_at, product_variants(archived_at)")
+      .eq("id", product.id)
+      .single();
+    expect(data?.product_variants).toHaveLength(2);
+    for (const v of data?.product_variants ?? []) {
+      expect(v.archived_at).toBe(data?.archived_at);
+    }
+  });
+
+  it("archiveProduct: refuses another tenant's product and changes nothing", async () => {
+    const other = await makeUser();
+    const otherOrg = await makeOrg(other.userId, "RESELLER");
+    const foreign = await makeProduct(otherOrg.id);
+    await makeVariant(foreign.id);
+
+    await expect(archiveProduct(formData({ id: foreign.id }))).rejects.toThrow(/not authorized/);
+    const { data } = await admin()
+      .from("products")
+      .select("archived_at, product_variants(archived_at)")
+      .eq("id", foreign.id)
+      .single();
+    expect(data?.archived_at).toBeNull();
+    expect(data?.product_variants[0]?.archived_at).toBeNull();
+  });
+
+  it("unarchiveProduct: surfaces an unknown product instead of reporting success", async () => {
+    await expect(
+      unarchiveProduct(formData({ id: "00000000-0000-0000-0000-000000000000" })),
+    ).rejects.toThrow(/Produto não encontrado/);
+  });
+
   it("createCategory: ok + duplicate name", async () => {
     const ok = await createCategory({}, formData({ name: "Bolsas" }));
     expect(ok.ok).toBe(true);
