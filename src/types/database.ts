@@ -1163,6 +1163,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      create_product: {
+        Args: { p_organization_id: string; p_product: Json; p_variants: Json }
+        Returns: string
+      }
       get_supplier_product: {
         Args: { p_product_id: string }
         Returns: {
