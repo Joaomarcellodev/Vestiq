@@ -1446,6 +1446,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      set_product_archived: {
+        Args: { p_archived: boolean; p_product_id: string }
+        Returns: string
+      }
       shares_network: {
         Args: { org_a: string; org_b: string }
         Returns: boolean
