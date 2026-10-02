@@ -256,13 +256,24 @@ export async function updateProduct(_prev: ActionState, formData: FormData): Pro
   redirect(`/produtos/${d.id}?toast=product-updated`);
 }
 
+/**
+ * BR-CAT-07/08: the product and all of its variants flip together in one
+ * transaction (`set_product_archived`), so a variant can never stay sellable
+ * under an archived product.
+ */
+async function setProductArchived(id: string, archived: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_product_archived", {
+    p_product_id: id,
+    p_archived: archived,
+  });
+  if (error) throw new Error(error.message);
+}
+
 export async function archiveProduct(formData: FormData): Promise<void> {
   await requireActiveOrganization();
   const id = formData.get("id") as string;
-  const supabase = await createClient();
-  const now = new Date().toISOString();
-  await supabase.from("products").update({ archived_at: now }).eq("id", id);
-  await supabase.from("product_variants").update({ archived_at: now }).eq("product_id", id);
+  await setProductArchived(id, true);
   revalidatePath("/produtos");
   redirect("/produtos?toast=product-archived");
 }
@@ -270,9 +281,7 @@ export async function archiveProduct(formData: FormData): Promise<void> {
 export async function unarchiveProduct(formData: FormData): Promise<void> {
   await requireActiveOrganization();
   const id = formData.get("id") as string;
-  const supabase = await createClient();
-  await supabase.from("products").update({ archived_at: null }).eq("id", id);
-  await supabase.from("product_variants").update({ archived_at: null }).eq("product_id", id);
+  await setProductArchived(id, false);
   revalidatePath("/produtos");
   revalidatePath(`/produtos/${id}`);
   redirect(`/produtos/${id}?toast=product-unarchived`);
