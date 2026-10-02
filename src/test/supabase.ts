@@ -1,4 +1,9 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import {
+  createClient,
+  isAuthApiError,
+  isAuthRetryableFetchError,
+  type SupabaseClient,
+} from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 
 /**
@@ -44,14 +49,32 @@ export function uniqueEmail(prefix = "user"): string {
   return `${prefix}-${Date.now()}-${seq}@vestiq.test`;
 }
 
+const AUTH_ATTEMPTS = 3;
+
+/**
+ * Retry an auth call on transient GoTrue failures (network errors and 5xx such
+ * as "Database error creating new user" under parallel test load). Vitest's
+ * `retry` does not cover `beforeAll`, so one such blip would fail a whole suite.
+ */
+export async function withAuthRetry<T extends { error: unknown }>(
+  call: () => Promise<T>,
+): Promise<T> {
+  for (let attempt = 1; ; attempt += 1) {
+    const result = await call();
+    const { error } = result;
+    const transient =
+      isAuthRetryableFetchError(error) || (isAuthApiError(error) && error.status >= 500);
+    if (!transient || attempt === AUTH_ATTEMPTS) return result;
+    await new Promise((resolve) => setTimeout(resolve, 250 * attempt));
+  }
+}
+
 /** Create a confirmed auth user and return an authenticated client + ids. */
 export async function makeUser(email = uniqueEmail(), password = "test-pass-1234") {
   const a = admin();
-  const { data, error } = await a.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  });
+  const { data, error } = await withAuthRetry(() =>
+    a.auth.admin.createUser({ email, password, email_confirm: true }),
+  );
   if (error || !data.user) throw error ?? new Error("createUser failed");
 
   const client = createClient<Database>(SUPABASE_URL, PUBLISHABLE_KEY, {
@@ -61,7 +84,7 @@ export async function makeUser(email = uniqueEmail(), password = "test-pass-1234
       storageKey: `vestiq-test-${Math.random().toString(36).slice(2)}`,
     },
   });
-  const signIn = await client.auth.signInWithPassword({ email, password });
+  const signIn = await withAuthRetry(() => client.auth.signInWithPassword({ email, password }));
   if (signIn.error) throw signIn.error;
 
   return { userId: data.user.id, email, client, admin: a };
