@@ -114,6 +114,8 @@ Ver [`TESTS.md`](./TESTS.md).
 
 - [ ] Migration `offers` + policies (dono + peer da rede) + enum de status
 - [ ] Actions: `publishOffer`, `cancelOffer`; recalculo de `quantity_remaining`/`status`
-- [ ] `queries`: `listNetworkOffers` (filtros), `getOfferForViewer` (projeção pública)
+- [x] `queries`: `listNetworkOffers` com busca por texto e `getOffer` sobre a projeção
+      pública `list_visible_offers` (migration 0022, VES-23)
+- [ ] Filtros do feed (marca, categoria, tamanho, preço)
 - [ ] Telas: feed da rede, detalhe da oferta, publicar oferta (a partir do produto)
 - [ ] Testes: limite de quantidade, RLS entre redes, projeção sem dados privados, transições de status

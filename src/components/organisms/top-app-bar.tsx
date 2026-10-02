@@ -8,6 +8,7 @@ export interface TopAppBarProps {
   userName?: string;
   notifications?: AppNotification[];
   unreadCount?: number;
+  organizationId?: string;
 }
 
 /**
@@ -19,6 +20,7 @@ export function TopAppBar({
   userName,
   notifications = [],
   unreadCount = 0,
+  organizationId,
 }: TopAppBarProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-outline-variant bg-surface/80 backdrop-blur">
@@ -29,7 +31,11 @@ export function TopAppBar({
         <div className="hidden lg:block" />
         <div className="flex items-center gap-1">
           <ThemeToggle />
-          <NotificationBell initialNotifications={notifications} initialUnread={unreadCount} />
+          <NotificationBell
+            initialNotifications={notifications}
+            initialUnread={unreadCount}
+            organizationId={organizationId}
+          />
           {/* Profile affordance — mobile only; on desktop the sidebar owns it. */}
           <Link
             href="/perfil"

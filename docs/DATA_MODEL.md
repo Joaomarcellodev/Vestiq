@@ -276,6 +276,25 @@ Migration `0020`: `negotiation_events` e `negotiations` estão na publicação
 negociação filtrando pelo id. O Realtime aplica as mesmas policies de `select`
 (`can_access_negotiation`), então só as duas partes recebem as mudanças.
 
+## Tempo real — notificações (ADR-0011)
+
+Migration `0021`: `notifications` entra na publicação `supabase_realtime`. O sino
+assina `INSERT` filtrando por `organization_id`. A policy `notifications_select`
+(`is_org_member`) garante que só membros da organização destinatária recebam as
+linhas. Nenhuma coluna ou policy nova, e a escrita continua exclusiva dos triggers.
+
+## Projeção pública das ofertas (SPEC-008)
+
+Migration `0022`. A policy `offers_select` libera a oferta para as revendedoras
+da mesma rede, mas `products`/`product_variants` continuam visíveis só para a
+dona. Por isso, sem esta função, quem via a oferta de outra revendedora ficava
+sem o nome, a marca e a foto da peça. `list_visible_offers(p_offer_id?)`
+(`security definer`, só `authenticated`) aplica a mesma regra da policy e devolve
+apenas os campos públicos: vendedora, status, quantidade restante, preço de
+transferência, observação, nome, marca, descrição, cor, tamanho e fotos. Nunca
+`cost_price`, `retail_price`, `stock_on_hand` nem `sku` (SDD §8). O feed `/rede`
+e o detalhe da oferta leem por ela.
+
 ## Funções de leitura — Fornecedores (SPEC-011)
 
 Migration `0017`. A revendedora lê o catálogo das fábricas das suas redes sem

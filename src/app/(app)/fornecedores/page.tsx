@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { listSuppliers, searchSupplierProducts } from "@/features/suppliers/queries";
 import { SupplierProductCard } from "@/features/suppliers/components/supplier-product-card";
 import { SupplierCard } from "@/features/suppliers/components/supplier-card";
-import { SupplierSearchForm } from "@/features/suppliers/components/supplier-search-form";
+import { SearchForm } from "@/components/molecules/search-form";
 import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
 import { FilterTabs } from "@/components/molecules/filter-tabs";
@@ -44,7 +44,7 @@ export default async function SuppliersPage({
             { value: "fornecedores", label: "Fornecedores" },
           ]}
         />
-        <SupplierSearchForm
+        <SearchForm
           query={query}
           placeholder={showSuppliers ? "Buscar fornecedores..." : "Buscar produtos, cores, SKUs..."}
           hidden={{ view: showSuppliers ? "fornecedores" : undefined }}

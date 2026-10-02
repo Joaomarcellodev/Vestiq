@@ -1,7 +1,7 @@
 import { Button, Icon } from "@/components/atoms";
 
 /** GET search form — keeps the other query params as hidden fields. */
-export function SupplierSearchForm({
+export function SearchForm({
   query,
   placeholder,
   hidden = {},

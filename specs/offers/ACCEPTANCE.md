@@ -62,3 +62,17 @@ observação e status.
 
 **Dado** uma oferta ativa cuja variação é arquivada
 **Então** a oferta passa a `CANCELLED`.
+
+## AC-OFFER-004-02 — Foto e produto visíveis para a rede (VES-23)
+
+**Dado** a revendedora B na mesma rede de A, e uma oferta de A cujo produto tem foto
+**Quando** B abre o feed da rede ou o detalhe da oferta
+**Então** vê o nome, a marca, a cor/tamanho e a foto do produto
+**E não** vê custo, preço de varejo, estoque real nem SKU de A.
+
+## AC-OFFER-busca — Busca no feed da rede (VES-23)
+
+**Dado** o feed da rede com ofertas
+**Quando** a revendedora busca por palavras (peça, marca, cor, tamanho ou revendedora)
+**Então** vê só as ofertas que contêm todas as palavras, sem diferenciar maiúsculas nem acentos, com a foto do produto
+**E** com nenhuma oferta correspondente, vê "Nenhuma oferta encontrada".

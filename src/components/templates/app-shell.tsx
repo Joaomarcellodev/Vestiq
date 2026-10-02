@@ -12,6 +12,7 @@ export interface AppShellProps {
   userName?: string;
   notifications?: AppNotification[];
   unreadCount?: number;
+  organizationId?: string;
 }
 
 /**
@@ -27,6 +28,7 @@ export function AppShell({
   userName,
   notifications = [],
   unreadCount = 0,
+  organizationId,
 }: AppShellProps) {
   return (
     <div className="min-h-screen bg-background">
@@ -38,6 +40,7 @@ export function AppShell({
           userName={userName}
           notifications={notifications}
           unreadCount={unreadCount}
+          organizationId={organizationId}
         />
         <main className="mx-auto w-full max-w-5xl px-margin-mobile pb-28 pt-lg sm:px-6 lg:px-8 lg:pb-12">
           <PageTransition>{children}</PageTransition>

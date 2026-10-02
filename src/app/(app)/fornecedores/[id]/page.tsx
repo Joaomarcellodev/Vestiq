@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupplier, searchSupplierProducts } from "@/features/suppliers/queries";
 import { SupplierProductCard } from "@/features/suppliers/components/supplier-product-card";
-import { SupplierSearchForm } from "@/features/suppliers/components/supplier-search-form";
+import { SearchForm } from "@/components/molecules/search-form";
 import { BackButton } from "@/components/molecules/back-button";
 import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
@@ -48,7 +48,7 @@ export default async function SupplierPage({
         }
       />
 
-      <SupplierSearchForm query={query} placeholder="Buscar neste catálogo..." />
+      <SearchForm query={query} placeholder="Buscar neste catálogo..." />
 
       {products.length === 0 ? (
         <EmptyState
