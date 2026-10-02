@@ -54,6 +54,11 @@ async function uploadProductImages(
   return { urls, paths };
 }
 
+/** Best-effort removal of uploaded photos whose product was never saved. */
+async function removeProductImages(supabase: SupabaseClient<Database>, paths: string[]) {
+  if (paths.length > 0) await supabase.storage.from(IMAGE_BUCKET).remove(paths);
+}
+
 /**
  * RF-PROD-007 / BR-CAT-13: only a factory sets wholesale conditions. A
  * reseller's form never posts them, and anything posted anyway is ignored.
@@ -120,39 +125,19 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
   if (wholesaleError) return { error: wholesaleError };
 
   const supabase = await createClient();
-  const { data: product, error } = await supabase
-    .from("products")
-    .insert({
-      organization_id: org.id,
-      name: input.name,
-      brand: input.brand || null,
-      category_id: input.categoryId || null,
-      internal_sku: input.internalSku || null,
-      description: input.description || null,
-      ...wholesaleColumns(wholesale),
-    })
-    .select("id")
-    .single();
 
-  if (error || !product) {
-    return {
-      error: error?.code === "23505" ? "SKU já utilizado" : (error?.message ?? "Falha ao salvar"),
-    };
-  }
-
+  // The id is chosen here so the photos can go to the product's folder before
+  // the product exists; nothing is written to the database until the RPC.
+  const productId = crypto.randomUUID();
   const imageFiles = readImageFiles(formData);
-  if (imageFiles.length > 0) {
-    const { urls, error: upErr } = await uploadProductImages(
-      supabase,
-      org.id,
-      product.id,
-      imageFiles,
-    );
-    if (upErr) {
-      await supabase.from("products").delete().eq("id", product.id);
-      return { error: upErr };
-    }
-    await supabase.from("products").update({ image_urls: urls }).eq("id", product.id);
+  const {
+    urls,
+    paths,
+    error: upErr,
+  } = await uploadProductImages(supabase, org.id, productId, imageFiles);
+  if (upErr) {
+    await removeProductImages(supabase, paths);
+    return { error: upErr };
   }
 
   // BR-CAT-03 / BR-CAT-14: at least one variant — one per grid size when the
@@ -165,35 +150,45 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
         ? wholesale.sizeGrid.map((size) => ({ ...blank, size }))
         : [{ ...blank, size: "Único" }];
 
-  for (const v of variants) {
-    const { data: variant, error: vErr } = await supabase
-      .from("product_variants")
-      .insert({
-        organization_id: org.id,
-        product_id: product.id,
-        size: v.size || null,
-        color: v.color || null,
-        sku: v.sku || null,
-        cost_price: v.costPrice,
-        retail_price: v.retailPrice,
-      })
-      .select("id")
-      .single();
-    if (vErr) {
-      return { error: vErr.code === "23505" ? "SKU de variação já utilizado" : vErr.message };
-    }
+  // Product, variants and initial stock entries are written in one transaction:
+  // any failure (duplicate SKU, stock entry) leaves nothing behind.
+  const { error } = await supabase.rpc("create_product", {
+    p_organization_id: org.id,
+    p_product: {
+      id: productId,
+      name: input.name,
+      brand: input.brand || null,
+      category_id: input.categoryId || null,
+      internal_sku: input.internalSku || null,
+      description: input.description || null,
+      image_urls: urls,
+      ...wholesaleColumns(wholesale),
+    },
+    p_variants: variants.map((v) => ({
+      size: v.size || null,
+      color: v.color || null,
+      sku: v.sku || null,
+      cost_price: v.costPrice,
+      retail_price: v.retailPrice,
+      initial_stock: v.initialStock,
+    })),
+  });
 
-    if (variant && v.initialStock > 0) {
-      await supabase.rpc("record_inventory_entry", {
-        p_variant_id: variant.id,
-        p_quantity: v.initialStock,
-        p_note: "Estoque inicial",
-      });
-    }
+  if (error) {
+    await removeProductImages(supabase, paths);
+    return { error: createProductErrorMessage(error) };
   }
 
   revalidatePath("/produtos");
-  redirect(`/produtos/${product.id}?toast=product-created`);
+  redirect(`/produtos/${productId}?toast=product-created`);
+}
+
+/** Maps a `create_product` failure to the message shown in the form. */
+function createProductErrorMessage(error: { code?: string; message: string }): string {
+  if (error.code !== "23505") return error.message;
+  return error.message.includes("product_variants")
+    ? "SKU de variação já utilizado"
+    : "SKU já utilizado";
 }
 
 const updateProductSchema = z.object({
