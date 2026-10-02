@@ -36,6 +36,7 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     // Local Supabase / GoTrue occasionally returns a transient
     // "Database error creating new user" under heavy parallel load.
+    // `retry` does not cover hooks, so `makeUser` also retries (src/test/supabase.ts).
     retry: process.env.CI ? 2 : 1,
     env: {
       NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54421",
