@@ -19,6 +19,14 @@
 **Então** o produto e a variação P são criados
 **E** a variação recebe SKU (informado ou gerado).
 
+## AC-PROD-002-02 — Cadastro tudo ou nada
+
+**Dado** uma revendedora cadastrando um produto com variações e estoque inicial
+**Quando** alguma etapa falha (ex.: SKU de variação repetido ou entrada de estoque inicial recusada)
+**Então** a tela mostra o erro
+**E** nada fica gravado: nem o produto, nem as variações anteriores, nem movimentos de estoque
+**E** as fotos enviadas são removidas do Storage.
+
 ## AC-PROD-003-01 — Produto exige ao menos uma variação
 
 **Dado** o formulário de novo produto
@@ -51,6 +59,13 @@
 **Dado** um produto arquivado
 **Quando** a revendedora o reativa
 **Então** ele volta às listas.
+
+## AC-PROD-006-03 — Produto e variações arquivados juntos
+
+**Dado** um produto com várias variações
+**Quando** a revendedora o arquiva ou desarquiva
+**Então** o produto e todas as variações mudam na mesma transação
+**E** se a operação falhar, nada muda e a tela mostra o erro, sem toast de sucesso.
 
 ## AC-PROD-05-margem — Margem estimada
 

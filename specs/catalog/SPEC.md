@@ -78,6 +78,8 @@ sem apagar histórico.
 | BR-CAT-12 | Grade = lista ordenada de até 20 tamanhos (até 20 caracteres cada); vazios e repetidos (sem diferenciar maiúsculas) são descartados |
 | BR-CAT-13 | Só organização `FACTORY` define pedido mínimo e grade (trigger no banco; campos ignorados no formulário da revendedora)             |
 | BR-CAT-14 | Produto da fábrica cadastrado sem variações ganha uma variação por tamanho da grade                                                 |
+| BR-CAT-15 | Cadastro de produto é atômico: produto, variações, fotos e estoque inicial gravam juntos ou nada grava (`create_product`)           |
+| BR-CAT-16 | Arquivar/desarquivar muda produto e todas as variações na mesma transação (`set_product_archived`)                                  |
 
 ## Fluxos
 

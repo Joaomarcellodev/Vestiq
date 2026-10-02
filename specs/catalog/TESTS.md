@@ -19,6 +19,8 @@
 | RF-PROD-007 | AC-PROD-007-03    | TC-PROD-11 | unit + integration             |
 | RF-PROD-007 | AC-PROD-007-04    | TC-PROD-13 | integration                    |
 | RF-PROD-007 | AC-PROD-007-04    | TC-PROD-14 | integration (trigger)          |
+| RF-PROD-002 | AC-PROD-002-02    | TC-PROD-15 | integration                    |
+| RF-PROD-006 | AC-PROD-006-03    | TC-PROD-16 | integration                    |
 
 ## Casos de teste
 
@@ -77,6 +79,14 @@ integration · **crítica (autorização)** · campos enviados pela revendedora 
 ### TC-PROD-14 — Trigger de condições só para fábrica
 
 integration · **crítica (autorização)** · `update` direto de `min_order_quantity`/`size_grid` em produto de revendedora → erro.
+
+### TC-PROD-15 — Cadastro atômico
+
+integration · **crítica (integridade)** · SKU de variação repetido na 2ª variação → erro e nenhum produto/variação/movimento gravado; entrada de estoque inicial que estoura o `integer` → rollback total; fotos removidas do Storage quando o produto não é salvo; `create_product` recusa outra organização e lista vazia de variações.
+
+### TC-PROD-16 — Arquivamento atômico
+
+integration · **crítica (RF-PROD-006)** · todas as variações recebem o mesmo `archived_at` do produto; produto de outra organização → erro e nada muda; produto inexistente → erro em vez de toast de sucesso.
 
 ## Cobertura de RF
 
