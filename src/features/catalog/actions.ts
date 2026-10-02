@@ -22,33 +22,36 @@ const IMAGE_BUCKET = "product-images";
 
 /**
  * Uploads the picked files to `product-images/{orgId}/{productId}/…` and
- * returns their public URLs. Returns an error string instead of throwing so
- * the caller can surface it in the form.
+ * returns their public URLs plus the storage paths (for cleanup). Returns an
+ * error string instead of throwing so the caller can surface it in the form;
+ * `paths` then lists what was already uploaded before the failure.
  */
 async function uploadProductImages(
   supabase: SupabaseClient<Database>,
   orgId: string,
   productId: string,
   files: File[],
-): Promise<{ urls: string[]; error?: string }> {
+): Promise<{ urls: string[]; paths: string[]; error?: string }> {
   const urls: string[] = [];
+  const paths: string[] = [];
   for (const file of files) {
     if (!(file instanceof File) || file.size === 0) continue;
     if (!PRODUCT_IMAGE_TYPES.includes(file.type)) {
-      return { urls, error: "Envie imagens JPG, PNG ou WebP." };
+      return { urls, paths, error: "Envie imagens JPG, PNG ou WebP." };
     }
     if (file.size > PRODUCT_IMAGE_MAX_BYTES) {
-      return { urls, error: "Cada imagem deve ter no máximo 5 MB." };
+      return { urls, paths, error: "Cada imagem deve ter no máximo 5 MB." };
     }
     const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
     const path = `${orgId}/${productId}/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage
       .from(IMAGE_BUCKET)
       .upload(path, file, { contentType: file.type, upsert: false });
-    if (error) return { urls, error: `Falha no upload da imagem: ${error.message}` };
+    if (error) return { urls, paths, error: `Falha no upload da imagem: ${error.message}` };
+    paths.push(path);
     urls.push(supabase.storage.from(IMAGE_BUCKET).getPublicUrl(path).data.publicUrl);
   }
-  return { urls };
+  return { urls, paths };
 }
 
 /**
