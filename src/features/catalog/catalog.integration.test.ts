@@ -131,6 +131,115 @@ d("catalog actions + queries (SPEC-004)", () => {
     expect(state.error).toMatch(/SKU já utilizado/i);
   });
 
+  const variant = (over: Record<string, unknown>) => ({
+    size: "",
+    color: "",
+    sku: "",
+    costPrice: 10,
+    retailPrice: 20,
+    initialStock: 0,
+    ...over,
+  });
+
+  it("createProduct: a duplicate variant SKU leaves no partial product behind", async () => {
+    const state = await createProduct(
+      {},
+      pForm({
+        name: "Parcial",
+        variants: variantsJSON([
+          variant({ size: "P", sku: "VAR-DUP", initialStock: 3 }),
+          variant({ size: "M", sku: "VAR-DUP" }),
+        ]),
+      }),
+    );
+    expect(state.error).toMatch(/SKU de variação já utilizado/i);
+
+    const db = admin();
+    const { data: products } = await db
+      .from("products")
+      .select("id")
+      .eq("organization_id", orgId)
+      .eq("name", "Parcial");
+    expect(products).toHaveLength(0);
+    const { data: variants } = await db
+      .from("product_variants")
+      .select("id")
+      .eq("organization_id", orgId);
+    expect(variants).toHaveLength(0);
+    const { data: movements } = await db
+      .from("inventory_movements")
+      .select("id")
+      .eq("organization_id", orgId);
+    expect(movements).toHaveLength(0);
+  });
+
+  it("createProduct: a failed initial stock entry rolls the whole product back", async () => {
+    // 2^31 does not fit the integer stock columns, so the entry fails inside
+    // the transaction after the product and the first variant were inserted.
+    const state = await createProduct(
+      {},
+      pForm({
+        name: "Sem estoque",
+        variants: variantsJSON([
+          variant({ size: "P", initialStock: 2 }),
+          variant({ size: "M", initialStock: 2147483648 }),
+        ]),
+      }),
+    );
+    expect(state.error).toMatch(/out of range/i);
+
+    const db = admin();
+    const { data: products } = await db.from("products").select("id").eq("organization_id", orgId);
+    expect(products).toHaveLength(0);
+    const { data: movements } = await db
+      .from("inventory_movements")
+      .select("id")
+      .eq("organization_id", orgId);
+    expect(movements).toHaveLength(0);
+  });
+
+  it("createProduct: removes the uploaded photos when the product is not saved", async () => {
+    await makeProduct(orgId, { internal_sku: "FOTO-DUP" });
+    const state = await createProduct(
+      {},
+      pForm({
+        name: "Foto órfã",
+        internalSku: "FOTO-DUP",
+        variants: variantsJSON(),
+        images: [pngFile("a.png")],
+      }),
+    );
+    expect(state.error).toMatch(/SKU já utilizado/i);
+
+    const { data: folders } = await admin().storage.from("product-images").list(orgId);
+    expect(folders).toHaveLength(0);
+  });
+
+  it("create_product RPC: refuses another organization and products without variants", async () => {
+    const other = await makeUser();
+    const otherOrg = await makeOrg(other.userId, "RESELLER");
+
+    const foreign = await user.client.rpc("create_product", {
+      p_organization_id: otherOrg.id,
+      p_product: { name: "Intruso" },
+      p_variants: [{ size: "Único", retail_price: 1 }],
+    });
+    expect(foreign.error?.message).toMatch(/not authorized/);
+
+    const empty = await user.client.rpc("create_product", {
+      p_organization_id: orgId,
+      p_product: { name: "Vazio" },
+      p_variants: [],
+    });
+    expect(empty.error?.message).toMatch(/ao menos uma variação/);
+
+    const { data } = await admin()
+      .from("products")
+      .select("id")
+      .in("organization_id", [orgId, otherOrg.id]);
+    expect(data).toHaveLength(0);
+  });
+
   it("updateProduct: edits fields and keeps / drops existing images", async () => {
     const product = await makeProduct(orgId, {
       name: "Antigo",
