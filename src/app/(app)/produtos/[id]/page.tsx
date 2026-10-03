@@ -117,7 +117,16 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 </div>
                 <StockBadge level={level} stock={v.stock_on_hand} />
               </div>
-              <StockControls variantId={v.id} />
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <StockControls variantId={v.id} />
+                <Link
+                  href={`/produtos/${id}/variantes/${v.id}/historico`}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 font-body-md text-body-md font-semibold text-primary hover:bg-surface-container-low"
+                >
+                  <Icon name="history" size={16} />
+                  Histórico
+                </Link>
+              </div>
             </div>
           );
         })}
