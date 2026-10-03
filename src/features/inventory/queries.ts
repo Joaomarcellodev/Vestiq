@@ -122,3 +122,42 @@ export async function listMovements(
 
   return { items, nextCursor };
 }
+
+export interface VariantHeader {
+  variantId: string;
+  productId: string;
+  productName: string;
+  brand: string | null;
+  descriptor: string;
+  sku: string | null;
+  stock: number;
+  level: StockLevel;
+}
+
+/** Header of the history screen; `null` if the variant is not this product's (or not visible). */
+export async function getVariantHeader(
+  productId: string,
+  variantId: string,
+): Promise<VariantHeader | null> {
+  await requireActiveOrganization();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("product_variants")
+    .select("id, size, color, sku, stock_on_hand, product_id, products(name, brand)")
+    .eq("id", variantId)
+    .eq("product_id", productId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+
+  return {
+    variantId: data.id,
+    productId: data.product_id,
+    productName: data.products?.name ?? "—",
+    brand: data.products?.brand ?? null,
+    descriptor: [data.color, data.size].filter(Boolean).join(" / ") || "Único",
+    sku: data.sku,
+    stock: data.stock_on_hand,
+    level: classifyStock(data.stock_on_hand, DEFAULT_LOW_STOCK_THRESHOLD),
+  };
+}
