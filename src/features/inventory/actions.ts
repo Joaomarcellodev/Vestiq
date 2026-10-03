@@ -24,8 +24,8 @@ export async function recordEntry(_prev: ActionState, formData: FormData): Promi
   });
   if (error) return { error: error.message };
 
-  revalidatePath("/produtos");
-  revalidatePath("/estoque");
+  // Product page, inventory list and the variant's movement history.
+  revalidatePath("/produtos", "layout");
   return { ok: true };
 }
 
@@ -46,7 +46,7 @@ export async function adjustStock(_prev: ActionState, formData: FormData): Promi
   });
   if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
 
-  revalidatePath("/produtos");
-  revalidatePath("/estoque");
+  // Product page, inventory list and the variant's movement history.
+  revalidatePath("/produtos", "layout");
   return { ok: true };
 }
