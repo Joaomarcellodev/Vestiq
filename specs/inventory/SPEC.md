@@ -78,8 +78,14 @@ das movimentações; bloquear estoque negativo.
 **Ajuste:** variação + delta (±) + motivo → RPC `adjust_inventory` → valida saldo
 resultante ≥ 0 → movimento `AJUSTE`.
 
-**Histórico:** lista paginada de `inventory_movements` da variação, com tipo, data,
-quantidade, saldo resultante, referência.
+**Histórico:** a partir do card da variação (detalhe do produto) →
+`/produtos/:id/variantes/:variantId/historico`. Mostra o saldo atual e a lista
+de `inventory_movements` da variação, da mais recente para a mais antiga, com
+tipo, data/hora (horário de Brasília), quantidade assinada, saldo resultante,
+nota/motivo e link para a origem (venda ou negociação). Abas filtram por tipo
+(Todas / Entradas / Ajustes / Vendas / Transferências); paginação por cursor
+`(created_at, id)` em páginas de 30 ("Mais antigas"). Variação de outro produto
+ou de outra organização → 404.
 
 ## Estados
 
@@ -111,6 +117,7 @@ Ver [`TESTS.md`](./TESTS.md).
 - [ ] Migration `inventory_movements` + policy append-only + `check` de saldo
 - [ ] RPC `record_inventory_entry`, `adjust_inventory` + trigger `balance_after`
 - [ ] Actions finas + `validation.ts`
-- [ ] Tela de inventário (busca, filtros, chips de status) + histórico da variação
+- [ ] Tela de inventário (busca, filtros, chips de status)
+- [x] Histórico da variação (filtro por tipo, paginação, link para a origem)
 - [ ] Limiar de estoque baixo por organização (settings)
 - [ ] Testes: invariante saldo=soma, bloqueio de negativo, append-only, RLS
