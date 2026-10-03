@@ -56,7 +56,7 @@ export default async function MovementHistoryPage({
         action={<StockBadge level={variant.level} stock={variant.stock} />}
       />
 
-      <div className="-mx-4 overflow-x-auto px-4">
+      <div className="overflow-x-auto">
         <FilterTabs basePath={basePath} param="tipo" current={tab} tabs={MOVEMENT_FILTER_TABS} />
       </div>
 
