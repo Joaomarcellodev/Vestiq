@@ -30,8 +30,8 @@ d("inventory actions + queries (SPEC-005)", () => {
     const rows = await listInventory();
     expect(rows.find((r) => r.variantId === ctx.variantId)?.stock).toBe(12);
 
-    const moves = await listMovements(ctx.variantId);
-    expect(moves[0]).toMatchObject({ type: "ENTRADA", quantity: 12, balance_after: 12 });
+    const { items } = await listMovements(ctx.variantId);
+    expect(items[0]).toMatchObject({ type: "ENTRADA", quantity: 12, balanceAfter: 12 });
   });
 
   it("recordEntry rejects a non-positive quantity (zod)", async () => {

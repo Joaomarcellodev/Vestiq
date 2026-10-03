@@ -3,6 +3,12 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import { classifyStock, DEFAULT_LOW_STOCK_THRESHOLD, type StockLevel } from "./classify";
+import {
+  movementTypesFor,
+  type MovementCursor,
+  type MovementFilter,
+  type MovementType,
+} from "./history";
 
 export interface InventoryRow {
   variantId: string;
@@ -55,15 +61,64 @@ export async function listInventory(filter: InventoryFilter = "all", search?: st
   });
 }
 
-export async function listMovements(variantId: string) {
+export const MOVEMENT_PAGE_SIZE = 30;
+
+export interface MovementRow {
+  id: string;
+  type: MovementType;
+  quantity: number;
+  balanceAfter: number;
+  note: string | null;
+  referenceType: string | null;
+  referenceId: string | null;
+  createdAt: string;
+}
+
+/** RF-INV-004 — a variant's movements, newest first, one page at a time. */
+export async function listMovements(
+  variantId: string,
+  {
+    filter = "all",
+    before = null,
+    limit = MOVEMENT_PAGE_SIZE,
+  }: { filter?: MovementFilter; before?: MovementCursor | null; limit?: number } = {},
+): Promise<{ items: MovementRow[]; nextCursor: MovementCursor | null }> {
   await requireActiveOrganization();
   const supabase = await createClient();
-  const { data, error } = await supabase
+
+  let query = supabase
     .from("inventory_movements")
-    .select("id, type, quantity, balance_after, note, created_at")
+    .select("id, type, quantity, balance_after, note, reference_type, reference_id, created_at")
     .eq("product_variant_id", variantId)
     .order("created_at", { ascending: false })
-    .limit(50);
+    .order("id", { ascending: false })
+    .limit(limit + 1);
+
+  const types = movementTypesFor(filter);
+  if (types) query = query.in("type", types);
+  if (before) {
+    query = query.or(
+      `created_at.lt."${before.createdAt}",and(created_at.eq."${before.createdAt}",id.lt.${before.id})`,
+    );
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
-  return data ?? [];
+
+  const rows = data ?? [];
+  const items: MovementRow[] = rows.slice(0, limit).map((m) => ({
+    id: m.id,
+    type: m.type,
+    quantity: m.quantity,
+    balanceAfter: m.balance_after,
+    note: m.note,
+    referenceType: m.reference_type,
+    referenceId: m.reference_id,
+    createdAt: m.created_at,
+  }));
+  const last = items.at(-1);
+  const nextCursor =
+    rows.length > limit && last ? { createdAt: last.createdAt, id: last.id } : null;
+
+  return { items, nextCursor };
 }
