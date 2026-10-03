@@ -48,3 +48,29 @@ export function movementReferenceLink(
 export function formatMovementQuantity(quantity: number): string {
   return quantity > 0 ? `+${quantity}` : String(quantity);
 }
+
+// --- keyset pagination ------------------------------------------------------
+// Movements of one transaction share `created_at` (now()), so the cursor is
+// the (created_at, id) pair of the last row shown, newest first.
+
+export interface MovementCursor {
+  createdAt: string;
+  id: string;
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function encodeMovementCursor(cursor: MovementCursor): string {
+  return `${cursor.createdAt}_${cursor.id}`;
+}
+
+/** Parses a cursor from the URL; anything malformed means "start from the newest". */
+export function decodeMovementCursor(raw: string | undefined): MovementCursor | null {
+  if (!raw) return null;
+  const sep = raw.lastIndexOf("_");
+  if (sep <= 0) return null;
+  const createdAt = raw.slice(0, sep);
+  const id = raw.slice(sep + 1);
+  if (!UUID.test(id) || Number.isNaN(Date.parse(createdAt))) return null;
+  return { createdAt, id };
+}

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  decodeMovementCursor,
+  encodeMovementCursor,
   formatMovementQuantity,
   MOVEMENT_FILTER_TABS,
   MOVEMENT_FILTER_TYPES,
@@ -55,5 +57,28 @@ describe("formatMovementQuantity", () => {
   it("signs the quantity", () => {
     expect(formatMovementQuantity(20)).toBe("+20");
     expect(formatMovementQuantity(-3)).toBe("-3");
+  });
+});
+
+describe("movement cursor", () => {
+  const cursor = {
+    createdAt: "2026-10-03T14:05:12.345678+00:00",
+    id: "6f1c2a8e-1b2c-4d5e-8f90-123456789abc",
+  };
+
+  it("round-trips through the URL", () => {
+    const raw = new URLSearchParams({ antes: encodeMovementCursor(cursor) }).toString();
+    expect(decodeMovementCursor(new URLSearchParams(raw).get("antes") ?? undefined)).toEqual(
+      cursor,
+    );
+  });
+
+  it("ignores missing or malformed cursors", () => {
+    expect(decodeMovementCursor(undefined)).toBeNull();
+    expect(decodeMovementCursor("")).toBeNull();
+    expect(decodeMovementCursor("_6f1c2a8e-1b2c-4d5e-8f90-123456789abc")).toBeNull();
+    expect(decodeMovementCursor(`ontem_${cursor.id}`)).toBeNull();
+    expect(decodeMovementCursor(`${cursor.createdAt}_nao-e-uuid`)).toBeNull();
+    expect(decodeMovementCursor("2026-10-03")).toBeNull();
   });
 });
