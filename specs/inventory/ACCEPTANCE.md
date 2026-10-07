@@ -25,6 +25,21 @@
 **Quando** a revendedora abre o histórico
 **Então** vê as 3 movimentações em ordem, com saldos 20, 17, 16.
 
+## AC-INV-004-02 — Origem e motivo no histórico
+
+**Dado** uma VENDA e um AJUSTE com motivo "peça manchada" numa variação
+**Quando** a revendedora abre o histórico
+**Então** a VENDA tem link para a venda que a causou
+**E** o AJUSTE mostra o motivo.
+
+## AC-INV-004-03 — Filtro e paginação do histórico
+
+**Dado** uma variação com ENTRADA, VENDA e AJUSTE
+**Quando** a revendedora escolhe a aba "Vendas"
+**Então** vê só a VENDA
+**E dado** mais movimentos do que cabem numa página, "Mais antigas" mostra os
+seguintes sem repetir nem pular nenhum.
+
 ## AC-INV-005-01 — Bloqueio de negativo (ajuste)
 
 **Dado** uma variação com saldo 2
