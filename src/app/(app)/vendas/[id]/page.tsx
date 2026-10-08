@@ -4,7 +4,8 @@ import { BackButton } from "@/components/molecules/back-button";
 import { getSale } from "@/features/sales/queries";
 import { cancelSale } from "@/features/sales/actions";
 import { PageHeader } from "@/components/molecules/page-header";
-import { Badge, Button } from "@/components/atoms";
+import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
+import { Badge } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { PAYMENT_METHOD } from "@/lib/i18n/labels";
 
@@ -52,7 +53,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
       </section>
 
       {sale.status === "CONFIRMED" && (
-        <form
+        <ActionForm
           action={cancelSale}
           className="space-y-sm rounded-xl border border-outline-variant p-lg"
         >
@@ -66,10 +67,10 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
             placeholder="Motivo do cancelamento"
             className="field-focus-ring w-full rounded-lg border border-outline-variant px-3 py-3 font-body-md text-body-md"
           />
-          <Button type="submit" variant="danger" size="sm">
+          <SubmitButton variant="danger" size="sm">
             Cancelar e estornar estoque
-          </Button>
-        </form>
+          </SubmitButton>
+        </ActionForm>
       )}
     </div>
   );

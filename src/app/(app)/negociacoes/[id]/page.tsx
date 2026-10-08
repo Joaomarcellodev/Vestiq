@@ -13,7 +13,8 @@ import type {
   Party,
 } from "@/features/negotiations/state-machine";
 import { PageHeader } from "@/components/molecules/page-header";
-import { Badge, Button } from "@/components/atoms";
+import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
+import { Badge } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { NEGOTIATION_STATUS } from "@/lib/i18n/labels";
 
@@ -73,17 +74,22 @@ export default async function NegotiationDetailPage({
       </div>
 
       {available.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {available.map((a) => (
-            <form key={a.action} action={negotiationAction}>
-              <input type="hidden" name="negotiationId" value={n.id} />
-              <input type="hidden" name="action" value={a.action} />
-              <Button type="submit" variant={a.variant} size="sm">
+        <ActionForm action={negotiationAction} className="space-y-sm">
+          <input type="hidden" name="negotiationId" value={n.id} />
+          <div className="flex flex-wrap gap-2">
+            {available.map((a) => (
+              <SubmitButton
+                key={a.action}
+                name="action"
+                value={a.action}
+                variant={a.variant}
+                size="sm"
+              >
                 {a.label}
-              </Button>
-            </form>
-          ))}
-        </div>
+              </SubmitButton>
+            ))}
+          </div>
+        </ActionForm>
       )}
 
       <NegotiationChat
