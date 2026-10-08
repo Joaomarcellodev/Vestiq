@@ -257,7 +257,7 @@ d("offers actions + queries (SPEC-008)", () => {
       .single();
 
     await expectRedirect(
-      () => cancelOffer(formData({ offerId: offer!.id })),
+      () => cancelOffer({}, formData({ offerId: offer!.id })),
       "/rede?toast=offer-cancelled",
     );
     const { data } = await admin().from("offers").select("status").eq("id", offer!.id).single();

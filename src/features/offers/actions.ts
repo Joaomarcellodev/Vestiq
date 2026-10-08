@@ -61,10 +61,10 @@ export async function publishOffer(_prev: ActionState, formData: FormData): Prom
   redirect("/rede?toast=offer-published");
 }
 
-export async function cancelOffer(formData: FormData): Promise<void> {
+export async function cancelOffer(_prev: ActionState, formData: FormData): Promise<ActionState> {
   await requireActiveOrganization();
   const parsed = cancelOfferSchema.safeParse({ offerId: formData.get("offerId") });
-  if (!parsed.success) throw new Error("Oferta inválida");
+  if (!parsed.success) return { error: "Oferta inválida" };
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -72,7 +72,7 @@ export async function cancelOffer(formData: FormData): Promise<void> {
     .update({ status: "CANCELLED" })
     .eq("id", parsed.data.offerId)
     .in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"]);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   revalidatePath("/rede");
   redirect("/rede?toast=offer-cancelled");
