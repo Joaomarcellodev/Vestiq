@@ -191,7 +191,7 @@ Append-only. Sem `update`/`delete` via RLS (RF-INV-006).
 | `unit_price` | numeric(12,2) | preço no momento da venda |
 | `line_total` | numeric(12,2) | `quantity * unit_price` |
 
-### `offers` — RF-OFFER-001..007
+### `offers` — RF-OFFER-001..008
 | coluna | tipo | notas |
 | --- | --- | --- |
 | `organization_id` | uuid | **tenant** = revendedora ofertante |
@@ -202,6 +202,7 @@ Append-only. Sem `update`/`delete` via RLS (RF-INV-006).
 | `transfer_price` | numeric(12,2) | preço/condição B2B |
 | `note` | text | null |
 | `status` | `offer_status` | |
+| `image_urls` | text[] | fotos da própria oferta (`0026`, RF-OFFER-008), no bucket `product-images` em `<org>/offers/`; vazio → `list_visible_offers` devolve as fotos do produto |
 
 A oferta **não** reserva estoque; a validação de disponibilidade ocorre na
 conclusão da negociação (transação).
