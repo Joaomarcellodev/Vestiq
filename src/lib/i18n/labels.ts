@@ -57,6 +57,19 @@ export const PAYMENT_METHOD: Record<Database["public"]["Enums"]["payment_method"
   DINHEIRO: "Dinheiro",
 };
 
+export const INVENTORY_MOVEMENT: Record<
+  Database["public"]["Enums"]["inventory_movement_type"],
+  string
+> = {
+  ENTRADA: "Entrada",
+  SAIDA: "Saída",
+  AJUSTE: "Ajuste",
+  VENDA: "Venda",
+  CANCELAMENTO: "Venda cancelada",
+  TRANSFERENCIA_ENTRADA: "Transferência recebida",
+  TRANSFERENCIA_SAIDA: "Transferência enviada",
+};
+
 export const MEMBER_ROLE: Record<Database["public"]["Enums"]["member_role"], string> = {
   PLATFORM_ADMIN: "Administrador da plataforma",
   FACTORY_ADMIN: "Administrador da fábrica",

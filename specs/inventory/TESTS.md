@@ -2,18 +2,20 @@
 
 ## Matriz de rastreabilidade
 
-| RF              | AC            | TC        | Nível                   | Crítica §38 |
-| --------------- | ------------- | --------- | ----------------------- | ----------- |
-| RF-INV-001      | AC-INV-001-01 | TC-INV-01 | integration             | sim         |
-| RF-INV-002      | AC-INV-002-01 | TC-INV-02 | integration             | sim         |
-| RF-INV-003      | AC-INV-003-01 | TC-INV-03 | integration             | sim         |
-| RF-INV-004      | AC-INV-004-01 | TC-INV-04 | integration             | sim         |
-| RF-INV-005      | AC-INV-005-01 | TC-INV-05 | integration             | sim         |
-| RF-INV-005      | AC-INV-005-02 | TC-INV-06 | integration             | sim         |
-| RF-INV-006      | AC-INV-006-01 | TC-INV-07 | integration             | sim         |
-| RF-INV-001..005 | AC-INV-inv    | TC-INV-08 | integration (property)  | sim         |
-| RF-INV-001      | AC-INV-baixo  | TC-INV-09 | unit + component        | não         |
-| RF-INV-004      | AC-INV-rls    | TC-INV-10 | integration (2 tenants) | sim         |
+| RF              | AC            | TC        | Nível                    | Crítica §38 |
+| --------------- | ------------- | --------- | ------------------------ | ----------- |
+| RF-INV-001      | AC-INV-001-01 | TC-INV-01 | integration              | sim         |
+| RF-INV-002      | AC-INV-002-01 | TC-INV-02 | integration              | sim         |
+| RF-INV-003      | AC-INV-003-01 | TC-INV-03 | integration              | sim         |
+| RF-INV-004      | AC-INV-004-01 | TC-INV-04 | integration              | sim         |
+| RF-INV-004      | AC-INV-004-02 | TC-INV-11 | integration + component  | não         |
+| RF-INV-004      | AC-INV-004-03 | TC-INV-12 | unit + integration + e2e | não         |
+| RF-INV-005      | AC-INV-005-01 | TC-INV-05 | integration              | sim         |
+| RF-INV-005      | AC-INV-005-02 | TC-INV-06 | integration              | sim         |
+| RF-INV-006      | AC-INV-006-01 | TC-INV-07 | integration              | sim         |
+| RF-INV-001..005 | AC-INV-inv    | TC-INV-08 | integration (property)   | sim         |
+| RF-INV-001      | AC-INV-baixo  | TC-INV-09 | unit + component         | não         |
+| RF-INV-004      | AC-INV-rls    | TC-INV-10 | integration (2 tenants)  | sim         |
 
 ## Casos de teste
 
@@ -32,6 +34,19 @@ Revogar `UPDATE` direto de `stock_on_hand` a `authenticated`; provar que só as 
 ### TC-INV-04 — Histórico ordenado com saldos corretos
 
 Sequência +20/-3/-1 → lista [20,17,16].
+
+Cobertura: `inventory-history.integration.test.ts`, `movement-list.test.tsx`,
+`e2e/inventory-history.spec.ts`.
+
+### TC-INV-11 — Origem e motivo de cada movimento
+
+VENDA traz `reference_type='sale'` + `reference_id` e vira link "Ver venda";
+AJUSTE traz a nota. Movimentos manuais não têm link.
+
+### TC-INV-12 — Filtro por aba e paginação por cursor
+
+Aba "Vendas" → só VENDA/CANCELAMENTO. Página de 2 sobre 3 movimentos → 2 + 1,
+sem repetição; cursor malformado na URL volta para os mais recentes.
 
 ### TC-INV-05 — Ajuste negativo além do saldo é recusado
 

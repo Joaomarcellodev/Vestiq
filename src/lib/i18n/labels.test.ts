@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  INVENTORY_MOVEMENT,
   MEMBER_ROLE,
   MEMBER_STATUS,
   NEGOTIATION_EVENT,
@@ -19,6 +20,15 @@ const ENUM_VALUES: Record<string, string[]> = {
   SUPPLY_ORDER_STATUS: ["PENDING", "CONFIRMED", "REJECTED", "CANCELLED"],
   PAYMENT_METHOD: ["PIX", "CARTAO", "DINHEIRO"],
   MEMBER_ROLE: ["PLATFORM_ADMIN", "FACTORY_ADMIN", "RESELLER"],
+  INVENTORY_MOVEMENT: [
+    "ENTRADA",
+    "SAIDA",
+    "AJUSTE",
+    "VENDA",
+    "CANCELAMENTO",
+    "TRANSFERENCIA_ENTRADA",
+    "TRANSFERENCIA_SAIDA",
+  ],
 };
 
 const MAPS = {
@@ -30,6 +40,7 @@ const MAPS = {
   SUPPLY_ORDER_STATUS,
   PAYMENT_METHOD,
   MEMBER_ROLE,
+  INVENTORY_MOVEMENT,
 } as Record<string, Record<string, unknown>>;
 
 describe("i18n labels", () => {

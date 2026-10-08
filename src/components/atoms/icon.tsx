@@ -21,6 +21,7 @@ type IconName =
   | "devices"
   | "factory"
   | "group"
+  | "history"
   | "hub"
   | "inbox"
   | "inventory_2"
@@ -176,6 +177,12 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <circle cx="11" cy="11" r="6" />
       <path d="m20 20-3.5-3.5" />
+    </>
+  ),
+  history: (
+    <>
+      <path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5" />
+      <path d="M3.5 3.5v5h5M12 7.5V12l3 2" />
     </>
   ),
   swap_horiz: <path d="M7 8h13m0 0-3-3m3 3-3 3M17 16H4m0 0 3-3m-3 3 3 3" />,
