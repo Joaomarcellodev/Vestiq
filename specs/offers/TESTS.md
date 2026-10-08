@@ -16,6 +16,9 @@
 | RF-OFFER-003     | AC-OFFER-arquivada   | TC-OFFER-10 | integration           | não               |
 | RF-OFFER-004     | AC-OFFER-004-02      | TC-OFFER-11 | integration           | sim (privacidade) |
 | RF-OFFER-004     | AC-OFFER-busca       | TC-OFFER-12 | unit + e2e            | não               |
+| RF-OFFER-008     | AC-OFFER-008-01      | TC-OFFER-13 | integration + e2e     | não               |
+| RF-OFFER-008     | AC-OFFER-008-02      | TC-OFFER-14 | integration + comp.   | sim (autorização) |
+| RF-OFFER-008     | AC-OFFER-008-03      | TC-OFFER-15 | integration           | não               |
 
 ## Casos de teste
 
@@ -66,6 +69,18 @@ integration · **crítica (SDD §8)** · `list_visible_offers` como peer devolve
 ### TC-OFFER-12 — Busca do feed
 
 unit · `matchesOfferQuery`: todas as palavras, sem caixa/acentos, em produto, marca, cor/tamanho ou revendedora · unit · `OfferCard` mostra a foto ou o ícone · e2e · peer busca "chanel PRETO" → acha a bolsa; busca sem resultado → estado vazio.
+
+### TC-OFFER-13 — Publicar com fotos
+
+integration + e2e · não-crítica · fotos gravadas em `offers.image_urls` (pasta `<org>/offers/`); RPC falha → arquivos removidos; peer vê a foto no feed (E2E).
+
+### TC-OFFER-14 — Editar fotos da oferta
+
+integration + component · **crítica (autorização)** · capa reordenada, foto removida apagada do Storage, URL alheia ignorada; oferta cancelada → erro; outra organização → erro, nada muda.
+
+### TC-OFFER-15 — Fallback para as fotos do produto
+
+integration · não-crítica · `list_visible_offers` devolve as fotos da oferta quando houver e as do produto quando não.
 
 ## Cobertura de RF
 
