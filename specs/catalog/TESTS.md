@@ -6,6 +6,11 @@
 | ----------- | ----------------- | ---------- | ------------------------------ |
 | RF-PROD-001 | AC-PROD-001-01    | TC-PROD-01 | integration                    |
 | RF-PROD-001 | AC-PROD-001-02    | TC-PROD-02 | integration                    |
+| RF-PROD-001 | AC-PROD-001-03    | TC-PROD-15 | integration                    |
+| RF-PROD-001 | AC-PROD-001-04    | TC-PROD-16 | integration                    |
+| RF-PROD-001 | AC-PROD-001-05    | TC-PROD-17 | integration                    |
+| RF-PROD-001 | AC-PROD-001-06    | TC-PROD-18 | component                      |
+| RF-PROD-001 | AC-PROD-rls       | TC-PROD-10 | integration (2 tenants)        |
 | RF-PROD-002 | AC-PROD-002-01    | TC-PROD-03 | integration + e2e              |
 | RF-PROD-003 | AC-PROD-003-01    | TC-PROD-04 | component + integration        |
 | RF-PROD-004 | AC-PROD-004-01    | TC-PROD-05 | integration                    |
@@ -77,6 +82,22 @@ integration · **crítica (autorização)** · campos enviados pela revendedora 
 ### TC-PROD-14 — Trigger de condições só para fábrica
 
 integration · **crítica (autorização)** · `update` direto de `min_order_quantity`/`size_grid` em produto de revendedora → erro.
+
+### TC-PROD-15 — Renomear categoria
+
+integration · não-crítica · nome novo salvo; nome duplicado → erro no campo, nada muda.
+
+### TC-PROD-16 — Arquivar e reativar categoria
+
+integration · não-crítica · arquivada some de `listCategories`, aparece em `listCategoriesForManagement`; produtos mantêm `category_id`.
+
+### TC-PROD-17 — Filtro de produtos por categoria
+
+integration · não-crítica · `listProducts` com `categoryId` devolve só os produtos da categoria, combinando com busca e escopo.
+
+### TC-PROD-18 — Nova categoria no formulário de produto
+
+component · não-crítica · criar pelo formulário adiciona a opção e a seleciona.
 
 ## Cobertura de RF
 
