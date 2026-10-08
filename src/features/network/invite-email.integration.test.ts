@@ -10,7 +10,13 @@ import {
   supabaseUp,
   uniqueEmail,
 } from "@/test/supabase";
-import { clearTestClient, formData, makeNetwork, setTestClient } from "@/test/actions";
+import {
+  clearTestClient,
+  expectRedirect,
+  formData,
+  makeNetwork,
+  setTestClient,
+} from "@/test/actions";
 import type { Database } from "@/types/database";
 
 // Lets one test simulate an SMTP failure while the others send for real.
@@ -28,7 +34,7 @@ vi.mock("./invite-email", async (importOriginal) => {
   };
 });
 
-const { inviteReseller } = await import("./actions");
+const { acceptInvite, inviteReseller } = await import("./actions");
 const { GET: confirmRoute } = await import("@/app/auth/confirm/route");
 
 const MAILPIT = "http://127.0.0.1:54424";
@@ -99,6 +105,32 @@ d("network invite email (VES-64)", () => {
     const res = await confirmRoute(new NextRequest(link.toString()));
     expect(res.headers.get("location")).toMatch(new RegExp(`/convite/${token}$`));
     expect((await browser.auth.getUser()).data.user?.email).toBe(email);
+  });
+
+  it("the invited account sets its password when accepting (TC-NET-15)", async () => {
+    const email = uniqueEmail("senha");
+    await inviteReseller({}, formData({ networkId, email }));
+    const token = await inviteToken(networkId, email);
+    const browser = createClient<Database>(SUPABASE_URL, PUBLISHABLE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    setTestClient(browser);
+    await confirmRoute(new NextRequest(emailLink((await waitForEmail(email)).html).toString()));
+
+    const accept = (password: string, confirm = password) =>
+      acceptInvite({}, formData({ token, resellerName: "Loja Nova", password, confirm }));
+    expect(await accept("curta")).toEqual({ error: "A senha deve ter ao menos 8 caracteres." });
+    expect(await accept("senha-forte-1", "outra-senha")).toEqual({
+      error: "As senhas não coincidem.",
+    });
+    await expectRedirect(() => accept("senha-forte-1"), /toast=network-joined/);
+
+    const fresh = createClient<Database>(SUPABASE_URL, PUBLISHABLE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const signIn = await fresh.auth.signInWithPassword({ email, password: "senha-forte-1" });
+    expect(signIn.error).toBeNull();
+    expect(signIn.data.user?.user_metadata.password_set).toBe(true);
   });
 
   it("sends an access link to an email that already has an account (TC-NET-13)", async () => {
