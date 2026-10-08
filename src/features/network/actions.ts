@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/features/auth/queries";
 import { requireRole } from "@/features/organizations/queries";
 import { acceptInviteSchema, createNetworkSchema, inviteResellerSchema } from "./validation";
+import { sendInviteEmail } from "./invite-email";
 
 export type ActionState = { error?: string; ok?: boolean };
 
@@ -33,13 +34,25 @@ export async function inviteReseller(_prev: ActionState, formData: FormData): Pr
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
   const supabase = await createClient();
-  const { error } = await supabase.from("network_members").insert({
-    network_id: parsed.data.networkId,
-    invited_email: parsed.data.email,
-    status: "INVITED",
-  });
+  const { data: invite, error } = await supabase
+    .from("network_members")
+    .insert({
+      network_id: parsed.data.networkId,
+      invited_email: parsed.data.email,
+      status: "INVITED",
+    })
+    .select("id, invite_token")
+    .single();
   if (error) {
     return { error: error.code === "23505" ? "Essa revendedora já foi convidada" : error.message };
+  }
+
+  // AC-NET-003-03: an invite nobody was told about is useless — undo it so the
+  // admin can simply try again.
+  const sent = await sendInviteEmail(parsed.data.email, invite.invite_token);
+  if (sent.error) {
+    await supabase.from("network_members").delete().eq("id", invite.id);
+    return { error: sent.error };
   }
 
   revalidatePath("/rede-fabrica");
