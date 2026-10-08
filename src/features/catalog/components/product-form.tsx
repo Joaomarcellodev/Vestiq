@@ -129,7 +129,13 @@ export function ProductForm({
 
       <section className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
         <h2 className="font-headline-md text-headline-md text-on-surface">Fotos</h2>
-        <ImageUploadField files={images} onFilesChange={setImages} />
+        <ImageUploadField
+          files={images}
+          onFilesChange={setImages}
+          hint={
+            isFactory ? "Estas fotos aparecem para as revendedoras em Fornecedores." : undefined
+          }
+        />
       </section>
 
       <section className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
