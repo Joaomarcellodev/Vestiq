@@ -12,6 +12,8 @@
 | RF-PROD-005 | AC-PROD-005-01    | TC-PROD-06 | integration                    |
 | RF-PROD-006 | AC-PROD-006-01    | TC-PROD-07 | integration                    |
 | RF-PROD-006 | AC-PROD-006-02    | TC-PROD-08 | integration                    |
+| RF-PROD-006 | AC-PROD-006-03    | TC-PROD-19 | integration + component + e2e  |
+| RF-PROD-006 | AC-PROD-006-04    | TC-PROD-20 | integration                    |
 | RF-PROD-005 | AC-PROD-05-margem | TC-PROD-09 | unit                           |
 | RF-PROD-002 | AC-PROD-rls       | TC-PROD-10 | integration (2 tenants)        |
 | RF-PROD-007 | AC-PROD-007-01    | TC-PROD-11 | unit + component + integration |
@@ -77,6 +79,14 @@ integration · **crítica (autorização)** · campos enviados pela revendedora 
 ### TC-PROD-14 — Trigger de condições só para fábrica
 
 integration · **crítica (autorização)** · `update` direto de `min_order_quantity`/`size_grid` em produto de revendedora → erro.
+
+### TC-PROD-19 — Arquivar publica na rede
+
+integration + component + e2e · **crítica (estoque)** · `archive_product_to_offers` cria uma oferta por variação com quantidade > 0 e arquiva o produto; quantidade acima do estoque, preço inválido, variação de outro produto ou rede da qual a revendedora não participa → erro e nada muda; outra organização → `not authorized`.
+
+### TC-PROD-20 — Arquivar sem ofertas
+
+integration · não-crítica · lista de itens vazia só arquiva o produto.
 
 ## Cobertura de RF
 
