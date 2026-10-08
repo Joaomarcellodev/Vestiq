@@ -440,6 +440,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          image_urls: string[]
           network_id: string
           note: string | null
           organization_id: string
@@ -453,6 +454,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          image_urls?: string[]
           network_id: string
           note?: string | null
           organization_id: string
@@ -466,6 +468,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          image_urls?: string[]
           network_id?: string
           note?: string | null
           organization_id?: string
@@ -1340,6 +1343,7 @@ export type Database = {
         Returns: {
           created_at: string
           id: string
+          image_urls: string[]
           network_id: string
           note: string | null
           organization_id: string
