@@ -57,6 +57,7 @@ jobs:
         run: npm run test:coverage
 
       - name: Install Playwright browsers
+        timeout-minutes: 5
         run: npx playwright install --with-deps chromium
 
       - name: Reset + seed the database for E2E
