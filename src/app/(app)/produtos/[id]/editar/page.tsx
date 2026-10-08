@@ -17,15 +17,19 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   ]);
   if (!product) notFound();
 
+  // An archived category is out of the picker (BR-CAT-10) but the product keeps
+  // it: list it anyway so saving the form doesn't drop it.
+  const current = product.category_id;
+  const options =
+    current && product.categories && !categories.some((c) => c.id === current)
+      ? [...categories, { id: current, name: `${product.categories.name} (arquivada)` }]
+      : categories;
+
   return (
     <div className="space-y-lg">
       <BackButton fallback={`/produtos/${id}`} label="Produto" />
       <PageHeader title="Editar produto" description={product.name} />
-      <EditProductForm
-        product={product}
-        categories={categories}
-        isFactory={org.type === "FACTORY"}
-      />
+      <EditProductForm product={product} categories={options} isFactory={org.type === "FACTORY"} />
     </div>
   );
 }
