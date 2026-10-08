@@ -84,4 +84,4 @@ integration · não-crítica · `list_visible_offers` devolve as fotos da oferta
 
 ## Cobertura de RF
 
-`RF-OFFER-001..007` ✔
+`RF-OFFER-001..008` ✔
