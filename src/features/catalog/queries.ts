@@ -84,3 +84,51 @@ export async function listCategories() {
   if (error) throw error;
   return data ?? [];
 }
+
+export interface ArchiveOption {
+  variantId: string;
+  label: string;
+  stock: number;
+  costPrice: number;
+}
+
+/**
+ * AC-PROD-006-03 — what the archive step offers: the product's variants with
+ * stock (prefilled with all of it at cost price) and the networks the
+ * organization can publish to.
+ */
+export async function getArchiveOptions(productId: string) {
+  const org = await requireActiveOrganization();
+  const supabase = await createClient();
+  const [{ data: product, error }, { data: networks }] = await Promise.all([
+    supabase
+      .from("products")
+      .select(
+        "id, name, archived_at, product_variants(id, size, color, stock_on_hand, cost_price, archived_at)",
+      )
+      .eq("id", productId)
+      .maybeSingle(),
+    supabase
+      .from("network_members")
+      .select("factory_networks(id, name)")
+      .eq("reseller_id", org.id)
+      .eq("status", "ACTIVE"),
+  ]);
+  if (error) throw error;
+  if (!product) return null;
+
+  const options: ArchiveOption[] = (product.product_variants ?? [])
+    .filter((v) => v.archived_at === null && v.stock_on_hand > 0)
+    .map((v) => ({
+      variantId: v.id,
+      label: [v.color, v.size].filter(Boolean).join(" / ") || "Único",
+      stock: v.stock_on_hand,
+      costPrice: Number(v.cost_price),
+    }));
+
+  return {
+    product: { id: product.id, name: product.name, archived: product.archived_at !== null },
+    variants: options,
+    networks: (networks ?? []).flatMap((m) => (m.factory_networks ? [m.factory_networks] : [])),
+  };
+}

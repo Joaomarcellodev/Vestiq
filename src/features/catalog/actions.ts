@@ -8,6 +8,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import type { Database } from "@/types/database";
 import {
+  archiveToOffersSchema,
   categorySchema,
   PRODUCT_IMAGE_MAX_BYTES,
   PRODUCT_IMAGE_MAX_COUNT,
@@ -254,6 +255,51 @@ export async function updateProduct(_prev: ActionState, formData: FormData): Pro
   revalidatePath("/produtos");
   revalidatePath(`/produtos/${d.id}`);
   redirect(`/produtos/${d.id}?toast=product-updated`);
+}
+
+/**
+ * AC-PROD-006-03/04 — archives the product and, in the same transaction,
+ * publishes the chosen quantities as network offers (`archive_product_to_offers`).
+ */
+export async function archiveProductToOffers(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireActiveOrganization();
+  let items: unknown;
+  try {
+    items = JSON.parse((formData.get("items") as string) || "[]");
+  } catch {
+    return { error: "Itens inválidos" };
+  }
+  const parsed = archiveToOffersSchema.safeParse({
+    productId: formData.get("productId"),
+    networkId: formData.get("networkId") ?? "",
+    items,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+
+  const supabase = await createClient();
+  const { data: offers, error } = await supabase.rpc("archive_product_to_offers", {
+    p_product_id: parsed.data.productId,
+    p_network_id: parsed.data.networkId || undefined,
+    p_items: parsed.data.items.map((i) => ({
+      variant_id: i.variantId,
+      quantity: i.quantity,
+      transfer_price: i.transferPrice,
+    })),
+  });
+  if (error) {
+    return {
+      error: /not authorized/i.test(error.message)
+        ? "Você não tem permissão para esta ação"
+        : error.message,
+    };
+  }
+
+  revalidatePath("/produtos");
+  revalidatePath("/rede");
+  redirect(`/produtos?toast=${offers > 0 ? "product-archived-offered" : "product-archived"}`);
 }
 
 export async function archiveProduct(formData: FormData): Promise<void> {

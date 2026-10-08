@@ -13,6 +13,10 @@ export const FLASH_MESSAGES: Record<string, { message: string; variant: ToastVar
   "product-created": { message: "Produto cadastrado.", variant: "success" },
   "product-updated": { message: "Produto atualizado.", variant: "success" },
   "product-archived": { message: "Produto arquivado.", variant: "success" },
+  "product-archived-offered": {
+    message: "Produto arquivado e peças publicadas na rede.",
+    variant: "success",
+  },
   "product-unarchived": { message: "Produto desarquivado.", variant: "success" },
 
   // customers

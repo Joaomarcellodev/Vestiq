@@ -29,3 +29,16 @@ export type VariantInput = z.infer<typeof variantSchema>;
 export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 export const PRODUCT_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 export const PRODUCT_IMAGE_MAX_COUNT = 5;
+
+/** AC-PROD-006-03 — archive a product, publishing the chosen stock to a network. */
+export const archiveToOffersSchema = z.object({
+  productId: z.string().uuid("Produto inválido"),
+  networkId: z.string().uuid("Escolha a rede").optional().or(z.literal("")),
+  items: z.array(
+    z.object({
+      variantId: z.string().uuid(),
+      quantity: z.coerce.number().int("Quantidade inválida").min(0, "Quantidade inválida"),
+      transferPrice: z.coerce.number().min(0, "Preço inválido"),
+    }),
+  ),
+});
