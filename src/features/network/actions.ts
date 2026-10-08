@@ -7,6 +7,8 @@ import { requireUser } from "@/features/auth/queries";
 import { requireRole } from "@/features/organizations/queries";
 import { acceptInviteSchema, createNetworkSchema, inviteResellerSchema } from "./validation";
 import { sendInviteEmail } from "./invite-email";
+import { needsPassword } from "./invite-password";
+import { newPasswordSchema } from "@/features/auth/validation";
 
 export type ActionState = { error?: string; ok?: boolean };
 
@@ -60,7 +62,7 @@ export async function inviteReseller(_prev: ActionState, formData: FormData): Pr
 }
 
 export async function acceptInvite(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  await requireUser();
+  const user = await requireUser();
   const parsed = acceptInviteSchema.safeParse({
     token: formData.get("token"),
     resellerName: formData.get("resellerName"),
@@ -68,6 +70,22 @@ export async function acceptInvite(_prev: ActionState, formData: FormData): Prom
   if (!parsed.success) return { error: "Convite inválido" };
 
   const supabase = await createClient();
+
+  if (needsPassword(user)) {
+    const password = newPasswordSchema.safeParse({
+      password: formData.get("password"),
+      confirm: formData.get("confirm"),
+    });
+    if (!password.success) {
+      return { error: password.error.issues[0]?.message ?? "Senha inválida" };
+    }
+    const { error } = await supabase.auth.updateUser({
+      password: password.data.password,
+      data: { password_set: true },
+    });
+    if (error) return { error: "Não foi possível salvar a senha. Tente novamente." };
+  }
+
   const { error } = await supabase.rpc("accept_network_invite", {
     p_token: parsed.data.token,
     p_reseller_name: parsed.data.resellerName || undefined,
