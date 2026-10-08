@@ -7,6 +7,7 @@
 | RF-PROD-001 | AC-PROD-001-01    | TC-PROD-01 | integration                    |
 | RF-PROD-001 | AC-PROD-001-02    | TC-PROD-02 | integration                    |
 | RF-PROD-002 | AC-PROD-002-01    | TC-PROD-03 | integration + e2e              |
+| RF-PROD-002 | AC-PROD-002-02    | TC-PROD-21 | component + integration + e2e  |
 | RF-PROD-003 | AC-PROD-003-01    | TC-PROD-04 | component + integration        |
 | RF-PROD-004 | AC-PROD-004-01    | TC-PROD-05 | integration                    |
 | RF-PROD-005 | AC-PROD-005-01    | TC-PROD-06 | integration                    |
@@ -77,6 +78,10 @@ integration · **crítica (autorização)** · campos enviados pela revendedora 
 ### TC-PROD-14 — Trigger de condições só para fábrica
 
 integration · **crítica (autorização)** · `update` direto de `min_order_quantity`/`size_grid` em produto de revendedora → erro.
+
+### TC-PROD-21 — Gerenciar fotos
+
+component + integration + e2e · não-crítica · "Tornar capa" move a foto para o início; remover apaga o arquivo do Storage; URL que não era do produto é ignorada; foto enviada pela fábrica aparece para a revendedora em `/fornecedores` (E2E).
 
 ## Cobertura de RF
 

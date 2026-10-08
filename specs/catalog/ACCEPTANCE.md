@@ -19,6 +19,15 @@
 **Então** o produto e a variação P são criados
 **E** a variação recebe SKU (informado ou gerado).
 
+## AC-PROD-002-02 — Gerenciar as fotos do produto
+
+**Dado** um produto com fotos (da revendedora ou da fábrica)
+**Quando** a dona do catálogo edita o produto
+**Então** ela adiciona fotos (até 5), remove fotos e escolhe a foto de capa (a primeira)
+**E** as fotos removidas são apagadas do bucket `product-images`
+**E** o servidor só aceita manter fotos que já eram do produto
+**E** no formulário da fábrica há o aviso de que essas fotos aparecem para as revendedoras em Fornecedores.
+
 ## AC-PROD-003-01 — Produto exige ao menos uma variação
 
 **Dado** o formulário de novo produto
