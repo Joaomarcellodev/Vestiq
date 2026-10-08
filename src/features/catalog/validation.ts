@@ -4,6 +4,15 @@ export const categorySchema = z.object({
   name: z.string().trim().min(1, "Informe o nome da categoria").max(80),
 });
 
+export const renameCategorySchema = categorySchema.extend({
+  id: z.string().uuid("Categoria inválida"),
+});
+
+export const categoryArchiveSchema = z.object({
+  id: z.string().uuid("Categoria inválida"),
+  archived: z.enum(["true", "false"]).transform((v) => v === "true"),
+});
+
 export const variantSchema = z.object({
   size: z.string().trim().max(20).optional().or(z.literal("")),
   color: z.string().trim().max(40).optional().or(z.literal("")),
