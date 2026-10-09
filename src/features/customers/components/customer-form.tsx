@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
 import { Button, TextField } from "@/components/atoms";
+import { useFormSubmit } from "@/lib/hooks/use-form-submit";
 import { createCustomer, updateCustomer, type ActionState } from "../actions";
 
 interface Customer {
@@ -15,13 +15,13 @@ interface Customer {
 
 export function CustomerForm({ customer }: { customer?: Customer }) {
   const editing = Boolean(customer);
-  const [state, action, pending] = useActionState<ActionState, FormData>(
+  const { state, pending, formProps } = useFormSubmit<ActionState>(
     editing ? updateCustomer : createCustomer,
     {},
   );
 
   return (
-    <form action={action} className="space-y-md">
+    <form {...formProps} className="space-y-md">
       {customer && <input type="hidden" name="id" value={customer.id} />}
       {state.error && (
         <p

@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { Button, Icon, TextField } from "@/components/atoms";
+import { useFormSubmit } from "@/lib/hooks/use-form-submit";
 import { updateProduct, type ActionState } from "../actions";
 import { ImageUploadField } from "./image-upload-field";
 import { WholesaleFields } from "./wholesale-fields";
@@ -62,7 +63,6 @@ export function EditProductForm({
   /** Shows the wholesale conditions (minimum order + size grid) — RF-PROD-007. */
   isFactory?: boolean;
 }) {
-  const [state, action, pending] = useActionState<ActionState, FormData>(updateProduct, {});
   const [images, setImages] = useState<File[]>([]);
   const [existing, setExisting] = useState<string[]>(product.image_urls ?? []);
   const [variants, setVariants] = useState<VariantRow[]>(() => {
@@ -72,6 +72,25 @@ export function EditProductForm({
   });
   // Existing variants taken off the form: archived on save, until then undoable.
   const [toArchive, setToArchive] = useState<VariantRow[]>([]);
+  const { state, pending, formProps } = useFormSubmit<ActionState>(updateProduct, {}, (fd) => {
+    fd.set("existingImages", JSON.stringify(existing));
+    fd.set(
+      "variants",
+      JSON.stringify(
+        variants.map((v) => ({
+          id: v.id ?? "",
+          size: v.size,
+          color: v.color,
+          sku: v.sku,
+          costPrice: v.costPrice,
+          retailPrice: v.retailPrice,
+          initialStock: v.id ? "0" : v.initialStock,
+        })),
+      ),
+    );
+    fd.delete("images");
+    images.forEach((f) => fd.append("images", f));
+  });
   const errors = state.fieldErrors ?? {};
 
   const update = (i: number, patch: Partial<VariantRow>) =>
@@ -91,29 +110,7 @@ export function EditProductForm({
     );
 
   return (
-    <form
-      action={(fd) => {
-        fd.set("existingImages", JSON.stringify(existing));
-        fd.set(
-          "variants",
-          JSON.stringify(
-            variants.map((v) => ({
-              id: v.id ?? "",
-              size: v.size,
-              color: v.color,
-              sku: v.sku,
-              costPrice: v.costPrice,
-              retailPrice: v.retailPrice,
-              initialStock: v.id ? "0" : v.initialStock,
-            })),
-          ),
-        );
-        fd.delete("images");
-        images.forEach((f) => fd.append("images", f));
-        action(fd);
-      }}
-      className="space-y-md"
-    >
+    <form {...formProps} className="space-y-md">
       <input type="hidden" name="id" value={product.id} />
       {state.error && (
         <p
