@@ -104,13 +104,19 @@ export function NotificationBell({
   const rootRef = useRef<HTMLDivElement>(null);
   const liveRef = useRef(false);
   const knownIds = useRef(new Set(initialNotifications.map((n) => n.id)));
+  // Bumped when a "mark as read" starts and when it lands: a refresh that left
+  // before then carries the old unread count and must not overwrite the
+  // optimistic one (the badge used to jump back after "Marcar todas").
+  const readVersion = useRef(0);
   const permission = useSyncExternalStore(subscribePermission, readPermission, serverPermission);
 
   const refresh = useCallback(async () => {
+    const version = readVersion.current;
     try {
       const res = await fetch("/api/notifications", { cache: "no-store" });
       if (!res.ok) return;
       const data = (await res.json()) as { notifications: AppNotification[]; unreadCount: number };
+      if (version !== readVersion.current) return;
       knownIds.current = new Set(data.notifications.map((n) => n.id));
       setItems(data.notifications);
       setUnread(data.unreadCount);
@@ -214,13 +220,26 @@ export function NotificationBell({
     };
   }, [open, refresh]);
 
+  /** Runs a "mark as read" action, then reconciles with the server. */
+  const markRead = (action: () => Promise<void>) => {
+    readVersion.current += 1;
+    startTransition(async () => {
+      try {
+        await action();
+      } finally {
+        readVersion.current += 1;
+      }
+      await refresh();
+    });
+  };
+
   const openItem = (n: AppNotification) => {
     if (!n.readAt) {
       setItems((list) =>
         list.map((x) => (x.id === n.id ? { ...x, readAt: new Date().toISOString() } : x)),
       );
       setUnread((u) => Math.max(0, u - 1));
-      startTransition(() => markNotificationRead(n.id));
+      markRead(() => markNotificationRead(n.id));
     }
     setOpen(false);
     if (n.link) router.push(n.link);
@@ -229,7 +248,7 @@ export function NotificationBell({
   const markAll = () => {
     setItems((list) => list.map((x) => ({ ...x, readAt: x.readAt ?? new Date().toISOString() })));
     setUnread(0);
-    startTransition(() => markAllNotificationsRead());
+    markRead(() => markAllNotificationsRead());
   };
 
   return (
