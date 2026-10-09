@@ -75,7 +75,13 @@ export async function archiveCustomer(formData: FormData): Promise<void> {
   await requireActiveOrganization();
   const id = formData.get("id") as string;
   const supabase = await createClient();
-  await supabase.from("customers").update({ archived_at: new Date().toISOString() }).eq("id", id);
+  const { data, error } = await supabase
+    .from("customers")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", id)
+    .select("id");
+  // RLS doesn't raise on rows it hides — an update that touched nothing failed too.
+  if (error || !data?.length) redirect(`/clientes/${id}?toast=customer-archive-failed`);
   revalidatePath("/clientes");
   redirect("/clientes?toast=customer-archived");
 }
@@ -84,7 +90,12 @@ export async function unarchiveCustomer(formData: FormData): Promise<void> {
   await requireActiveOrganization();
   const id = formData.get("id") as string;
   const supabase = await createClient();
-  await supabase.from("customers").update({ archived_at: null }).eq("id", id);
+  const { data, error } = await supabase
+    .from("customers")
+    .update({ archived_at: null })
+    .eq("id", id)
+    .select("id");
+  if (error || !data?.length) redirect("/clientes?scope=archived&toast=customer-unarchive-failed");
   revalidatePath("/clientes");
   revalidatePath(`/clientes/${id}`);
   redirect(`/clientes/${id}?toast=customer-unarchived`);
