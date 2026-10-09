@@ -89,6 +89,21 @@
 **Quando** a revendedora o reativa
 **Então** ele volta às listas.
 
+## AC-PROD-006-03 — Arquivar publica as peças na rede
+
+**Dado** uma revendedora de uma rede ativa com um produto que tem variações em estoque
+**Quando** ela arquiva o produto
+**Então** vê cada variação com estoque, já preenchida com todo o estoque e o preço de custo
+**E** ao confirmar, cada variação com quantidade > 0 vira uma oferta ativa na rede escolhida
+**E** o produto e as variações ficam arquivados (somem das vendas, aparecem em "Arquivados")
+**E** tudo acontece numa transação: se uma oferta for inválida, nada é arquivado.
+
+## AC-PROD-006-04 — Arquivar sem rede ou sem estoque
+
+**Dado** um produto sem estoque, ou uma revendedora que não participa de nenhuma rede
+**Quando** ela arquiva o produto
+**Então** o produto só é arquivado, com o aviso de que nenhuma oferta foi publicada.
+
 ## AC-PROD-05-margem — Margem estimada
 
 **Dado** custo R$ 60,00 e venda R$ 100,00

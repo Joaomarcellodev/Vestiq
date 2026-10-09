@@ -265,6 +265,7 @@ Ver [ADR-0004](./adr/0004-atomic-operations-via-postgres-functions.md).
 | `adjust_inventory(variant_id uuid, delta int, note text)` | movimento `AJUSTE`, bloqueia saldo negativo (RF-INV-005) |
 | `record_inventory_entry(variant_id uuid, qty int, note text)` | movimento `ENTRADA` |
 | `send_negotiation_message(p_negotiation_id uuid, p_body text)` | evento `MESSAGE` (1–1.000 caracteres, só as partes, negociação aberta); devolve o evento (ADR-0010) |
+| `archive_product_to_offers(p_product_id uuid, p_network_id uuid, p_items jsonb)` | migration `0025`: cria uma oferta `ACTIVE` por variação com quantidade > 0 (≤ `stock_on_hand`, preço > 0, revendedora `ACTIVE` na rede) e arquiva produto + variações; erro em qualquer item → nada muda (AC-PROD-006-03/04, VES-69) |
 
 Todas `security definer`, `set search_path = ''`, e revalidam a associação do
 usuário à organização antes de escrever.
