@@ -31,7 +31,10 @@ test.describe("Auth", () => {
   test("an expired email link lands on the login with a clear message", async ({ page }) => {
     await page.goto("/auth/callback?code=nope");
     await expect(page).toHaveURL(/\/login\?error=link/);
-    await expect(page.getByRole("alert")).toContainText(/link expirou ou já foi usado/i);
+    // Next's route announcer is also role="alert" — pick the banner by its text.
+    await expect(
+      page.getByRole("alert").filter({ hasText: /link expirou ou já foi usado/i }),
+    ).toBeVisible();
   });
 
   test("forgot-password: request → email link → set a new password → logged in", async ({
