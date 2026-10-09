@@ -12,12 +12,49 @@
 **Quando** a revendedora tenta criar "Bolsas" de novo
 **Então** recebe erro de nome duplicado.
 
+## AC-PROD-001-03 — Renomear categoria
+
+**Dado** a categoria "Bolsas" da revendedora
+**Quando** ela renomeia para "Bolsas e carteiras"
+**Então** o novo nome aparece na tela de categorias, no formulário e no filtro de produtos
+**E** um nome que já existe na organização é recusado com erro no campo.
+
+## AC-PROD-001-04 — Arquivar e reativar categoria
+
+**Dado** a categoria "Bolsas" com produtos vinculados
+**Quando** a revendedora arquiva a categoria
+**Então** ela some da seleção do formulário de produto e do filtro
+**E** os produtos continuam vinculados a ela (BR-CAT-10)
+**E** a categoria pode ser reativada na tela de categorias.
+
+## AC-PROD-001-05 — Filtrar produtos por categoria
+
+**Dado** produtos em "Bolsas" e em "Calçados"
+**Quando** a revendedora escolhe "Bolsas" no filtro de /produtos
+**Então** só os produtos de "Bolsas" aparecem
+**E** o filtro combina com a busca e com Ativos/Arquivados.
+
+## AC-PROD-001-06 — Criar categoria pelo formulário de produto
+
+**Dado** o formulário de novo produto ou de edição
+**Quando** a revendedora cria uma categoria por ali
+**Então** a categoria é criada e já fica selecionada no produto.
+
 ## AC-PROD-002-01 — Cadastrar produto com variação
 
 **Dado** uma revendedora
 **Quando** ela cadastra "Vestido Floral" com preço de venda R$ 199,90 e uma variação P
 **Então** o produto e a variação P são criados
 **E** a variação recebe SKU (informado ou gerado).
+
+## AC-PROD-002-02 — Gerenciar as fotos do produto
+
+**Dado** um produto com fotos (da revendedora ou da fábrica)
+**Quando** a dona do catálogo edita o produto
+**Então** ela adiciona fotos (até 5), remove fotos e escolhe a foto de capa (a primeira)
+**E** as fotos removidas são apagadas do bucket `product-images`
+**E** o servidor só aceita manter fotos que já eram do produto
+**E** no formulário da fábrica há o aviso de que essas fotos aparecem para as revendedoras em Fornecedores.
 
 ## AC-PROD-003-01 — Produto exige ao menos uma variação
 

@@ -8,6 +8,9 @@
 | RF-NET-002 | AC-NET-002-01 | TC-NET-02 | integration             |
 | RF-NET-002 | AC-NET-002-02 | TC-NET-03 | integration             |
 | RF-NET-003 | AC-NET-003-01 | TC-NET-04 | integration             |
+| RF-NET-003 | AC-NET-003-02 | TC-NET-13 | integration (Mailpit)   |
+| RF-NET-003 | AC-NET-003-03 | TC-NET-14 | integration             |
+| RF-NET-004 | AC-NET-004-04 | TC-NET-15 | component + integration |
 | RF-NET-004 | AC-NET-004-01 | TC-NET-05 | e2e                     |
 | RF-NET-004 | AC-NET-004-02 | TC-NET-06 | unit + integration      |
 | RF-NET-004 | AC-NET-004-03 | TC-NET-07 | integration             |
@@ -33,7 +36,19 @@
 
 ### TC-NET-04 — Convite gera token + email
 
-- integration · não-crítica · `network_members INVITED`, token único; mock de email chamado.
+- integration · não-crítica · `network_members INVITED`, token único; email enviado.
+
+### TC-NET-13 — Email de convite
+
+- integration · não-crítica · conta nova recebe o email de convite e conta existente recebe o link de acesso; os dois chegam no Mailpit com o link `/auth/confirm?next=/convite/<token>`.
+
+### TC-NET-14 — Falha no envio desfaz o convite
+
+- integration · não-crítica · envio falha → action devolve `{ error }` e o `network_members` não existe.
+
+### TC-NET-15 — Senha definida no aceite
+
+- component + integration · **crítica (autenticação)** · usuária convidada sem senha aceita com senha → consegue entrar com `signInWithPassword`; senha curta é recusada.
 
 ### TC-NET-05 — Aceite feliz
 

@@ -7,6 +7,7 @@
  */
 import { createClient } from "@supabase/supabase-js";
 import { loadEnvLocal } from "./load-env.mjs";
+import { COLOR_HEX, swatchPng } from "./seed-images.mjs";
 
 loadEnvLocal();
 
@@ -303,6 +304,22 @@ async function main() {
       },
       { organization_id: factory.id, name: item.name },
     );
+    // One photo per colour, so /fornecedores shows the pieces (VES-107).
+    if (!prod.image_urls?.length) {
+      const urls = [];
+      for (const color of Object.keys(item.colors)) {
+        const path = `${factory.id}/${prod.id}/seed-${color.toLowerCase()}.png`;
+        const { error } = await db.storage
+          .from("product-images")
+          .upload(path, swatchPng(COLOR_HEX[color] ?? "#888888"), {
+            contentType: "image/png",
+            upsert: true,
+          });
+        if (error) console.warn("factory photo:", error.message);
+        else urls.push(db.storage.from("product-images").getPublicUrl(path).data.publicUrl);
+      }
+      if (urls.length) await db.from("products").update({ image_urls: urls }).eq("id", prod.id);
+    }
     for (const [color, stock] of Object.entries(item.colors)) {
       for (const size of item.size_grid) {
         const sku = `${item.sku}-${color.slice(0, 3).toUpperCase()}-${size}`;

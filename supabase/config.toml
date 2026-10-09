@@ -247,10 +247,16 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# Network invite emails (RF-NET-003). Both links go through /auth/confirm with
+# a token hash; `RedirectTo` already carries `?next=/convite/<token>`. Copy the
+# same subject/body to the hosted project (Dashboard → Auth → Email Templates).
+[auth.email.template.invite]
+subject = "Convite para uma rede no Vestiq"
+content_path = "./supabase/templates/invite.html"
+
+[auth.email.template.magic_link]
+subject = "Seu convite no Vestiq"
+content_path = "./supabase/templates/magic_link.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]

@@ -7,17 +7,29 @@ import { signInWithOAuth, signInWithPassword, type AuthFormState } from "../acti
 
 const initialState: AuthFormState = {};
 
-export function LoginForm({ next, oauthError }: { next: string; oauthError?: boolean }) {
+export function LoginForm({
+  next,
+  oauthError,
+  linkError,
+}: {
+  next: string;
+  oauthError?: boolean;
+  /** An email link (invite) that was expired or already used — see /auth/confirm. */
+  linkError?: boolean;
+}) {
   const [state, formAction, pending] = useActionState(signInWithPassword, initialState);
 
   return (
     <div className="w-full max-w-md">
-      {(state.error || oauthError) && (
+      {(state.error || oauthError || linkError) && (
         <div
           role="alert"
           className="mb-md rounded-lg border border-error/30 bg-error-container px-4 py-3 font-body-md text-body-md text-on-error-container"
         >
-          {state.error ?? "Não foi possível concluir o login social. Tente novamente."}
+          {state.error ??
+            (linkError
+              ? "Este link expirou ou já foi usado. Entre com email e senha, ou peça um novo convite à fábrica."
+              : "Não foi possível concluir o login social. Tente novamente.")}
         </div>
       )}
 

@@ -57,8 +57,8 @@ As demais migrations acompanham cada feature.
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | **auth** | 1 | RF-AUTH-001..004 | login | Fase 0 | ✅ |
 | 2 | **organizations** | 1 | base RF-NET, RF-AUTH-004 | — | auth | ✅ |
-| 3 | **network** | 1 / 6 | RF-NET-001..008 | rede conectada 1·2, perfil da revendedora | organizations | 🟨 back-end + telas base; falta email de convite real, perfil público |
-| 4 | **catalog** | 2 | RF-PROD-001..006 | novo produto, detalhes do produto, inventário | organizations | 🟨 CRUD funcional; arquivar publica o estoque como ofertas na rede (VES-69, `0025`); falta upload de imagens, categorias UI |
+| 3 | **network** | 1 / 6 | RF-NET-001..008 | rede conectada 1·2, perfil da revendedora | organizations | 🟨 back-end + telas base + email de convite pelo Supabase Auth (senha definida no aceite); falta perfil público |
+| 4 | **catalog** | 2 | RF-PROD-001..006 | novo produto, detalhes do produto, inventário | organizations | 🟨 CRUD funcional; upload e gestão de fotos (capa, remover), archive UI (arquivar publica o estoque como ofertas na rede, VES-69, `0025`) e gestão de categorias (`/produtos/categorias` + filtro) prontos; falta editar variações (VES-68) |
 | 5 | **inventory** | 3 | RF-INV-001..006 | inventário, detalhes do produto | catalog | ✅ RPCs + controles + histórico de movimentações por variação; tela de inventário pendente |
 | 6 | **customers** | 3 | RF-CUSTOMER-001..004 | clientes, detalhes do cliente | organizations | 🟨 CRUD + histórico; falta editar/arquivar na UI |
 | 7 | **sales** | 3 | RF-SALE-001..009 | registrar venda, vendas | inventory, customers | ✅ confirmar/cancelar transacional + telas |

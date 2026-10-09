@@ -53,7 +53,7 @@ sem apagar histórico.
 
 | ID        | Como…         | Quero…                                                        | Para…                                     |
 | --------- | ------------- | ------------------------------------------------------------- | ----------------------------------------- |
-| US-CAT-01 | RESELLER      | criar categorias                                              | organizar o catálogo                      |
+| US-CAT-01 | RESELLER      | criar, renomear, arquivar categorias e filtrar por elas       | organizar o catálogo                      |
 | US-CAT-02 | RESELLER      | cadastrar um produto com fotos, preços e variações            | disponibilizá-lo para venda               |
 | US-CAT-03 | RESELLER      | editar um produto                                             | corrigir dados e preços                   |
 | US-CAT-04 | RESELLER      | desativar um produto que saiu de linha                        | limpar a listagem sem perder histórico    |

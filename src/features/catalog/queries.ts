@@ -21,6 +21,7 @@ export interface ProductListItem {
 export async function listProducts(
   search?: string,
   scope: "active" | "archived" = "active",
+  categoryId?: string,
 ): Promise<ProductListItem[]> {
   await requireActiveOrganization();
   const supabase = await createClient();
@@ -38,6 +39,7 @@ export async function listProducts(
   if (search && search.trim()) {
     query = query.ilike("name", `%${search.trim()}%`);
   }
+  if (categoryId) query = query.eq("category_id", categoryId);
 
   const { data, error } = await query;
   if (error) throw error;
@@ -131,4 +133,28 @@ export async function getArchiveOptions(productId: string) {
     variants: options,
     networks: (networks ?? []).flatMap((m) => (m.factory_networks ? [m.factory_networks] : [])),
   };
+}
+
+export interface CategoryListItem {
+  id: string;
+  name: string;
+  archived: boolean;
+  productCount: number;
+}
+
+/** Every category of the organization, archived ones included (category management screen). */
+export async function listCategoriesForManagement(): Promise<CategoryListItem[]> {
+  await requireActiveOrganization();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id, name, archived_at, products(count)")
+    .order("name");
+  if (error) throw error;
+  return (data ?? []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    archived: c.archived_at !== null,
+    productCount: c.products?.[0]?.count ?? 0,
+  }));
 }
