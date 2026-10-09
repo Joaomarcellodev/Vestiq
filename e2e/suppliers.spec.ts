@@ -83,5 +83,7 @@ test("a photo the factory uploads shows up for the reseller in Fornecedores", as
 
   // Keep the demo catalog clean: archived products leave Fornecedores.
   await page.getByRole("button", { name: "Arquivar" }).click();
+  await expect(page).toHaveURL(/\/produtos\/[0-9a-f-]{36}\/arquivar/);
+  await page.getByRole("button", { name: "Arquivar produto" }).click();
   await expect(page.getByText("Produto arquivado.")).toBeVisible();
 });
