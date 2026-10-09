@@ -440,6 +440,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          image_urls: string[]
           network_id: string
           note: string | null
           organization_id: string
@@ -453,6 +454,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          image_urls?: string[]
           network_id: string
           note?: string | null
           organization_id: string
@@ -466,6 +468,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          image_urls?: string[]
           network_id?: string
           note?: string | null
           organization_id?: string
@@ -1057,6 +1060,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      archive_product_to_offers: {
+        Args: { p_items?: Json; p_network_id?: string; p_product_id: string }
+        Returns: number
+      }
       auth_network_ids: { Args: never; Returns: string[] }
       auth_org_ids: { Args: never; Returns: string[] }
       auth_supplier_ids: { Args: never; Returns: string[] }
@@ -1340,6 +1347,7 @@ export type Database = {
         Returns: {
           created_at: string
           id: string
+          image_urls: string[]
           network_id: string
           note: string | null
           organization_id: string
@@ -1449,6 +1457,10 @@ export type Database = {
       shares_network: {
         Args: { org_a: string; org_b: string }
         Returns: boolean
+      }
+      update_product: {
+        Args: { p_product: Json; p_product_id: string; p_variants?: Json }
+        Returns: undefined
       }
     }
     Enums: {

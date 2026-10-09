@@ -48,3 +48,42 @@ test("a product outside the reseller's networks is not found", async ({ page }) 
   await page.goto("/fornecedores/produtos/00000000-0000-0000-0000-000000000000");
   await expect(page.getByText(/could not be found/i)).toBeVisible();
 });
+
+// VES-107 TC-PROD-21 — the factory's photos are what resellers see.
+test("a photo the factory uploads shows up for the reseller in Fornecedores", async ({
+  page,
+  browser,
+}) => {
+  const PNG = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+    "base64",
+  );
+  const name = `Peça Fábrica ${Date.now() % 100000}`;
+
+  await login(page, "fabrica@vestiq.dev");
+  await page.goto("/produtos/novo");
+  await page.getByLabel(/nome do produto/i).fill(name);
+  await page.getByLabel("Preço de venda (R$)").fill("90");
+  await expect(page.getByText(/aparecem para as revendedoras em Fornecedores/)).toBeVisible();
+  await page.locator("input[type=file]").setInputFiles({
+    name: "foto.png",
+    mimeType: "image/png",
+    buffer: PNG,
+  });
+  await expect(page.getByText("Capa", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: /salvar produto/i }).click();
+  await expect(page).toHaveURL(/\/produtos\/[0-9a-f-]{36}$/);
+
+  const reseller = await (await browser.newContext()).newPage();
+  await login(reseller, "revenda@vestiq.dev");
+  await reseller.goto(`/fornecedores?q=${encodeURIComponent(name)}`);
+  const card = reseller.getByRole("link", { name: new RegExp(name) });
+  await expect(card).toBeVisible();
+  await expect(card.locator("img")).toBeVisible();
+
+  // Keep the demo catalog clean: archived products leave Fornecedores.
+  await page.getByRole("button", { name: "Arquivar" }).click();
+  await expect(page).toHaveURL(/\/produtos\/[0-9a-f-]{36}\/arquivar/);
+  await page.getByRole("button", { name: "Arquivar produto" }).click();
+  await expect(page.getByText("Produto arquivado.")).toBeVisible();
+});

@@ -191,7 +191,7 @@ Append-only. Sem `update`/`delete` via RLS (RF-INV-006).
 | `unit_price` | numeric(12,2) | preço no momento da venda |
 | `line_total` | numeric(12,2) | `quantity * unit_price` |
 
-### `offers` — RF-OFFER-001..007
+### `offers` — RF-OFFER-001..008
 | coluna | tipo | notas |
 | --- | --- | --- |
 | `organization_id` | uuid | **tenant** = revendedora ofertante |
@@ -202,6 +202,7 @@ Append-only. Sem `update`/`delete` via RLS (RF-INV-006).
 | `transfer_price` | numeric(12,2) | preço/condição B2B |
 | `note` | text | null |
 | `status` | `offer_status` | |
+| `image_urls` | text[] | fotos da própria oferta (`0026`, RF-OFFER-008), no bucket `product-images` em `<org>/offers/`; vazio → `list_visible_offers` devolve as fotos do produto |
 
 A oferta **não** reserva estoque; a validação de disponibilidade ocorre na
 conclusão da negociação (transação).
@@ -265,6 +266,8 @@ Ver [ADR-0004](./adr/0004-atomic-operations-via-postgres-functions.md).
 | `adjust_inventory(variant_id uuid, delta int, note text)` | movimento `AJUSTE`, bloqueia saldo negativo (RF-INV-005) |
 | `record_inventory_entry(variant_id uuid, qty int, note text)` | movimento `ENTRADA` |
 | `send_negotiation_message(p_negotiation_id uuid, p_body text)` | evento `MESSAGE` (1–1.000 caracteres, só as partes, negociação aberta); devolve o evento (ADR-0010) |
+| `update_product(p_product_id uuid, p_product jsonb, p_variants jsonb)` | migration `0027`: grava os campos do produto e, quando recebe a lista, atualiza / cria / arquiva variações na mesma transação; variação nova pode trazer estoque inicial (movimento `ENTRADA`); nunca altera `stock_on_hand` de uma existente; ao menos uma variação (AC-PROD-005-02, VES-68) |
+| `archive_product_to_offers(p_product_id uuid, p_network_id uuid, p_items jsonb)` | migration `0025`: cria uma oferta `ACTIVE` por variação com quantidade > 0 (≤ `stock_on_hand`, preço > 0, revendedora `ACTIVE` na rede) e arquiva produto + variações; erro em qualquer item → nada muda (AC-PROD-006-03/04, VES-69) |
 
 Todas `security definer`, `set search_path = ''`, e revalidam a associação do
 usuário à organização antes de escrever.

@@ -16,7 +16,7 @@ Pages Router, e como fazer as mutações (Route Handlers/API vs Server Actions).
 - **Server Actions** para mutações (`"use server"` em `features/*/actions.ts`),
   consumidas via `<form action={...}>` e `useActionState`.
 - **Route Handlers** apenas para integrações que exigem endpoint HTTP (ex.:
-  `/auth/callback` do OAuth).
+  `/auth/callback` e `/auth/confirm` dos links enviados por email).
 - Proteção de rotas via `src/proxy.ts` (o antigo `middleware.ts`; Next 16 renomeou
   a convenção para `proxy`).
 - `typedRoutes` desligado até a superfície de rotas estabilizar (pós-Sprint 2),

@@ -2,28 +2,11 @@
 
 import { useActionState, useState } from "react";
 import { Button, Icon, TextField } from "@/components/atoms";
-import { estimatedMargin, formatPercent } from "@/lib/utils/currency";
 import { createProduct, type ActionState } from "../actions";
 import { ImageUploadField } from "./image-upload-field";
 import { WholesaleFields } from "./wholesale-fields";
-
-interface VariantRow {
-  size: string;
-  color: string;
-  sku: string;
-  costPrice: string;
-  retailPrice: string;
-  initialStock: string;
-}
-
-const emptyVariant: VariantRow = {
-  size: "Único",
-  color: "",
-  sku: "",
-  costPrice: "",
-  retailPrice: "",
-  initialStock: "0",
-};
+import { CategoryField } from "./category-field";
+import { emptyVariant, VariantFields, type VariantRow } from "./variant-fields";
 
 export function ProductForm({
   categories,
@@ -89,22 +72,7 @@ export function ProductForm({
         />
         <TextField label="SKU (código interno)" name="internalSku" placeholder="VST-001" />
         <TextField label="Marca" name="brand" placeholder="Ex: Chanel" />
-        <div>
-          <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
-            Categoria
-          </label>
-          <select
-            name="categoryId"
-            className="field-focus-ring w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3 font-body-md text-body-md"
-          >
-            <option value="">Selecione uma categoria</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CategoryField categories={categories} emptyLabel="Selecione uma categoria" />
         <div>
           <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
             Descrição
@@ -129,7 +97,13 @@ export function ProductForm({
 
       <section className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
         <h2 className="font-headline-md text-headline-md text-on-surface">Fotos</h2>
-        <ImageUploadField files={images} onFilesChange={setImages} />
+        <ImageUploadField
+          files={images}
+          onFilesChange={setImages}
+          hint={
+            isFactory ? "Estas fotos aparecem para as revendedoras em Fornecedores." : undefined
+          }
+        />
       </section>
 
       <section className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
@@ -153,65 +127,18 @@ export function ProductForm({
           </div>
         </div>
 
-        {variants.map((v, i) => {
-          const margin = estimatedMargin(Number(v.costPrice) || 0, Number(v.retailPrice) || 0);
-          return (
-            <div key={i} className="space-y-sm rounded-lg border border-outline-variant p-4">
-              <div className="grid grid-cols-1 gap-sm sm:grid-cols-2">
-                <TextField
-                  label="Tamanho"
-                  value={v.size}
-                  onChange={(e) => update(i, { size: e.target.value })}
-                />
-                <TextField
-                  label="Cor"
-                  value={v.color}
-                  onChange={(e) => update(i, { color: e.target.value })}
-                />
-                <TextField
-                  label="SKU variante"
-                  value={v.sku}
-                  onChange={(e) => update(i, { sku: e.target.value })}
-                />
-                <TextField
-                  label="Estoque inicial"
-                  type="number"
-                  value={v.initialStock}
-                  onChange={(e) => update(i, { initialStock: e.target.value })}
-                />
-                <TextField
-                  label="Custo (R$)"
-                  type="number"
-                  step="0.01"
-                  value={v.costPrice}
-                  onChange={(e) => update(i, { costPrice: e.target.value })}
-                />
-                <TextField
-                  label="Preço de venda (R$)"
-                  type="number"
-                  step="0.01"
-                  value={v.retailPrice}
-                  onChange={(e) => update(i, { retailPrice: e.target.value })}
-                />
-              </div>
-              <div className="flex items-center justify-between font-label-md text-label-md text-on-surface-variant">
-                <span>
-                  Margem estimada:{" "}
-                  <strong className="text-primary-container">{formatPercent(margin)}</strong>
-                </span>
-                {variants.length > 1 && (
-                  <button
-                    type="button"
-                    className="text-error"
-                    onClick={() => setVariants((r) => r.filter((_, idx) => idx !== i))}
-                  >
-                    Remover
-                  </button>
-                )}
-              </div>
-            </div>
-          );
-        })}
+        {variants.map((v, i) => (
+          <VariantFields
+            key={i}
+            row={v}
+            onChange={(patch) => update(i, patch)}
+            onRemove={
+              variants.length > 1
+                ? () => setVariants((r) => r.filter((_, idx) => idx !== i))
+                : undefined
+            }
+          />
+        ))}
       </section>
 
       <div className="flex justify-end">

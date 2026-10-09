@@ -86,6 +86,38 @@ describe("NotificationBell", () => {
     expect(screen.queryByRole("button", { name: /marcar todas/i })).toBeNull();
   });
 
+  it("keeps the badge at zero when a refresh from before 'marcar todas' lands late", async () => {
+    const stale = [notif(), notif()];
+    let answer: (value: unknown) => void = () => {};
+    const fetchMock = vi
+      .fn()
+      // the refresh fired by opening the panel — still in flight when "marcar todas" is clicked
+      .mockImplementationOnce(() => new Promise((resolve) => (answer = resolve)))
+      // the reconcile after the action: everything is read now
+      .mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          notifications: stale.map((n) => ({ ...n, readAt: new Date().toISOString() })),
+          unreadCount: 0,
+        }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<NotificationBell initialNotifications={stale} initialUnread={2} />);
+
+    const bell = screen.getByRole("button", { name: /notificações/i });
+    await userEvent.click(bell);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await userEvent.click(screen.getByRole("button", { name: /marcar todas como lidas/i }));
+
+    await act(async () => {
+      answer({ ok: true, json: async () => ({ notifications: stale, unreadCount: 2 }) });
+    });
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(bell).not.toHaveTextContent(/[1-9]/);
+    expect(bell).toHaveAccessibleName("Notificações");
+  });
+
   it("refreshes from /api/notifications when opened", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

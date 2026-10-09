@@ -13,6 +13,10 @@ export const FLASH_MESSAGES: Record<string, { message: string; variant: ToastVar
   "product-created": { message: "Produto cadastrado.", variant: "success" },
   "product-updated": { message: "Produto atualizado.", variant: "success" },
   "product-archived": { message: "Produto arquivado.", variant: "success" },
+  "product-archived-offered": {
+    message: "Produto arquivado e peças publicadas na rede.",
+    variant: "success",
+  },
   "product-unarchived": { message: "Produto desarquivado.", variant: "success" },
 
   // customers
@@ -28,6 +32,7 @@ export const FLASH_MESSAGES: Record<string, { message: string; variant: ToastVar
   // offers
   "offer-published": { message: "Oferta publicada na rede.", variant: "success" },
   "offer-cancelled": { message: "Oferta cancelada.", variant: "success" },
+  "offer-photos-updated": { message: "Fotos da oferta atualizadas.", variant: "success" },
 
   // negotiations
   "negotiation-opened": { message: "Proposta enviada.", variant: "success" },

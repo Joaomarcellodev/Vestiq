@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { listProducts } from "@/features/catalog/queries";
+import { listCategories, listProducts } from "@/features/catalog/queries";
 import { unarchiveProduct } from "@/features/catalog/actions";
 import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
@@ -15,11 +15,14 @@ export const metadata: Metadata = { title: "Produtos" };
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; scope?: string }>;
+  searchParams: Promise<{ q?: string; scope?: string; categoria?: string }>;
 }) {
-  const { q, scope } = await searchParams;
+  const { q, scope, categoria } = await searchParams;
   const currentScope = scope === "archived" ? "archived" : "active";
-  const products = await listProducts(q, currentScope);
+  const categories = await listCategories();
+  // Ignore a stale or foreign id instead of showing an empty list.
+  const category = categories.find((c) => c.id === categoria);
+  const products = await listProducts(q, currentScope, category?.id);
 
   return (
     <div className="space-y-lg">
@@ -27,12 +30,19 @@ export default async function ProductsPage({
         title="Inventário"
         description="Catálogo e estoque da sua loja."
         action={
-          <Link href="/produtos/novo" className="block">
-            <Button size="md" className="w-full sm:w-auto">
-              <Icon name="add" size={18} />
-              Novo produto
-            </Button>
-          </Link>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Link href="/produtos/categorias" className="block">
+              <Button variant="secondary" size="md" className="w-full sm:w-auto">
+                Categorias
+              </Button>
+            </Link>
+            <Link href="/produtos/novo" className="block">
+              <Button size="md" className="w-full sm:w-auto">
+                <Icon name="add" size={18} />
+                Novo produto
+              </Button>
+            </Link>
+          </div>
         }
       />
 
@@ -41,19 +51,35 @@ export default async function ProductsPage({
           basePath="/produtos"
           param="scope"
           current={currentScope === "active" ? "" : "archived"}
-          extra={{ q }}
+          extra={{ q, categoria: category?.id }}
           tabs={[
             { value: "", label: "Ativos" },
             { value: "archived", label: "Arquivados" },
           ]}
         />
-        <form className="flex gap-2">
+        <form className="flex flex-wrap gap-2 sm:flex-nowrap">
           {scope && <input type="hidden" name="scope" value={scope} />}
+          {categories.length > 0 && (
+            <select
+              name="categoria"
+              aria-label="Filtrar por categoria"
+              defaultValue={category?.id ?? ""}
+              className="field-focus-ring w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2.5 font-body-md text-body-md sm:w-48"
+            >
+              <option value="">Todas as categorias</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          )}
           <input
             name="q"
             defaultValue={q}
+            aria-label="Buscar produtos"
             placeholder="Buscar produtos, SKUs..."
-            className="field-focus-ring w-full min-w-0 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2.5 font-body-md text-body-md sm:w-64"
+            className="field-focus-ring min-w-0 flex-1 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2.5 font-body-md text-body-md sm:w-64 sm:flex-none"
           />
           <Button type="submit" variant="secondary">
             Buscar
@@ -67,17 +93,17 @@ export default async function ProductsPage({
           title={
             currentScope === "archived"
               ? "Nenhum produto arquivado"
-              : q
+              : q || category
                 ? "Nenhum produto encontrado"
                 : "Nenhum produto cadastrado"
           }
           description={
-            currentScope === "active" && !q
+            currentScope === "active" && !q && !category
               ? "Cadastre seu primeiro produto para começar a vender."
               : undefined
           }
           action={
-            currentScope === "active" && !q ? (
+            currentScope === "active" && !q && !category ? (
               <Link href="/produtos/novo">
                 <Button size="sm">Cadastrar produto</Button>
               </Link>

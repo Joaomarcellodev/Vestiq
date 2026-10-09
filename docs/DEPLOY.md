@@ -73,7 +73,12 @@ Só duas — ambas públicas (protegidas por RLS):
 > mais importante no deploy pela CLI: veja a armadilha do `.env.local` em
 > [Deploy pela CLI](#deploy-pela-cli-método-em-uso).
 >
-> `SUPABASE_SECRET_KEY` **não** é usada pelo app em produção (só em seeds/scripts).
+> `SUPABASE_SECRET_KEY` **é obrigatória** desde o email de convite da rede
+> (VES-64): o app usa a chave secreta só para `auth.admin.inviteUserByEmail`
+> (`src/features/network/invite-email.ts`). Cadastre-a como variável
+> **secreta**, com escopo **Functions** (runtime), nunca com prefixo
+> `NEXT_PUBLIC_`. Sem ela, convidar uma revendedora mostra "O envio de emails
+> não está configurado" e o convite não é criado.
 
 Depois de adicionar as variáveis: **Deploys → Trigger deploy → Deploy site**.
 
@@ -91,11 +96,19 @@ Vá em **Supabase → Authentication → URL Configuration**:
   (os dois asteriscos são obrigatórios; sem eles só a raiz é autorizada e o
   retorno em `/auth/callback` é recusado)
 
-Sem isso o login por **email/senha funciona**, mas login social e recuperação de
-senha falham (redirect não autorizado).
+Sem isso o login por **email/senha funciona**, mas a recuperação de senha e o
+link do email de convite falham (redirect não autorizado).
 
-Login social (opcional): **Authentication → Providers** → configure Client ID /
-Secret de Google e Apple.
+**Templates de email do convite** (**Authentication → Email Templates**): copie
+assunto e corpo de `supabase/templates/invite.html` ("Invite user", assunto
+`Convite para uma rede no Vestiq`) e de `supabase/templates/magic_link.html`
+("Magic Link", assunto `Seu convite no Vestiq`). Os dois links passam por
+`/auth/confirm` com `token_hash` — o template padrão do Supabase não funciona
+com essa rota. O SMTP padrão do Supabase tem limite baixo de envios por hora;
+para uso real, configure um SMTP próprio em **Authentication → SMTP Settings**.
+
+Login social: **não usado** (ADR-0002, revisão de 2026-10-08). Deixe Google e
+Apple desabilitados em **Authentication → Providers**.
 
 ---
 

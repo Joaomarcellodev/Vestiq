@@ -3,13 +3,11 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const signInWithPassword = vi.fn();
-const signInWithOAuth = vi.fn();
 const requestPasswordReset = vi.fn();
 const updatePassword = vi.fn();
 
 vi.mock("../actions", () => ({
   signInWithPassword: (p: unknown, fd: FormData) => signInWithPassword(p, fd),
-  signInWithOAuth: (fd: FormData) => signInWithOAuth(fd),
   requestPasswordReset: (p: unknown, fd: FormData) => requestPasswordReset(p, fd),
   updatePassword: (p: unknown, fd: FormData) => updatePassword(p, fd),
 }));
@@ -20,21 +18,25 @@ const { ResetPasswordForm } = await import("./reset-password-form");
 const { AuthScreen } = await import("./auth-screen");
 
 describe("LoginForm", () => {
-  it("renders email/password fields, the Google button and the forgot-password link", () => {
+  it("renders email/password fields and the forgot-password link", () => {
     render(<LoginForm next="/dashboard" />);
     expect(screen.getByLabelText(/email profissional/i)).toBeInTheDocument();
     expect(screen.getByLabelText("Senha", { exact: true })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /continuar com google/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /esqueci minha senha/i })).toHaveAttribute(
       "href",
       "/recuperar-senha",
     );
-    expect(screen.queryByRole("button", { name: /apple/i })).not.toBeInTheDocument();
   });
 
-  it("shows the OAuth error banner", () => {
-    render(<LoginForm next="/dashboard" oauthError />);
-    expect(screen.getByRole("alert")).toHaveTextContent(/login social/i);
+  it("offers no social sign-in (VES-96)", () => {
+    render(<LoginForm next="/dashboard" />);
+    expect(screen.queryByRole("button", { name: /google|apple/i })).not.toBeInTheDocument();
+    expect(screen.queryByText("ou")).not.toBeInTheDocument();
+  });
+
+  it("shows the expired-link banner", () => {
+    render(<LoginForm next="/dashboard" linkError />);
+    expect(screen.getByRole("alert")).toHaveTextContent(/link expirou ou já foi usado/i);
   });
 
   it("surfaces field errors returned by the action", async () => {
@@ -44,14 +46,6 @@ describe("LoginForm", () => {
     await userEvent.type(screen.getByLabelText("Senha", { exact: true }), "y");
     await userEvent.click(screen.getByRole("button", { name: /entrar na plataforma/i }));
     expect(await screen.findByText("Email inválido.")).toBeInTheDocument();
-  });
-
-  it("submits the OAuth form with the google provider + next", async () => {
-    render(<LoginForm next="/vendas" />);
-    await userEvent.click(screen.getByRole("button", { name: /continuar com google/i }));
-    const fd = signInWithOAuth.mock.calls[0]?.[0] as FormData;
-    expect(fd.get("provider")).toBe("google");
-    expect(fd.get("next")).toBe("/vendas");
   });
 });
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser } from "@/features/auth/queries";
 import { getResellerDashboard } from "@/features/dashboard/queries";
+import { DASHBOARD_TIME_ZONE, greeting } from "@/features/dashboard/greeting";
 import {
   SalesTrendChart,
   TopProductsChart,
@@ -24,10 +25,16 @@ export default async function DashboardPage() {
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1 className="font-headline-lg text-headline-lg text-on-surface">
-            Bom dia{name ? `, ${name}` : ""}.
+            {greeting()}
+            {name ? `, ${name}` : ""}.
           </h1>
           <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
-            Resumo de {data.orgName} — {new Date().toLocaleDateString("pt-BR", { month: "long" })}.
+            Resumo de {data.orgName} —{" "}
+            {new Date().toLocaleDateString("pt-BR", {
+              month: "long",
+              timeZone: DASHBOARD_TIME_ZONE,
+            })}
+            .
           </p>
         </div>
         <Link href="/vendas/nova" className="block shrink-0">

@@ -29,6 +29,8 @@ export type OfferDetail = {
   brand: string | null;
   descriptor: string;
   imageUrls: string[];
+  /** The offer's own photos (owner only, for editing) — `imageUrls` falls back to the product's. */
+  ownImageUrls: string[];
 };
 
 /**
@@ -64,6 +66,12 @@ export async function getOffer(id: string) {
   const { data, error } = await supabase.rpc("list_visible_offers", { p_offer_id: id }).single();
   if (error) throw error;
   const active = await getActiveOrganization();
+  const isMine = data.organization_id === active?.id;
+  let ownImageUrls: string[] = [];
+  if (isMine) {
+    const { data: own } = await supabase.from("offers").select("image_urls").eq("id", id).single();
+    ownImageUrls = own?.image_urls ?? [];
+  }
   const offer: OfferDetail = {
     id: data.id,
     status: data.status,
@@ -75,8 +83,9 @@ export async function getOffer(id: string) {
     brand: data.brand ?? null,
     descriptor: [data.color, data.size].filter(Boolean).join(" / "),
     imageUrls: data.image_urls ?? [],
+    ownImageUrls,
   };
-  return { offer, isMine: data.organization_id === active?.id };
+  return { offer, isMine };
 }
 
 /** Reseller's own variants + the networks they belong to, for the publish form. */

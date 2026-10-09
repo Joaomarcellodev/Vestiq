@@ -76,3 +76,24 @@ observação e status.
 **Quando** a revendedora busca por palavras (peça, marca, cor, tamanho ou revendedora)
 **Então** vê só as ofertas que contêm todas as palavras, sem diferenciar maiúsculas nem acentos, com a foto do produto
 **E** com nenhuma oferta correspondente, vê "Nenhuma oferta encontrada".
+
+## AC-OFFER-008-01 — Fotos ao publicar
+
+**Dado** uma revendedora publicando uma oferta
+**Quando** ela envia até 5 fotos (JPG, PNG ou WebP, até 5 MB, comprimidas no navegador)
+**Então** as fotos ficam na oferta e aparecem no feed, na busca e no detalhe para as revendedoras da rede
+**E** se a publicação falhar, as fotos enviadas são apagadas.
+
+## AC-OFFER-008-02 — Editar as fotos da oferta
+
+**Dado** uma oferta ativa ou parcialmente negociada da revendedora
+**Quando** ela abre o detalhe da oferta
+**Então** pode adicionar fotos, remover fotos e escolher a capa
+**E** as fotos removidas são apagadas do Storage
+**E** oferta cancelada ou concluída não pode ter as fotos alteradas
+**E** outra organização não altera as fotos.
+
+## AC-OFFER-008-03 — Sem fotos próprias
+
+**Dado** uma oferta sem fotos próprias
+**Então** ela mostra as fotos do produto, como antes.

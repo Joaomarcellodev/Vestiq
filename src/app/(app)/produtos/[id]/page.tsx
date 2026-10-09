@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { getProduct } from "@/features/catalog/queries";
-import { archiveProduct, unarchiveProduct } from "@/features/catalog/actions";
+import { unarchiveProduct } from "@/features/catalog/actions";
 import { BackButton } from "@/components/molecules/back-button";
 import { classifyStock, DEFAULT_LOW_STOCK_THRESHOLD } from "@/features/inventory/classify";
 import { StockControls } from "@/features/inventory/components/stock-controls";
@@ -20,8 +20,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const product = await getProduct(id).catch(() => null);
   if (!product) notFound();
 
-  const variants = product.product_variants ?? [];
   const archived = product.archived_at !== null;
+  // Variants archived on their own (VES-68) leave the active product's list.
+  const variants = (product.product_variants ?? []).filter(
+    (v) => archived || v.archived_at === null,
+  );
   const images: string[] = product.image_urls ?? [];
 
   return (
@@ -49,20 +52,20 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 </Button>
               </form>
             ) : (
-              <form action={archiveProduct}>
-                <input type="hidden" name="id" value={id} />
-                <Button variant="ghost" size="sm" type="submit">
+              <Link href={`/produtos/${id}/arquivar`}>
+                <Button variant="ghost" size="sm">
                   <Icon name="archive" size={16} />
                   Arquivar
                 </Button>
-              </form>
+              </Link>
             )}
           </div>
         }
       />
       {archived && (
         <p className="rounded-lg bg-warning-container px-4 py-3 font-body-md text-body-md text-on-warning-container">
-          Este produto está arquivado — não aparece nas vendas nem pode ser ofertado.
+          Este produto está arquivado — não aparece nas vendas. As ofertas publicadas ao arquivar
+          continuam na rede.
         </p>
       )}
       {images.length > 0 && (

@@ -4,7 +4,14 @@ import { useActionState } from "react";
 import { Button, TextField } from "@/components/atoms";
 import { acceptInvite, type ActionState } from "../actions";
 
-export function AcceptInviteForm({ token }: { token: string }) {
+export function AcceptInviteForm({
+  token,
+  needsPassword = false,
+}: {
+  token: string;
+  /** Account created by the invite email — it sets its password here. */
+  needsPassword?: boolean;
+}) {
   const [state, action, pending] = useActionState<ActionState, FormData>(acceptInvite, {});
 
   return (
@@ -23,6 +30,26 @@ export function AcceptInviteForm({ token }: { token: string }) {
         name="resellerName"
         placeholder="Ex: Atelier Sarah"
       />
+      {needsPassword && (
+        <>
+          <TextField
+            label="Crie sua senha"
+            name="password"
+            required
+            minLength={8}
+            revealable
+            autoComplete="new-password"
+            hint="No mínimo 8 caracteres. Você vai usá-la para entrar no Vestiq."
+          />
+          <TextField
+            label="Confirme a senha"
+            name="confirm"
+            required
+            revealable
+            autoComplete="new-password"
+          />
+        </>
+      )}
       <Button type="submit" size="lg" fullWidth loading={pending}>
         Aceitar convite
       </Button>

@@ -50,6 +50,7 @@ concluídas.
 | RF-OFFER-005 | Ofertas de outras redes não são acessíveis                                |
 | RF-OFFER-006 | A proprietária pode cancelar oferta não negociada                         |
 | RF-OFFER-007 | Quantidade ofertada é atualizada quando há negociação concluída           |
+| RF-OFFER-008 | A proprietária adiciona, troca e remove fotos da própria oferta           |
 
 ## User Stories
 

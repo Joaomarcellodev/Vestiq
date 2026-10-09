@@ -4,51 +4,33 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireActiveOrganization } from "@/features/organizations/queries";
-import type { Database } from "@/types/database";
 import {
+  archiveToOffersSchema,
+  categoryArchiveSchema,
   categorySchema,
-  PRODUCT_IMAGE_MAX_BYTES,
+  editVariantsSchema,
+  fieldErrorsOf,
   PRODUCT_IMAGE_MAX_COUNT,
-  PRODUCT_IMAGE_TYPES,
   productSchema,
+  renameCategorySchema,
 } from "./validation";
 import { parseWholesaleForm, type WholesaleInput } from "./wholesale";
+import { keptImages as keepImages, readImageFiles, removeImages, uploadImages } from "./images";
 
-export type ActionState = { error?: string; ok?: boolean };
+export type ActionState = {
+  error?: string;
+  ok?: boolean;
+  /** Per-field messages keyed by path — "name", "variants.0.retailPrice" (VES-68). */
+  fieldErrors?: Record<string, string>;
+};
+export type CategoryActionState = ActionState & { category?: { id: string; name: string } };
 
-const IMAGE_BUCKET = "product-images";
+const DUPLICATE_CATEGORY = "Já existe uma categoria com esse nome";
 
-/**
- * Uploads the picked files to `product-images/{orgId}/{productId}/…` and
- * returns their public URLs. Returns an error string instead of throwing so
- * the caller can surface it in the form.
- */
-async function uploadProductImages(
-  supabase: SupabaseClient<Database>,
-  orgId: string,
-  productId: string,
-  files: File[],
-): Promise<{ urls: string[]; error?: string }> {
-  const urls: string[] = [];
-  for (const file of files) {
-    if (!(file instanceof File) || file.size === 0) continue;
-    if (!PRODUCT_IMAGE_TYPES.includes(file.type)) {
-      return { urls, error: "Envie imagens JPG, PNG ou WebP." };
-    }
-    if (file.size > PRODUCT_IMAGE_MAX_BYTES) {
-      return { urls, error: "Cada imagem deve ter no máximo 5 MB." };
-    }
-    const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-    const path = `${orgId}/${productId}/${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabase.storage
-      .from(IMAGE_BUCKET)
-      .upload(path, file, { contentType: file.type, upsert: false });
-    if (error) return { urls, error: `Falha no upload da imagem: ${error.message}` };
-    urls.push(supabase.storage.from(IMAGE_BUCKET).getPublicUrl(path).data.publicUrl);
-  }
-  return { urls };
+function revalidateCategories() {
+  revalidatePath("/produtos");
+  revalidatePath("/produtos/categorias");
 }
 
 /**
@@ -73,29 +55,73 @@ function wholesaleColumns(wholesale: WholesaleInput | null) {
     : {};
 }
 
-function readImageFiles(formData: FormData): File[] {
-  return formData
-    .getAll("images")
-    .filter((v): v is File => v instanceof File && v.size > 0)
-    .slice(0, PRODUCT_IMAGE_MAX_COUNT);
-}
-
-export async function createCategory(_prev: ActionState, formData: FormData): Promise<ActionState> {
+export async function createCategory(
+  _prev: CategoryActionState,
+  formData: FormData,
+): Promise<CategoryActionState> {
   const org = await requireActiveOrganization();
   const parsed = categorySchema.safeParse({ name: formData.get("name") });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("categories")
-    .insert({ organization_id: org.id, name: parsed.data.name });
+    .insert({ organization_id: org.id, name: parsed.data.name })
+    .select("id, name")
+    .single();
 
   if (error) {
-    return {
-      error: error.code === "23505" ? "Já existe uma categoria com esse nome" : error.message,
-    };
+    return { error: error.code === "23505" ? DUPLICATE_CATEGORY : error.message };
   }
-  revalidatePath("/produtos");
+  revalidateCategories();
+  return { ok: true, category: data };
+}
+
+export async function renameCategory(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  await requireActiveOrganization();
+  const parsed = renameCategorySchema.safeParse({
+    id: formData.get("id"),
+    name: formData.get("name"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("categories")
+    .update({ name: parsed.data.name })
+    .eq("id", parsed.data.id)
+    .select("id");
+  if (error) {
+    return { error: error.code === "23505" ? DUPLICATE_CATEGORY : error.message };
+  }
+  if (!data?.length) return { error: "Categoria não encontrada" };
+
+  revalidateCategories();
+  return { ok: true };
+}
+
+/** BR-CAT-10: archiving only hides the category from the pickers; products keep it. */
+export async function setCategoryArchived(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireActiveOrganization();
+  const parsed = categoryArchiveSchema.safeParse({
+    id: formData.get("id"),
+    archived: formData.get("archived"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("categories")
+    .update({ archived_at: parsed.data.archived ? new Date().toISOString() : null })
+    .eq("id", parsed.data.id)
+    .select("id");
+  if (error) return { error: error.message };
+  if (!data?.length) return { error: "Categoria não encontrada" };
+
+  revalidateCategories();
   return { ok: true };
 }
 
@@ -137,12 +163,11 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
     };
   }
 
-  const imageFiles = readImageFiles(formData);
+  const imageFiles = readImageFiles(formData, PRODUCT_IMAGE_MAX_COUNT);
   if (imageFiles.length > 0) {
-    const { urls, error: upErr } = await uploadProductImages(
+    const { urls, error: upErr } = await uploadImages(
       supabase,
-      org.id,
-      product.id,
+      `${org.id}/${product.id}`,
       imageFiles,
     );
     if (upErr) {
@@ -202,6 +227,42 @@ const updateProductSchema = z.object({
   description: z.string().trim().max(2000).optional().or(z.literal("")),
 });
 
+/**
+ * VES-68 — the variants posted by the edit form, or null when the form sent
+ * none (the variants are then left as they are).
+ */
+function readEditVariants(formData: FormData) {
+  const raw = formData.get("variants");
+  if (raw === null) return { variants: null };
+  let json: unknown;
+  try {
+    json = JSON.parse(String(raw));
+  } catch {
+    return { variants: null, error: "Variações inválidas" };
+  }
+  const parsed = editVariantsSchema.safeParse(json);
+  if (!parsed.success) {
+    return {
+      variants: null,
+      error: parsed.error.issues[0]?.message ?? "Variações inválidas",
+      fieldErrors: fieldErrorsOf(parsed.error, "variants"),
+    };
+  }
+  return { variants: parsed.data };
+}
+
+function updateProductError(message: string, code?: string): string {
+  if (code === "23505") {
+    return /product_variants/.test(message) ? "SKU de variação já utilizado" : "SKU já utilizado";
+  }
+  if (/not authorized/i.test(message)) return "Você não tem permissão para esta ação";
+  return message;
+}
+
+/**
+ * Edits the product and its variants (VES-68) in one transaction
+ * (`update_product`, ADR-0004): a duplicated SKU or a bad price saves nothing.
+ */
 export async function updateProduct(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const org = await requireActiveOrganization();
   const parsed = updateProductSchema.safeParse({
@@ -212,48 +273,132 @@ export async function updateProduct(_prev: ActionState, formData: FormData): Pro
     internalSku: formData.get("internalSku"),
     description: formData.get("description"),
   });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  const variants = readEditVariants(formData);
+  if (!parsed.success || variants.error) {
+    return {
+      error: parsed.success
+        ? variants.error
+        : (parsed.error.issues[0]?.message ?? "Dados inválidos"),
+      fieldErrors: {
+        ...(parsed.success ? {} : fieldErrorsOf(parsed.error)),
+        ...variants.fieldErrors,
+      },
+    };
+  }
   const d = parsed.data;
   const { wholesale, error: wholesaleError } = readWholesale(org.type, formData);
   if (wholesaleError) return { error: wholesaleError };
 
   const supabase = await createClient();
 
-  // Images: kept existing URLs + freshly uploaded files.
-  let keptImages: string[] = [];
-  try {
-    const raw = formData.get("existingImages");
-    keptImages = raw ? (JSON.parse(raw as string) as string[]) : [];
-  } catch {
-    keptImages = [];
-  }
-  const imageFiles = readImageFiles(formData);
+  const { data: current } = await supabase
+    .from("products")
+    .select("image_urls")
+    .eq("id", d.id)
+    .maybeSingle();
+  if (!current) return { error: "Produto não encontrado" };
+  const previousImages = current.image_urls ?? [];
+
+  // Images: kept existing URLs (in the order chosen — the first is the cover)
+  // + freshly uploaded files. Only URLs the product already had can be kept.
+  const keptImages = keepImages(formData.get("existingImages"), previousImages);
+  const imageFiles = readImageFiles(formData, PRODUCT_IMAGE_MAX_COUNT);
   let imageUrls = keptImages;
+  let uploaded: string[] = [];
   if (imageFiles.length > 0) {
-    const { urls, error: upErr } = await uploadProductImages(supabase, org.id, d.id, imageFiles);
+    const { urls, error: upErr } = await uploadImages(supabase, `${org.id}/${d.id}`, imageFiles);
     if (upErr) return { error: upErr };
+    uploaded = urls;
     imageUrls = [...keptImages, ...urls].slice(0, PRODUCT_IMAGE_MAX_COUNT);
   }
 
-  const { error } = await supabase
-    .from("products")
-    .update({
+  const { error } = await supabase.rpc("update_product", {
+    p_product_id: d.id,
+    p_product: {
       name: d.name,
-      brand: d.brand || null,
-      category_id: d.categoryId || null,
-      internal_sku: d.internalSku || null,
-      description: d.description || null,
+      brand: d.brand ?? "",
+      category_id: d.categoryId ?? "",
+      internal_sku: d.internalSku ?? "",
+      description: d.description ?? "",
       image_urls: imageUrls,
-      ...wholesaleColumns(wholesale),
-    })
-    .eq("id", d.id);
+      ...(wholesale
+        ? { min_order_quantity: wholesale.minOrderQuantity, size_grid: wholesale.sizeGrid }
+        : {}),
+    },
+    p_variants:
+      variants.variants?.map((v) => ({
+        id: v.id || null,
+        size: v.size ?? "",
+        color: v.color ?? "",
+        sku: v.sku ?? "",
+        cost_price: v.costPrice,
+        retail_price: v.retailPrice,
+        initial_stock: v.id ? 0 : v.initialStock,
+      })) ?? undefined,
+  });
 
   if (error) {
-    return { error: error.code === "23505" ? "SKU já utilizado" : error.message };
+    // Nothing was saved: the photos uploaded for this attempt are orphans.
+    await removeImages(supabase, uploaded);
+    return { error: updateProductError(error.message, error.code) };
   }
+
+  // AC-PROD-002-02: removed photos leave the bucket too. A failure here only
+  // leaves an orphan file behind, so it doesn't fail the save.
+  await removeImages(
+    supabase,
+    previousImages.filter((u) => !imageUrls.includes(u)),
+  );
+
   revalidatePath("/produtos");
   revalidatePath(`/produtos/${d.id}`);
+  revalidatePath("/fornecedores", "layout");
   redirect(`/produtos/${d.id}?toast=product-updated`);
+}
+
+/**
+ * AC-PROD-006-03/04 — archives the product and, in the same transaction,
+ * publishes the chosen quantities as network offers (`archive_product_to_offers`).
+ */
+export async function archiveProductToOffers(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireActiveOrganization();
+  let items: unknown;
+  try {
+    items = JSON.parse((formData.get("items") as string) || "[]");
+  } catch {
+    return { error: "Itens inválidos" };
+  }
+  const parsed = archiveToOffersSchema.safeParse({
+    productId: formData.get("productId"),
+    networkId: formData.get("networkId") ?? "",
+    items,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+
+  const supabase = await createClient();
+  const { data: offers, error } = await supabase.rpc("archive_product_to_offers", {
+    p_product_id: parsed.data.productId,
+    p_network_id: parsed.data.networkId || undefined,
+    p_items: parsed.data.items.map((i) => ({
+      variant_id: i.variantId,
+      quantity: i.quantity,
+      transfer_price: i.transferPrice,
+    })),
+  });
+  if (error) {
+    return {
+      error: /not authorized/i.test(error.message)
+        ? "Você não tem permissão para esta ação"
+        : error.message,
+    };
+  }
+
+  revalidatePath("/produtos");
+  revalidatePath("/rede");
+  redirect(`/produtos?toast=${offers > 0 ? "product-archived-offered" : "product-archived"}`);
 }
 
 export async function archiveProduct(formData: FormData): Promise<void> {

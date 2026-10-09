@@ -5,17 +5,20 @@ import userEvent from "@testing-library/user-event";
 const createNetwork = vi.fn().mockResolvedValue({});
 const inviteReseller = vi.fn().mockResolvedValue({});
 const setMemberActive = vi.fn().mockResolvedValue(undefined);
+const acceptInvite = vi.fn().mockResolvedValue({});
 const toast = vi.fn();
 
 vi.mock("../actions", () => ({
   createNetwork: (p: unknown, fd: FormData) => createNetwork(p, fd),
   inviteReseller: (p: unknown, fd: FormData) => inviteReseller(p, fd),
   setMemberActive: (fd: FormData) => setMemberActive(fd),
+  acceptInvite: (p: unknown, fd: FormData) => acceptInvite(p, fd),
 }));
 vi.mock("@/components/organisms/toast/toast-provider", () => ({ useToast: () => ({ toast }) }));
 
 const { CreateNetworkForm, InviteResellerForm } = await import("./factory-network-panel");
 const { MemberActiveSwitch } = await import("./member-active-switch");
+const { AcceptInviteForm } = await import("./accept-invite-form");
 
 describe("CreateNetworkForm", () => {
   it("submits and toasts on success", async () => {
@@ -54,5 +57,28 @@ describe("MemberActiveSwitch", () => {
     await userEvent.click(screen.getByRole("switch"));
     expect(setMemberActive.mock.calls.at(-1)?.[0].get("active")).toBe("true");
     expect(toast).toHaveBeenCalledWith({ message: "Loja B reativada.", variant: "success" });
+  });
+});
+
+describe("AcceptInviteForm (TC-NET-15)", () => {
+  it("asks an invited account for its password and posts it", async () => {
+    acceptInvite.mockResolvedValueOnce({ error: "As senhas não coincidem." });
+    render(<AcceptInviteForm token="t1" needsPassword />);
+    await userEvent.type(screen.getByLabelText("Crie sua senha"), "senha-forte-1");
+    await userEvent.type(screen.getByLabelText("Confirme a senha"), "senha-forte-1");
+    await userEvent.click(screen.getByRole("button", { name: "Aceitar convite" }));
+
+    const fd = acceptInvite.mock.calls[0]![1] as FormData;
+    expect([fd.get("token"), fd.get("password"), fd.get("confirm")]).toEqual([
+      "t1",
+      "senha-forte-1",
+      "senha-forte-1",
+    ]);
+    expect(await screen.findByRole("alert")).toHaveTextContent("As senhas não coincidem.");
+  });
+
+  it("doesn't ask for a password from an account that already has one", () => {
+    render(<AcceptInviteForm token="t1" />);
+    expect(screen.queryByLabelText("Crie sua senha")).not.toBeInTheDocument();
   });
 });

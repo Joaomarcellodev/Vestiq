@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/features/auth/queries";
 import { AcceptInviteForm } from "@/features/network/components/accept-invite-form";
+import { needsPassword } from "@/features/network/invite-password";
 import { Logo } from "@/components/atoms";
 
 export const metadata: Metadata = { title: "Convite" };
 
 export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) {
-  await requireUser();
+  const user = await requireUser();
   const { token } = await params;
 
   return (
@@ -21,7 +22,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
           com outras revendedoras.
         </p>
       </div>
-      <AcceptInviteForm token={token} />
+      <AcceptInviteForm token={token} needsPassword={needsPassword(user)} />
     </div>
   );
 }

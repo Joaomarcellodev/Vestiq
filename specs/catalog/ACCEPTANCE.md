@@ -12,12 +12,49 @@
 **Quando** a revendedora tenta criar "Bolsas" de novo
 **Então** recebe erro de nome duplicado.
 
+## AC-PROD-001-03 — Renomear categoria
+
+**Dado** a categoria "Bolsas" da revendedora
+**Quando** ela renomeia para "Bolsas e carteiras"
+**Então** o novo nome aparece na tela de categorias, no formulário e no filtro de produtos
+**E** um nome que já existe na organização é recusado com erro no campo.
+
+## AC-PROD-001-04 — Arquivar e reativar categoria
+
+**Dado** a categoria "Bolsas" com produtos vinculados
+**Quando** a revendedora arquiva a categoria
+**Então** ela some da seleção do formulário de produto e do filtro
+**E** os produtos continuam vinculados a ela (BR-CAT-10)
+**E** a categoria pode ser reativada na tela de categorias.
+
+## AC-PROD-001-05 — Filtrar produtos por categoria
+
+**Dado** produtos em "Bolsas" e em "Calçados"
+**Quando** a revendedora escolhe "Bolsas" no filtro de /produtos
+**Então** só os produtos de "Bolsas" aparecem
+**E** o filtro combina com a busca e com Ativos/Arquivados.
+
+## AC-PROD-001-06 — Criar categoria pelo formulário de produto
+
+**Dado** o formulário de novo produto ou de edição
+**Quando** a revendedora cria uma categoria por ali
+**Então** a categoria é criada e já fica selecionada no produto.
+
 ## AC-PROD-002-01 — Cadastrar produto com variação
 
 **Dado** uma revendedora
 **Quando** ela cadastra "Vestido Floral" com preço de venda R$ 199,90 e uma variação P
 **Então** o produto e a variação P são criados
 **E** a variação recebe SKU (informado ou gerado).
+
+## AC-PROD-002-02 — Gerenciar as fotos do produto
+
+**Dado** um produto com fotos (da revendedora ou da fábrica)
+**Quando** a dona do catálogo edita o produto
+**Então** ela adiciona fotos (até 5), remove fotos e escolhe a foto de capa (a primeira)
+**E** as fotos removidas são apagadas do bucket `product-images`
+**E** o servidor só aceita manter fotos que já eram do produto
+**E** no formulário da fábrica há o aviso de que essas fotos aparecem para as revendedoras em Fornecedores.
 
 ## AC-PROD-003-01 — Produto exige ao menos uma variação
 
@@ -38,6 +75,17 @@
 **Então** o novo preço vale para vendas futuras
 **E** vendas já registradas mantêm o preço original.
 
+## AC-PROD-005-02 — Editar as variações (VES-68)
+
+**Dado** um produto ativo com variações
+**Quando** a revendedora edita o produto
+**Então** pode alterar cor, tamanho, SKU, custo e preço de venda de cada variação
+**E** adicionar variações novas (com estoque inicial, lançado como entrada no inventário)
+**E** arquivar variações — nunca apagar: vendas, ofertas e histórico continuam apontando para elas
+**E** o estoque de uma variação existente só aparece para leitura (muda pelo inventário)
+**E** o produto mantém ao menos uma variação
+**E** um erro (SKU repetido, preço inválido) não salva nada, com a mensagem no campo.
+
 ## AC-PROD-006-01 — Desativar sem apagar
 
 **Dado** um produto com histórico de vendas
@@ -51,6 +99,21 @@
 **Dado** um produto arquivado
 **Quando** a revendedora o reativa
 **Então** ele volta às listas.
+
+## AC-PROD-006-03 — Arquivar publica as peças na rede
+
+**Dado** uma revendedora de uma rede ativa com um produto que tem variações em estoque
+**Quando** ela arquiva o produto
+**Então** vê cada variação com estoque, já preenchida com todo o estoque e o preço de custo
+**E** ao confirmar, cada variação com quantidade > 0 vira uma oferta ativa na rede escolhida
+**E** o produto e as variações ficam arquivados (somem das vendas, aparecem em "Arquivados")
+**E** tudo acontece numa transação: se uma oferta for inválida, nada é arquivado.
+
+## AC-PROD-006-04 — Arquivar sem rede ou sem estoque
+
+**Dado** um produto sem estoque, ou uma revendedora que não participa de nenhuma rede
+**Quando** ela arquiva o produto
+**Então** o produto só é arquivado, com o aviso de que nenhuma oferta foi publicada.
 
 ## AC-PROD-05-margem — Margem estimada
 

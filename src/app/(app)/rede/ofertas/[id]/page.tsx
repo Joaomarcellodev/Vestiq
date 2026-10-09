@@ -5,6 +5,7 @@ import { BackButton } from "@/components/molecules/back-button";
 import { getOffer } from "@/features/offers/queries";
 import { cancelOffer } from "@/features/offers/actions";
 import { ProposeForm } from "@/features/negotiations/components/propose-form";
+import { OfferPhotosForm } from "@/features/offers/components/offer-photos-form";
 import { PageHeader } from "@/components/molecules/page-header";
 import { Badge, Button, Icon } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
@@ -65,6 +66,9 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
           <p className="mt-3 font-body-md text-body-md text-on-surface">{offer.note}</p>
         )}
       </div>
+      {isMine && ["ACTIVE", "PARTIALLY_NEGOTIATED"].includes(offer.status) && (
+        <OfferPhotosForm offerId={offer.id} photos={offer.ownImageUrls} />
+      )}
       {isMine ? (
         offer.status !== "CANCELLED" && (
           <form action={cancelOffer}>
