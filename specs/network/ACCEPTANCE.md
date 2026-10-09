@@ -40,6 +40,17 @@
 **Então** ele vê a mensagem de erro
 **E** nenhum `network_members` fica criado (pode tentar de novo sem "já foi convidada").
 
+## AC-NET-003-04 — E-mail que já está na rede
+
+**Dado** uma rede X em que `loja@exemplo.com` já é membro ativo, está desativada
+ou tem convite pendente (não expirado)
+**Quando** o `FACTORY_ADMIN` convida `loja@exemplo.com` (maiúsculas/minúsculas não importam)
+**Então** ele vê "Essa revendedora já faz parte da rede", "…está desativada na rede —
+reative-a na lista de membros" ou "Já existe um convite pendente para esse e-mail"
+**E** nenhum `network_members` novo é criado e nenhum e-mail é enviado
+**E** um convite expirado não bloqueia um novo convite, e o mesmo e-mail pode ser
+convidado para outra rede.
+
 ## AC-NET-004-04 — Definir senha ao aceitar
 
 **Dado** uma revendedora que entrou pelo link do email de convite e ainda não tem senha

@@ -33,6 +33,12 @@ dashboard da fábrica exponha dados comerciais privados das revendedoras.
 - Quantidade de ofertas.
 - Negociações iniciadas e concluídas.
 - Taxa de utilização da plataforma (ex.: % de revendedoras com atividade no mês).
+- Convites pendentes aparecem à parte: não contam como revendedoras nem entram
+  na taxa de utilização.
+- Fonte dos números: a view `factory_network_stats` (`security_barrier`, migration
+  0028). Ofertas e negociações continuam invisíveis linha a linha para a fábrica
+  (RLS); a view devolve só uma linha de contagens por rede que o
+  `FACTORY_ADMIN`/`PLATFORM_ADMIN` administra.
 
 ## Fora do Escopo
 

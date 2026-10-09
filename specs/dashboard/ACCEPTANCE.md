@@ -52,6 +52,21 @@
 **Quando** o admin de F1 abre o dashboard
 **Então** os agregados contam apenas a rede de F1.
 
+## AC-FACTORY-DASH-001-05 — Convites pendentes não são revendedoras
+
+**Dado** uma rede com 2 revendedoras ativas e 1 convite pendente
+**Quando** o `FACTORY_ADMIN` abre o dashboard
+**Então** "Revendedoras" mostra 2 (com "1 convite pendente" no detalhe)
+**E** "Taxa de utilização: 100%".
+
+## AC-FACTORY-DASH-001-06 — Só agregados no banco
+
+**Dado** revendedoras da rede com ofertas e negociações
+**Quando** o `FACTORY_ADMIN` consulta `offers` ou `negotiations` diretamente
+**Então** não recebe nenhuma linha
+**E** `factory_network_stats` devolve apenas contagens, uma linha por rede dele
+**E** uma revendedora (de qualquer rede) não lê nenhuma linha da view.
+
 ## AC-FACTORY-DASH-001-04 — Rede vazia
 
 **Dado** uma fábrica sem revendedoras
