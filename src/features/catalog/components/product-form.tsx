@@ -6,6 +6,7 @@ import { estimatedMargin, formatPercent } from "@/lib/utils/currency";
 import { createProduct, type ActionState } from "../actions";
 import { ImageUploadField } from "./image-upload-field";
 import { WholesaleFields } from "./wholesale-fields";
+import { CategoryField } from "./category-field";
 
 interface VariantRow {
   size: string;
@@ -89,22 +90,7 @@ export function ProductForm({
         />
         <TextField label="SKU (código interno)" name="internalSku" placeholder="VST-001" />
         <TextField label="Marca" name="brand" placeholder="Ex: Chanel" />
-        <div>
-          <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
-            Categoria
-          </label>
-          <select
-            name="categoryId"
-            className="field-focus-ring w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3 font-body-md text-body-md"
-          >
-            <option value="">Selecione uma categoria</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CategoryField categories={categories} emptyLabel="Selecione uma categoria" />
         <div>
           <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
             Descrição

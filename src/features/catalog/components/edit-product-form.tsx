@@ -5,6 +5,7 @@ import { Button, TextField } from "@/components/atoms";
 import { updateProduct, type ActionState } from "../actions";
 import { ImageUploadField } from "./image-upload-field";
 import { WholesaleFields } from "./wholesale-fields";
+import { CategoryField } from "./category-field";
 
 interface Product {
   id: string;
@@ -58,23 +59,11 @@ export function EditProductForm({
         defaultValue={product.internal_sku ?? ""}
       />
       <TextField label="Marca" name="brand" defaultValue={product.brand ?? ""} />
-      <div>
-        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
-          Categoria
-        </label>
-        <select
-          name="categoryId"
-          defaultValue={product.category_id ?? ""}
-          className="field-focus-ring w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3 font-body-md text-body-md"
-        >
-          <option value="">Sem categoria</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <CategoryField
+        categories={categories}
+        emptyLabel="Sem categoria"
+        defaultValue={product.category_id ?? ""}
+      />
       <div>
         <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
           Descrição
