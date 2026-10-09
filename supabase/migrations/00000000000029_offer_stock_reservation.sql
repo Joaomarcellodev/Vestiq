@@ -108,8 +108,9 @@ begin
     and o.id <> new.id;
 
   if v_new_open > v_free then
-    raise exception 'Estoque livre insuficiente (% disponível, o restante já está em ofertas ativas)',
-      greatest(v_free, 0)
+    raise exception 'Estoque livre insuficiente (% %, o restante já está em ofertas ativas)',
+      greatest(v_free, 0),
+      case when greatest(v_free, 0) = 1 then 'disponível' else 'disponíveis' end
       using errcode = 'check_violation';
   end if;
   return new;
@@ -266,7 +267,8 @@ begin
     from public.product_variants where id = v_offer.product_variant_id for update;
     v_free := v_stock - public.variant_reserved_quantity(v_offer.product_variant_id);
     if v_neg.quantity > v_free then
-      raise exception 'Estoque insuficiente para aceitar (% disponível)', greatest(v_free, 0);
+      raise exception 'Estoque insuficiente para aceitar (% %)', greatest(v_free, 0),
+        case when greatest(v_free, 0) = 1 then 'disponível' else 'disponíveis' end;
     end if;
 
     v_new := 'ACCEPTED'; v_event := 'ACCEPTED';

@@ -84,11 +84,11 @@ d("offer stock reservation (SPEC-008/009, VES-73)", () => {
     expect(first.error).toBeNull();
 
     const tooMuch = await publish(3);
-    expect(tooMuch.error?.message).toMatch(/Estoque livre insuficiente \(2 disponível/);
+    expect(tooMuch.error?.message).toMatch(/Estoque livre insuficiente \(2 disponíveis,/);
 
     const rest = await publish(2);
     expect(rest.error).toBeNull();
-    expect((await publish(1)).error?.message).toMatch(/\(0 disponível/);
+    expect((await publish(1)).error?.message).toMatch(/\(0 disponíveis,/);
   });
 
   it("serialises two concurrent offers of the same variant (TC-OFFER-16)", async () => {
@@ -106,7 +106,7 @@ d("offer stock reservation (SPEC-008/009, VES-73)", () => {
       p_network_id: ctx.network.id,
       p_items: [{ variant_id: ctx.variant.id, quantity: 2, transfer_price: 500 }],
     });
-    expect(archived.error?.message).toMatch(/\(1 disponível/);
+    expect(archived.error?.message).toMatch(/\(1 disponível,/);
 
     // the owner RLS policy allows updates — the trigger still guards them
     await ctx.seller.client.from("offers").update({ status: "CANCELLED" }).eq("id", offerId);
