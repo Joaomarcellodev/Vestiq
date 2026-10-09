@@ -16,6 +16,7 @@
 | RF-PROD-003 | AC-PROD-003-01    | TC-PROD-04 | component + integration        |
 | RF-PROD-004 | AC-PROD-004-01    | TC-PROD-05 | integration                    |
 | RF-PROD-005 | AC-PROD-005-01    | TC-PROD-06 | integration                    |
+| RF-PROD-005 | AC-PROD-005-02    | TC-PROD-22 | unit + component + integration |
 | RF-PROD-006 | AC-PROD-006-01    | TC-PROD-07 | integration                    |
 | RF-PROD-006 | AC-PROD-006-02    | TC-PROD-08 | integration                    |
 | RF-PROD-006 | AC-PROD-006-03    | TC-PROD-19 | integration + component + e2e  |
@@ -105,6 +106,10 @@ component · não-crítica · criar pelo formulário adiciona a opção e a sele
 ### TC-PROD-21 — Gerenciar fotos
 
 component + integration + e2e · não-crítica · "Tornar capa" move a foto para o início; remover apaga o arquivo do Storage; URL que não era do produto é ignorada; foto enviada pela fábrica aparece para a revendedora em `/fornecedores` (E2E).
+
+### TC-PROD-22 — Editar as variações
+
+unit + component + integration · **crítica (estoque)** · `update_product` (migration `0027`) altera preço, cor, tamanho e SKU sem mexer no `stock_on_hand` nem gravar movimento; variação nova entra com movimento `ENTRADA` "Estoque inicial"; variação fora da lista é arquivada com o estoque intacto; SKU repetido → nada muda (nem o nome do produto); lista vazia ou variação de outro produto → erro; outra organização → nada muda; preço negativo → erro no campo (`variants.N.retailPrice`).
 
 ### TC-PROD-19 — Arquivar publica na rede
 
