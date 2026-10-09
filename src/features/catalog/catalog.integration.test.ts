@@ -13,10 +13,12 @@ import {
   archiveProduct,
   createCategory,
   createProduct,
+  renameCategory,
+  setCategoryArchived,
   unarchiveProduct,
   updateProduct,
 } from "./actions";
-import { getProduct, listCategories, listProducts } from "./queries";
+import { getProduct, listCategories, listCategoriesForManagement, listProducts } from "./queries";
 
 const up = await supabaseUp();
 const d = up ? describe : describe.skip;
@@ -236,7 +238,7 @@ d("catalog actions + queries (SPEC-004)", () => {
 
   it("createCategory: ok + duplicate name", async () => {
     const ok = await createCategory({}, formData({ name: "Bolsas" }));
-    expect(ok.ok).toBe(true);
+    expect(ok).toMatchObject({ ok: true, category: { name: "Bolsas" } });
     const dup = await createCategory({}, formData({ name: "Bolsas" }));
     expect(dup.error).toMatch(/já existe/i);
   });
@@ -272,5 +274,79 @@ d("catalog actions + queries (SPEC-004)", () => {
 
     const cats = await listCategories();
     expect(cats.map((c) => c.name)).toContain("Acessórios");
+  });
+
+  it("renameCategory: renames, refuses a duplicate name (TC-PROD-15)", async () => {
+    const bags = await makeCategory(orgId, "Bolsas");
+    await makeCategory(orgId, "Calçados");
+
+    expect(await renameCategory({}, formData({ id: bags.id, name: "Bolsas e carteiras" }))).toEqual(
+      { ok: true },
+    );
+    expect((await listCategories()).map((c) => c.name)).toContain("Bolsas e carteiras");
+
+    expect(await renameCategory({}, formData({ id: bags.id, name: "Calçados" }))).toEqual({
+      error: "Já existe uma categoria com esse nome",
+    });
+    expect(await renameCategory({}, formData({ id: bags.id, name: "  " }))).toEqual({
+      error: "Informe o nome da categoria",
+    });
+  });
+
+  it("setCategoryArchived: hides it from the picker, keeps the products (TC-PROD-16)", async () => {
+    const cat = await makeCategory(orgId, "Verão");
+    const product = await makeProduct(orgId, { name: "Biquíni", category_id: cat.id });
+
+    expect(await setCategoryArchived({}, formData({ id: cat.id, archived: "true" }))).toEqual({
+      ok: true,
+    });
+    expect((await listCategories()).map((c) => c.id)).not.toContain(cat.id);
+    expect(await listCategoriesForManagement()).toContainEqual({
+      id: cat.id,
+      name: "Verão",
+      archived: true,
+      productCount: 1,
+    });
+    expect((await getProduct(product.id)).category_id).toBe(cat.id);
+
+    await setCategoryArchived({}, formData({ id: cat.id, archived: "false" }));
+    expect((await listCategories()).map((c) => c.id)).toContain(cat.id);
+  });
+
+  it("listProducts: filters by category with search and scope (TC-PROD-17)", async () => {
+    const bags = await makeCategory(orgId, "Bolsas");
+    const shoes = await makeCategory(orgId, "Calçados");
+    const bag = await makeProduct(orgId, { name: "Bolsa Azul", category_id: bags.id });
+    const oldBag = await makeProduct(orgId, {
+      name: "Bolsa Velha",
+      category_id: bags.id,
+      archived_at: new Date().toISOString(),
+    });
+    await makeProduct(orgId, { name: "Tênis Azul", category_id: shoes.id });
+
+    expect((await listProducts(undefined, "active", bags.id)).map((p) => p.id)).toEqual([bag.id]);
+    expect((await listProducts("azul", "active", bags.id)).map((p) => p.id)).toEqual([bag.id]);
+    expect((await listProducts(undefined, "archived", bags.id)).map((p) => p.id)).toEqual([
+      oldBag.id,
+    ]);
+  });
+
+  it("category actions can't touch another organization's categories (TC-PROD-10)", async () => {
+    const other = await makeUser();
+    const otherOrg = await makeOrg(other.userId, "RESELLER");
+    const foreign = await makeCategory(otherOrg.id, "Alheia");
+
+    expect(await renameCategory({}, formData({ id: foreign.id, name: "Minha" }))).toEqual({
+      error: "Categoria não encontrada",
+    });
+    expect(await setCategoryArchived({}, formData({ id: foreign.id, archived: "true" }))).toEqual({
+      error: "Categoria não encontrada",
+    });
+    const { data } = await admin()
+      .from("categories")
+      .select("name, archived_at")
+      .eq("id", foreign.id)
+      .single();
+    expect(data).toEqual({ name: "Alheia", archived_at: null });
   });
 });

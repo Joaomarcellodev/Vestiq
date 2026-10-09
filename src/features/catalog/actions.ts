@@ -5,11 +5,25 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireActiveOrganization } from "@/features/organizations/queries";
-import { categorySchema, PRODUCT_IMAGE_MAX_COUNT, productSchema } from "./validation";
+import {
+  categoryArchiveSchema,
+  categorySchema,
+  PRODUCT_IMAGE_MAX_COUNT,
+  productSchema,
+  renameCategorySchema,
+} from "./validation";
 import { parseWholesaleForm, type WholesaleInput } from "./wholesale";
 import { keptImages as keepImages, readImageFiles, removeImages, uploadImages } from "./images";
 
 export type ActionState = { error?: string; ok?: boolean };
+export type CategoryActionState = ActionState & { category?: { id: string; name: string } };
+
+const DUPLICATE_CATEGORY = "Já existe uma categoria com esse nome";
+
+function revalidateCategories() {
+  revalidatePath("/produtos");
+  revalidatePath("/produtos/categorias");
+}
 
 /**
  * RF-PROD-007 / BR-CAT-13: only a factory sets wholesale conditions. A
@@ -33,22 +47,73 @@ function wholesaleColumns(wholesale: WholesaleInput | null) {
     : {};
 }
 
-export async function createCategory(_prev: ActionState, formData: FormData): Promise<ActionState> {
+export async function createCategory(
+  _prev: CategoryActionState,
+  formData: FormData,
+): Promise<CategoryActionState> {
   const org = await requireActiveOrganization();
   const parsed = categorySchema.safeParse({ name: formData.get("name") });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("categories")
-    .insert({ organization_id: org.id, name: parsed.data.name });
+    .insert({ organization_id: org.id, name: parsed.data.name })
+    .select("id, name")
+    .single();
 
   if (error) {
-    return {
-      error: error.code === "23505" ? "Já existe uma categoria com esse nome" : error.message,
-    };
+    return { error: error.code === "23505" ? DUPLICATE_CATEGORY : error.message };
   }
-  revalidatePath("/produtos");
+  revalidateCategories();
+  return { ok: true, category: data };
+}
+
+export async function renameCategory(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  await requireActiveOrganization();
+  const parsed = renameCategorySchema.safeParse({
+    id: formData.get("id"),
+    name: formData.get("name"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("categories")
+    .update({ name: parsed.data.name })
+    .eq("id", parsed.data.id)
+    .select("id");
+  if (error) {
+    return { error: error.code === "23505" ? DUPLICATE_CATEGORY : error.message };
+  }
+  if (!data?.length) return { error: "Categoria não encontrada" };
+
+  revalidateCategories();
+  return { ok: true };
+}
+
+/** BR-CAT-10: archiving only hides the category from the pickers; products keep it. */
+export async function setCategoryArchived(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireActiveOrganization();
+  const parsed = categoryArchiveSchema.safeParse({
+    id: formData.get("id"),
+    archived: formData.get("archived"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("categories")
+    .update({ archived_at: parsed.data.archived ? new Date().toISOString() : null })
+    .eq("id", parsed.data.id)
+    .select("id");
+  if (error) return { error: error.message };
+  if (!data?.length) return { error: "Categoria não encontrada" };
+
+  revalidateCategories();
   return { ok: true };
 }
 
