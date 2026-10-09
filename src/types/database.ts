@@ -1060,6 +1060,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      archive_product_to_offers: {
+        Args: { p_items?: Json; p_network_id?: string; p_product_id: string }
+        Returns: number
+      }
       auth_network_ids: { Args: never; Returns: string[] }
       auth_org_ids: { Args: never; Returns: string[] }
       auth_supplier_ids: { Args: never; Returns: string[] }
