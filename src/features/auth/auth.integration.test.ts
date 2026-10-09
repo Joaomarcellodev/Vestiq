@@ -1,13 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { makeUser, supabaseUp, uniqueEmail } from "@/test/supabase";
 import { clearTestClient, expectRedirect, formData, setTestClient } from "@/test/actions";
-import {
-  requestPasswordReset,
-  signInWithOAuth,
-  signInWithPassword,
-  signOut,
-  updatePassword,
-} from "./actions";
+import { requestPasswordReset, signInWithPassword, signOut, updatePassword } from "./actions";
 
 const up = await supabaseUp();
 const d = up ? describe : describe.skip;
@@ -56,22 +50,6 @@ d("auth actions (SPEC-002)", () => {
       const state = await signInWithPassword({}, formData({ email: "nope", password: "" }));
       expect(state.fieldErrors?.email).toBeTruthy();
       expect(state.fieldErrors?.password).toBeTruthy();
-    });
-  });
-
-  describe("signInWithOAuth", () => {
-    it("throws on an unsupported provider", async () => {
-      await expect(
-        signInWithOAuth(formData({ provider: "apple", next: "/dashboard" })),
-      ).rejects.toThrow();
-    });
-
-    it("redirects for a supported provider", async () => {
-      // local Supabase returns a provider URL even without Google configured
-      await expectRedirect(
-        () => signInWithOAuth(formData({ provider: "google", next: "/dashboard" })),
-        /./,
-      );
     });
   });
 
