@@ -141,18 +141,17 @@ d("negotiations actions + queries (SPEC-009)", () => {
   });
 
   it("negotiationAction: returns the database error instead of throwing (VES-74)", async () => {
+    // A pending proposal can't be completed — the RPC refuses it. (Zeroing the
+    // stock under an accepted one no longer works: reserved stock is guarded.)
     const negId = await openNeg();
     setTestClient(ctx.seller.client);
-    await expectRedirect(
-      () => negotiationAction({}, formData({ negotiationId: negId, action: "accept" })),
-      /negotiation-accepted/,
-    );
-    await admin().from("product_variants").update({ stock_on_hand: 0 }).eq("id", ctx.variant.id);
 
-    expect(
-      await negotiationAction({}, formData({ negotiationId: negId, action: "complete" })),
-    ).toEqual({ error: "Estoque insuficiente na origem" });
-    expect((await getNegotiation(negId)).negotiation?.status).toBe("ACCEPTED");
+    const state = await negotiationAction(
+      {},
+      formData({ negotiationId: negId, action: "complete" }),
+    );
+    expect(state.error).toBeTruthy();
+    expect((await getNegotiation(negId)).negotiation?.status).toBe("PENDING");
   });
 
   it("listNegotiations: visible only to the two parties (RLS)", async () => {
