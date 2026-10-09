@@ -7,8 +7,8 @@ import type { AppNotification } from "@/features/notifications/queries";
 import type { NotificationRow } from "@/features/notifications/live";
 
 vi.mock("@/features/notifications/actions", () => ({
-  markNotificationRead: vi.fn().mockResolvedValue(undefined),
-  markAllNotificationsRead: vi.fn().mockResolvedValue(undefined),
+  markNotificationRead: vi.fn().mockResolvedValue({}),
+  markAllNotificationsRead: vi.fn().mockResolvedValue({}),
 }));
 
 // --- fake Supabase Realtime channel -----------------------------------------
@@ -263,7 +263,7 @@ describe("NotificationBell — live delivery (ADR-0011)", () => {
     expect(alert.options).toMatchObject({ body: "Casaco · 300,00", tag: row.id });
 
     const { markNotificationRead } = await import("@/features/notifications/actions");
-    vi.mocked(markNotificationRead).mockResolvedValue(undefined);
+    vi.mocked(markNotificationRead).mockResolvedValue({});
     vi.spyOn(window, "focus").mockImplementation(() => {});
     act(() => alert.onclick?.());
     expect(alert.close).toHaveBeenCalled();
