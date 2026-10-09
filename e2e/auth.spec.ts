@@ -22,10 +22,16 @@ test.describe("Auth", () => {
     await expect(page).toHaveURL(/\/dashboard/);
   });
 
-  test("no Apple sign-in, only Google", async ({ page }) => {
+  test("sign-in is email and password only, no social login (VES-96)", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.getByRole("button", { name: /continuar com google/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /apple/i })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /entrar na plataforma/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /google|apple/i })).toHaveCount(0);
+  });
+
+  test("an expired email link lands on the login with a clear message", async ({ page }) => {
+    await page.goto("/auth/callback?code=nope");
+    await expect(page).toHaveURL(/\/login\?error=link/);
+    await expect(page.getByRole("alert")).toContainText(/link expirou ou já foi usado/i);
   });
 
   test("forgot-password: request → email link → set a new password → logged in", async ({
