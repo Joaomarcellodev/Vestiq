@@ -1458,6 +1458,10 @@ export type Database = {
         Args: { org_a: string; org_b: string }
         Returns: boolean
       }
+      update_product: {
+        Args: { p_product: Json; p_product_id: string; p_variants?: Json }
+        Returns: undefined
+      }
     }
     Enums: {
       inventory_movement_type:

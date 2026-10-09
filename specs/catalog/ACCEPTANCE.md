@@ -75,6 +75,17 @@
 **Então** o novo preço vale para vendas futuras
 **E** vendas já registradas mantêm o preço original.
 
+## AC-PROD-005-02 — Editar as variações (VES-68)
+
+**Dado** um produto ativo com variações
+**Quando** a revendedora edita o produto
+**Então** pode alterar cor, tamanho, SKU, custo e preço de venda de cada variação
+**E** adicionar variações novas (com estoque inicial, lançado como entrada no inventário)
+**E** arquivar variações — nunca apagar: vendas, ofertas e histórico continuam apontando para elas
+**E** o estoque de uma variação existente só aparece para leitura (muda pelo inventário)
+**E** o produto mantém ao menos uma variação
+**E** um erro (SKU repetido, preço inválido) não salva nada, com a mensagem no campo.
+
 ## AC-PROD-006-01 — Desativar sem apagar
 
 **Dado** um produto com histórico de vendas

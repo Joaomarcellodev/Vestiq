@@ -34,6 +34,32 @@ export const productSchema = z.object({
 export type ProductInput = z.infer<typeof productSchema>;
 export type VariantInput = z.infer<typeof variantSchema>;
 
+/**
+ * VES-68 — the variants of the edit form: the same rules as creation, plus the
+ * id of an existing variant. "initialStock" only counts for a new one (no id);
+ * an existing variant's stock moves through the inventory, never this form.
+ */
+export const editVariantSchema = variantSchema.extend({
+  id: z.string().uuid("Variação inválida").optional().or(z.literal("")),
+});
+
+/** BR-CAT-03 — a product always keeps at least one variant. */
+export const editVariantsSchema = z
+  .array(editVariantSchema)
+  .min(1, "O produto precisa de pelo menos uma variação");
+
+export type EditVariantInput = z.infer<typeof editVariantSchema>;
+
+/** Zod issues keyed by field path ("name", "variants.0.retailPrice"), first message wins. */
+export function fieldErrorsOf(error: z.ZodError, prefix = ""): Record<string, string> {
+  const errors: Record<string, string> = {};
+  for (const issue of error.issues) {
+    const key = [prefix, ...issue.path].filter((p) => p !== "").join(".");
+    if (key && !(key in errors)) errors[key] = issue.message;
+  }
+  return errors;
+}
+
 /** Product photos — Storage bucket `product-images`. */
 export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 export const PRODUCT_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
