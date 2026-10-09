@@ -9,7 +9,7 @@ test.describe("Reseller core flow", () => {
     await page.getByLabel("Senha", { exact: true }).fill(RESELLER.password);
     await page.getByRole("button", { name: /entrar na plataforma/i }).click();
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByRole("heading", { name: /bom dia/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /bom dia|boa tarde|boa noite/i })).toBeVisible();
   });
 
   test("protected route redirects to login when signed out", async ({ page }) => {
