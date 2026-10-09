@@ -9,6 +9,8 @@ import {
   archiveToOffersSchema,
   categoryArchiveSchema,
   categorySchema,
+  editVariantsSchema,
+  fieldErrorsOf,
   PRODUCT_IMAGE_MAX_COUNT,
   productSchema,
   renameCategorySchema,
@@ -16,7 +18,12 @@ import {
 import { parseWholesaleForm, type WholesaleInput } from "./wholesale";
 import { keptImages as keepImages, readImageFiles, removeImages, uploadImages } from "./images";
 
-export type ActionState = { error?: string; ok?: boolean };
+export type ActionState = {
+  error?: string;
+  ok?: boolean;
+  /** Per-field messages keyed by path — "name", "variants.0.retailPrice" (VES-68). */
+  fieldErrors?: Record<string, string>;
+};
 export type CategoryActionState = ActionState & { category?: { id: string; name: string } };
 
 const DUPLICATE_CATEGORY = "Já existe uma categoria com esse nome";
@@ -220,6 +227,42 @@ const updateProductSchema = z.object({
   description: z.string().trim().max(2000).optional().or(z.literal("")),
 });
 
+/**
+ * VES-68 — the variants posted by the edit form, or null when the form sent
+ * none (the variants are then left as they are).
+ */
+function readEditVariants(formData: FormData) {
+  const raw = formData.get("variants");
+  if (raw === null) return { variants: null };
+  let json: unknown;
+  try {
+    json = JSON.parse(String(raw));
+  } catch {
+    return { variants: null, error: "Variações inválidas" };
+  }
+  const parsed = editVariantsSchema.safeParse(json);
+  if (!parsed.success) {
+    return {
+      variants: null,
+      error: parsed.error.issues[0]?.message ?? "Variações inválidas",
+      fieldErrors: fieldErrorsOf(parsed.error, "variants"),
+    };
+  }
+  return { variants: parsed.data };
+}
+
+function updateProductError(message: string, code?: string): string {
+  if (code === "23505") {
+    return /product_variants/.test(message) ? "SKU de variação já utilizado" : "SKU já utilizado";
+  }
+  if (/not authorized/i.test(message)) return "Você não tem permissão para esta ação";
+  return message;
+}
+
+/**
+ * Edits the product and its variants (VES-68) in one transaction
+ * (`update_product`, ADR-0004): a duplicated SKU or a bad price saves nothing.
+ */
 export async function updateProduct(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const org = await requireActiveOrganization();
   const parsed = updateProductSchema.safeParse({
@@ -230,7 +273,18 @@ export async function updateProduct(_prev: ActionState, formData: FormData): Pro
     internalSku: formData.get("internalSku"),
     description: formData.get("description"),
   });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  const variants = readEditVariants(formData);
+  if (!parsed.success || variants.error) {
+    return {
+      error: parsed.success
+        ? variants.error
+        : (parsed.error.issues[0]?.message ?? "Dados inválidos"),
+      fieldErrors: {
+        ...(parsed.success ? {} : fieldErrorsOf(parsed.error)),
+        ...variants.fieldErrors,
+      },
+    };
+  }
   const d = parsed.data;
   const { wholesale, error: wholesaleError } = readWholesale(org.type, formData);
   if (wholesaleError) return { error: wholesaleError };
@@ -250,27 +304,43 @@ export async function updateProduct(_prev: ActionState, formData: FormData): Pro
   const keptImages = keepImages(formData.get("existingImages"), previousImages);
   const imageFiles = readImageFiles(formData, PRODUCT_IMAGE_MAX_COUNT);
   let imageUrls = keptImages;
+  let uploaded: string[] = [];
   if (imageFiles.length > 0) {
     const { urls, error: upErr } = await uploadImages(supabase, `${org.id}/${d.id}`, imageFiles);
     if (upErr) return { error: upErr };
+    uploaded = urls;
     imageUrls = [...keptImages, ...urls].slice(0, PRODUCT_IMAGE_MAX_COUNT);
   }
 
-  const { error } = await supabase
-    .from("products")
-    .update({
+  const { error } = await supabase.rpc("update_product", {
+    p_product_id: d.id,
+    p_product: {
       name: d.name,
-      brand: d.brand || null,
-      category_id: d.categoryId || null,
-      internal_sku: d.internalSku || null,
-      description: d.description || null,
+      brand: d.brand ?? "",
+      category_id: d.categoryId ?? "",
+      internal_sku: d.internalSku ?? "",
+      description: d.description ?? "",
       image_urls: imageUrls,
-      ...wholesaleColumns(wholesale),
-    })
-    .eq("id", d.id);
+      ...(wholesale
+        ? { min_order_quantity: wholesale.minOrderQuantity, size_grid: wholesale.sizeGrid }
+        : {}),
+    },
+    p_variants:
+      variants.variants?.map((v) => ({
+        id: v.id || null,
+        size: v.size ?? "",
+        color: v.color ?? "",
+        sku: v.sku ?? "",
+        cost_price: v.costPrice,
+        retail_price: v.retailPrice,
+        initial_stock: v.id ? 0 : v.initialStock,
+      })) ?? undefined,
+  });
 
   if (error) {
-    return { error: error.code === "23505" ? "SKU já utilizado" : error.message };
+    // Nothing was saved: the photos uploaded for this attempt are orphans.
+    await removeImages(supabase, uploaded);
+    return { error: updateProductError(error.message, error.code) };
   }
 
   // AC-PROD-002-02: removed photos leave the bucket too. A failure here only
