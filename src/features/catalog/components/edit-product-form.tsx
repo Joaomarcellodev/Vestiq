@@ -90,6 +90,9 @@ export function EditProductForm({
           onFilesChange={setImages}
           existing={existing}
           onExistingChange={setExisting}
+          hint={
+            isFactory ? "Estas fotos aparecem para as revendedoras em Fornecedores." : undefined
+          }
         />
       </div>
       <div className="flex justify-end">

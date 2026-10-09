@@ -17,9 +17,22 @@ interface Props {
   /** Already-uploaded image URLs to keep (edit only). */
   existing?: string[];
   onExistingChange?: (urls: string[]) => void;
+  /** Extra line under the field (e.g. who sees these photos). */
+  hint?: string;
 }
 
-export function ImageUploadField({ files, onFilesChange, existing = [], onExistingChange }: Props) {
+/** Moves item `i` to the front — the first photo is the product's cover. */
+function toFront<T>(list: T[], i: number): T[] {
+  return [list[i]!, ...list.filter((_, idx) => idx !== i)];
+}
+
+export function ImageUploadField({
+  files,
+  onFilesChange,
+  existing = [],
+  onExistingChange,
+  hint,
+}: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -55,10 +68,14 @@ export function ImageUploadField({ files, onFilesChange, existing = [], onExisti
   return (
     <div className="space-y-sm">
       <div className="flex flex-wrap gap-3">
-        {existing.map((url) => (
+        {existing.map((url, i) => (
           <Thumb
             key={url}
             src={url}
+            cover={i === 0}
+            onMakeCover={
+              onExistingChange && i > 0 ? () => onExistingChange(toFront(existing, i)) : undefined
+            }
             onRemove={
               onExistingChange
                 ? () => onExistingChange(existing.filter((u) => u !== url))
@@ -70,6 +87,12 @@ export function ImageUploadField({ files, onFilesChange, existing = [], onExisti
           <Thumb
             key={src}
             src={src}
+            cover={existing.length === 0 && i === 0}
+            // Saved photos come first on the server, so only reorder new ones
+            // while there are none.
+            onMakeCover={
+              existing.length === 0 && i > 0 ? () => onFilesChange(toFront(files, i)) : undefined
+            }
             onRemove={() => onFilesChange(files.filter((_, idx) => idx !== i))}
           />
         ))}
@@ -89,8 +112,9 @@ export function ImageUploadField({ files, onFilesChange, existing = [], onExisti
       <p className="font-label-md text-label-md text-on-surface-variant">
         {busy
           ? "Otimizando as imagens…"
-          : `JPG, PNG ou WebP · até ${PRODUCT_IMAGE_MAX_COUNT} imagens · 5 MB cada`}
+          : `JPG, PNG ou WebP · até ${PRODUCT_IMAGE_MAX_COUNT} imagens · 5 MB cada · a primeira é a capa`}
       </p>
+      {hint && <p className="font-label-md text-label-md text-on-surface-variant">{hint}</p>}
       {notice && (
         <p role="status" className="font-label-md text-label-md text-error">
           {notice}
@@ -112,10 +136,34 @@ export function ImageUploadField({ files, onFilesChange, existing = [], onExisti
   );
 }
 
-function Thumb({ src, onRemove }: { src: string; onRemove?: () => void }) {
+function Thumb({
+  src,
+  cover = false,
+  onMakeCover,
+  onRemove,
+}: {
+  src: string;
+  cover?: boolean;
+  onMakeCover?: () => void;
+  onRemove?: () => void;
+}) {
   return (
     <div className="relative h-24 w-24 overflow-hidden rounded-lg border border-outline-variant bg-surface-container">
       <Image src={src} alt="" fill sizes="96px" className="object-cover" unoptimized />
+      {cover && (
+        <span className="absolute bottom-1 left-1 rounded bg-primary-container px-1.5 py-0.5 font-label-sm text-label-sm text-on-primary">
+          Capa
+        </span>
+      )}
+      {onMakeCover && (
+        <button
+          type="button"
+          onClick={onMakeCover}
+          className="absolute inset-x-1 bottom-1 rounded bg-surface-container-lowest/90 px-1 py-0.5 font-label-sm text-label-sm text-on-surface hover:bg-surface-container-lowest"
+        >
+          Tornar capa
+        </button>
+      )}
       {onRemove && (
         <Button
           type="button"

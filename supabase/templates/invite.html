@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+  <body style="margin:0;background:#f6f2fb;font-family:Arial,Helvetica,sans-serif;color:#1d1a22">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:16px;padding:32px">
+            <tr>
+              <td>
+                <p style="margin:0 0 24px;font-size:20px;font-weight:bold;color:#7027b8">VESTIQ</p>
+                <h1 style="margin:0 0 16px;font-size:22px">Você foi convidada para uma rede</h1>
+                <p style="margin:0 0 24px;font-size:16px;line-height:1.5">
+                  Uma fábrica convidou sua loja para a rede dela no Vestiq. Ao aceitar, você vê o
+                  catálogo da fábrica, faz pedidos e negocia peças com outras revendedoras.
+                </p>
+                <p style="margin:0 0 24px">
+                  <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=invite" style="display:inline-block;background:#7027b8;color:#ffffff;text-decoration:none;font-weight:bold;padding:14px 24px;border-radius:8px">Aceitar convite</a>
+                </p>
+                <p style="margin:0;font-size:13px;line-height:1.5;color:#6b6475">
+                  No primeiro acesso você define a sua senha. Se não esperava este convite, pode
+                  ignorar este email.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -12,6 +12,7 @@
 | RF-PROD-001 | AC-PROD-001-06    | TC-PROD-18 | component                      |
 | RF-PROD-001 | AC-PROD-rls       | TC-PROD-10 | integration (2 tenants)        |
 | RF-PROD-002 | AC-PROD-002-01    | TC-PROD-03 | integration + e2e              |
+| RF-PROD-002 | AC-PROD-002-02    | TC-PROD-21 | component + integration + e2e  |
 | RF-PROD-003 | AC-PROD-003-01    | TC-PROD-04 | component + integration        |
 | RF-PROD-004 | AC-PROD-004-01    | TC-PROD-05 | integration                    |
 | RF-PROD-005 | AC-PROD-005-01    | TC-PROD-06 | integration                    |
@@ -98,6 +99,10 @@ integration · não-crítica · `listProducts` com `categoryId` devolve só os p
 ### TC-PROD-18 — Nova categoria no formulário de produto
 
 component · não-crítica · criar pelo formulário adiciona a opção e a seleciona.
+
+### TC-PROD-21 — Gerenciar fotos
+
+component + integration + e2e · não-crítica · "Tornar capa" move a foto para o início; remover apaga o arquivo do Storage; URL que não era do produto é ignorada; foto enviada pela fábrica aparece para a revendedora em `/fornecedores` (E2E).
 
 ## Cobertura de RF
 
