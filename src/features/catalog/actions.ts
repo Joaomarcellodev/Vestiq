@@ -4,20 +4,17 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireActiveOrganization } from "@/features/organizations/queries";
-import type { Database } from "@/types/database";
 import {
   archiveToOffersSchema,
   categoryArchiveSchema,
   categorySchema,
-  PRODUCT_IMAGE_MAX_BYTES,
   PRODUCT_IMAGE_MAX_COUNT,
-  PRODUCT_IMAGE_TYPES,
   productSchema,
   renameCategorySchema,
 } from "./validation";
 import { parseWholesaleForm, type WholesaleInput } from "./wholesale";
+import { keptImages as keepImages, readImageFiles, removeImages, uploadImages } from "./images";
 
 export type ActionState = { error?: string; ok?: boolean };
 export type CategoryActionState = ActionState & { category?: { id: string; name: string } };
@@ -27,46 +24,6 @@ const DUPLICATE_CATEGORY = "Já existe uma categoria com esse nome";
 function revalidateCategories() {
   revalidatePath("/produtos");
   revalidatePath("/produtos/categorias");
-}
-
-const IMAGE_BUCKET = "product-images";
-
-/**
- * Uploads the picked files to `product-images/{orgId}/{productId}/…` and
- * returns their public URLs. Returns an error string instead of throwing so
- * the caller can surface it in the form.
- */
-async function uploadProductImages(
-  supabase: SupabaseClient<Database>,
-  orgId: string,
-  productId: string,
-  files: File[],
-): Promise<{ urls: string[]; error?: string }> {
-  const urls: string[] = [];
-  for (const file of files) {
-    if (!(file instanceof File) || file.size === 0) continue;
-    if (!PRODUCT_IMAGE_TYPES.includes(file.type)) {
-      return { urls, error: "Envie imagens JPG, PNG ou WebP." };
-    }
-    if (file.size > PRODUCT_IMAGE_MAX_BYTES) {
-      return { urls, error: "Cada imagem deve ter no máximo 5 MB." };
-    }
-    const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-    const path = `${orgId}/${productId}/${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabase.storage
-      .from(IMAGE_BUCKET)
-      .upload(path, file, { contentType: file.type, upsert: false });
-    if (error) return { urls, error: `Falha no upload da imagem: ${error.message}` };
-    urls.push(supabase.storage.from(IMAGE_BUCKET).getPublicUrl(path).data.publicUrl);
-  }
-  return { urls };
-}
-
-/** `…/storage/v1/object/public/product-images/<path>` → `<path>`. */
-function storagePathFromUrl(url: string): string | null {
-  const marker = `/storage/v1/object/public/${IMAGE_BUCKET}/`;
-  const i = url.indexOf(marker);
-  return i === -1 ? null : decodeURIComponent(url.slice(i + marker.length));
 }
 
 /**
@@ -89,13 +46,6 @@ function wholesaleColumns(wholesale: WholesaleInput | null) {
   return wholesale
     ? { min_order_quantity: wholesale.minOrderQuantity, size_grid: wholesale.sizeGrid }
     : {};
-}
-
-function readImageFiles(formData: FormData): File[] {
-  return formData
-    .getAll("images")
-    .filter((v): v is File => v instanceof File && v.size > 0)
-    .slice(0, PRODUCT_IMAGE_MAX_COUNT);
 }
 
 export async function createCategory(
@@ -206,12 +156,11 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
     };
   }
 
-  const imageFiles = readImageFiles(formData);
+  const imageFiles = readImageFiles(formData, PRODUCT_IMAGE_MAX_COUNT);
   if (imageFiles.length > 0) {
-    const { urls, error: upErr } = await uploadProductImages(
+    const { urls, error: upErr } = await uploadImages(
       supabase,
-      org.id,
-      product.id,
+      `${org.id}/${product.id}`,
       imageFiles,
     );
     if (upErr) {
@@ -298,20 +247,11 @@ export async function updateProduct(_prev: ActionState, formData: FormData): Pro
 
   // Images: kept existing URLs (in the order chosen — the first is the cover)
   // + freshly uploaded files. Only URLs the product already had can be kept.
-  let keptImages: string[] = [];
-  try {
-    const raw = formData.get("existingImages");
-    const parsedKept: unknown = raw ? JSON.parse(raw as string) : [];
-    keptImages = Array.isArray(parsedKept)
-      ? parsedKept.filter((u): u is string => previousImages.includes(u as string))
-      : [];
-  } catch {
-    keptImages = [];
-  }
-  const imageFiles = readImageFiles(formData);
+  const keptImages = keepImages(formData.get("existingImages"), previousImages);
+  const imageFiles = readImageFiles(formData, PRODUCT_IMAGE_MAX_COUNT);
   let imageUrls = keptImages;
   if (imageFiles.length > 0) {
-    const { urls, error: upErr } = await uploadProductImages(supabase, org.id, d.id, imageFiles);
+    const { urls, error: upErr } = await uploadImages(supabase, `${org.id}/${d.id}`, imageFiles);
     if (upErr) return { error: upErr };
     imageUrls = [...keptImages, ...urls].slice(0, PRODUCT_IMAGE_MAX_COUNT);
   }
@@ -335,14 +275,10 @@ export async function updateProduct(_prev: ActionState, formData: FormData): Pro
 
   // AC-PROD-002-02: removed photos leave the bucket too. A failure here only
   // leaves an orphan file behind, so it doesn't fail the save.
-  const removed = previousImages
-    .filter((u) => !imageUrls.includes(u))
-    .map(storagePathFromUrl)
-    .filter((p): p is string => p !== null);
-  if (removed.length) {
-    const { error: removeError } = await supabase.storage.from(IMAGE_BUCKET).remove(removed);
-    if (removeError) console.error("product image cleanup failed", removeError);
-  }
+  await removeImages(
+    supabase,
+    previousImages.filter((u) => !imageUrls.includes(u)),
+  );
 
   revalidatePath("/produtos");
   revalidatePath(`/produtos/${d.id}`);

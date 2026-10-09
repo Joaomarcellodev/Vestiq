@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Button, TextField } from "@/components/atoms";
+import { ImageUploadField } from "@/features/catalog/components/image-upload-field";
 import { publishOffer, type ActionState } from "../actions";
 
 export function PublishOfferForm({
@@ -12,6 +13,7 @@ export function PublishOfferForm({
   networks: { id: string; name: string }[];
 }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(publishOffer, {});
+  const [images, setImages] = useState<File[]>([]);
 
   if (variants.length === 0) {
     return (
@@ -29,7 +31,14 @@ export function PublishOfferForm({
   }
 
   return (
-    <form action={action} className="space-y-md">
+    <form
+      action={(fd) => {
+        fd.delete("images");
+        images.forEach((f) => fd.append("images", f));
+        action(fd);
+      }}
+      className="space-y-md"
+    >
       {state.error && (
         <p
           role="alert"
@@ -79,6 +88,16 @@ export function PublishOfferForm({
         required
       />
       <TextField label="Observação" name="note" placeholder="Estado da peça, condições..." />
+      <div>
+        <p className="mb-1.5 font-body-md text-body-md font-semibold text-on-surface">
+          Fotos da peça (opcional)
+        </p>
+        <ImageUploadField
+          files={images}
+          onFilesChange={setImages}
+          hint="Mostre a peça real: estado, detalhes, etiqueta. Sem fotos, a oferta usa as do produto."
+        />
+      </div>
       <div className="flex justify-end">
         <Button type="submit" size="lg" loading={pending} className="w-full sm:w-auto sm:px-10">
           Publicar na rede

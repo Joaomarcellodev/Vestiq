@@ -9,3 +9,5 @@ export const publishOfferSchema = z.object({
 });
 
 export const cancelOfferSchema = z.object({ offerId: z.string().uuid() });
+
+export const offerPhotosSchema = z.object({ offerId: z.string().uuid("Oferta inválida") });
