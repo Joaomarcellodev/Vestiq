@@ -59,15 +59,78 @@ d("network actions (SPEC-003)", () => {
       .select("status, invited_email")
       .eq("network_id", network.id);
     expect(data?.[0]).toMatchObject({ status: "INVITED", invited_email: "nova@loja.com" });
+  });
 
-    // NOTE: there is no unique constraint on (network_id, invited_email) for
-    // pending invites, so a second invite to the same email currently succeeds.
-    // The action's 23505 "já foi convidada" branch is therefore unreachable today.
-    const dup = await inviteReseller(
-      {},
-      formData({ networkId: network.id, email: "nova@loja.com" }),
-    );
-    expect(dup.ok).toBe(true);
+  describe("inviteReseller: an e-mail already in the network (VES-76)", () => {
+    const rowsFor = async (networkId: string) =>
+      (await admin().from("network_members").select("id").eq("network_id", networkId)).data ?? [];
+
+    it("rejects a pending invite to the same e-mail, ignoring case", async () => {
+      const network = await makeNetwork(factoryOrgId);
+      await inviteMember(network.id, "pendente@loja.com");
+
+      const dup = await inviteReseller(
+        {},
+        formData({ networkId: network.id, email: "Pendente@Loja.com" }),
+      );
+      expect(dup.error).toBe("Já existe um convite pendente para esse e-mail");
+      expect(await rowsFor(network.id)).toHaveLength(1);
+    });
+
+    it("rejects an active member", async () => {
+      const network = await makeNetwork(factoryOrgId);
+      const reseller = await makeUser();
+      const resellerOrg = await makeOrg(reseller.userId, "RESELLER", "RESELLER");
+      const member = await addMember(network.id, resellerOrg.id, "ACTIVE");
+
+      const dup = await inviteReseller(
+        {},
+        formData({ networkId: network.id, email: member.invited_email }),
+      );
+      expect(dup.error).toBe("Essa revendedora já faz parte da rede");
+      expect(await rowsFor(network.id)).toHaveLength(1);
+    });
+
+    it("points a disabled member to the reactivate switch", async () => {
+      const network = await makeNetwork(factoryOrgId);
+      const reseller = await makeUser();
+      const resellerOrg = await makeOrg(reseller.userId, "RESELLER", "RESELLER");
+      const member = await addMember(network.id, resellerOrg.id, "DISABLED");
+
+      const dup = await inviteReseller(
+        {},
+        formData({ networkId: network.id, email: member.invited_email }),
+      );
+      expect(dup.error).toMatch(/desativada.*reative/i);
+      expect(await rowsFor(network.id)).toHaveLength(1);
+    });
+
+    it("lets the admin invite again once the old invite expired", async () => {
+      const network = await makeNetwork(factoryOrgId);
+      const old = await inviteMember(network.id, "expirou@loja.com");
+      await admin()
+        .from("network_members")
+        .update({ invite_expires_at: new Date(Date.now() - 86_400_000).toISOString() })
+        .eq("id", old.id);
+
+      const again = await inviteReseller(
+        {},
+        formData({ networkId: network.id, email: "expirou@loja.com" }),
+      );
+      expect(again.ok).toBe(true);
+    });
+
+    it("the same e-mail can still be invited to another network", async () => {
+      const first = await makeNetwork(factoryOrgId);
+      const second = await makeNetwork(factoryOrgId);
+      await inviteMember(first.id, "duas@loja.com");
+
+      const other = await inviteReseller(
+        {},
+        formData({ networkId: second.id, email: "duas@loja.com" }),
+      );
+      expect(other.ok).toBe(true);
+    });
   });
 
   it("inviteReseller: rejects a malformed email (zod)", async () => {
