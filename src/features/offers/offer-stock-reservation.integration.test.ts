@@ -94,7 +94,7 @@ d("offer stock reservation (SPEC-008/009, VES-73)", () => {
   it("serialises two concurrent offers of the same variant (TC-OFFER-16)", async () => {
     const results = await Promise.all([publish(4), publish(4)]);
     expect(results.filter((r) => r.error === null)).toHaveLength(1);
-    expect(results.filter((r) => r.error !== null)[0].error?.message).toMatch(/livre insuficiente/);
+    expect(results.find((r) => r.error !== null)?.error?.message).toMatch(/livre insuficiente/);
   });
 
   it("archiving to offers and direct offer updates obey the free stock (TC-OFFER-17)", async () => {
