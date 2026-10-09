@@ -6,7 +6,7 @@ Decisões técnicas transversais do Vestiq. Formato definido em
 | # | Título | Status |
 | --- | --- | --- |
 | [0001](./0001-record-architecture-decisions.md) | Registrar decisões de arquitetura | Aceito |
-| [0002](./0002-invite-and-social-auth.md) | Onboarding por convite + login social | Aceito |
+| [0002](./0002-invite-and-social-auth.md) | Onboarding por convite + login por email e senha | Aceito (revisado: sem login social) |
 | [0003](./0003-single-supabase-project.md) | Projeto Supabase único | Aceito |
 | [0004](./0004-atomic-operations-via-postgres-functions.md) | Operações críticas como funções PostgreSQL transacionais | Aceito |
 | [0005](./0005-inventory-balance-from-movements.md) | Saldo de estoque derivado das movimentações | Aceito |
