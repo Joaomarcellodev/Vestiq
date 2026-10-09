@@ -23,7 +23,8 @@ select
   (select count(*) from public.network_members nm
     where nm.network_id = fn.id and nm.status = 'DISABLED')::integer as disabled_resellers,
   (select count(*) from public.network_members nm
-    where nm.network_id = fn.id and nm.status = 'INVITED')::integer as pending_invites,
+    where nm.network_id = fn.id and nm.status = 'INVITED'
+      and nm.invite_expires_at > now())::integer as pending_invites,
   (select count(*) from public.offers o
     where o.network_id = fn.id and o.status in ('ACTIVE', 'PARTIALLY_NEGOTIATED'))::integer
     as active_offers,
