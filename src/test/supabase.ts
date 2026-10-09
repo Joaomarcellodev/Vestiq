@@ -44,9 +44,15 @@ export async function supabaseUp(): Promise<boolean> {
 }
 
 let seq = 0;
+/**
+ * `seq` is per Vitest worker, so two workers could build the same address in
+ * the same millisecond ("A user with this email address has already been
+ * registered") — the random part keeps them apart.
+ */
 export function uniqueEmail(prefix = "user"): string {
   seq += 1;
-  return `${prefix}-${Date.now()}-${seq}@vestiq.test`;
+  const nonce = Math.random().toString(36).slice(2, 8);
+  return `${prefix}-${Date.now()}-${seq}-${nonce}@vestiq.test`;
 }
 
 const AUTH_ATTEMPTS = 3;
