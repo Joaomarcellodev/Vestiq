@@ -65,7 +65,11 @@ export function EditProductForm({
   const [state, action, pending] = useActionState<ActionState, FormData>(updateProduct, {});
   const [images, setImages] = useState<File[]>([]);
   const [existing, setExisting] = useState<string[]>(product.image_urls ?? []);
-  const [variants, setVariants] = useState<VariantRow[]>(() => toRows(product.product_variants));
+  const [variants, setVariants] = useState<VariantRow[]>(() => {
+    const rows = toRows(product.product_variants);
+    // BR-CAT-03: a product without variants gets one on save, like a new product.
+    return rows.length > 0 ? rows : [{ ...emptyVariant }];
+  });
   // Existing variants taken off the form: archived on save, until then undoable.
   const [toArchive, setToArchive] = useState<VariantRow[]>([]);
   const errors = state.fieldErrors ?? {};
