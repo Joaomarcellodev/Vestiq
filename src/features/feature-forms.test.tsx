@@ -71,6 +71,20 @@ describe("CustomerForm", () => {
     await userEvent.click(screen.getByRole("button", { name: /salvar cliente/i }));
     expect(await screen.findByRole("alert")).toHaveTextContent("CPF já existe");
   });
+
+  it("keeps every field after a validation error (VES-77)", async () => {
+    customerActions.createCustomer.mockResolvedValueOnce({ error: "CPF inválido" });
+    render(<CustomerForm />);
+    await userEvent.type(screen.getByLabelText("Nome"), "Ana Silva");
+    await userEvent.type(screen.getByLabelText("Email"), "ana@x.com");
+    await userEvent.type(screen.getByLabelText("CPF"), "123");
+    await userEvent.click(screen.getByRole("button", { name: /salvar cliente/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("CPF inválido");
+    expect(screen.getByLabelText("Nome")).toHaveValue("Ana Silva");
+    expect(screen.getByLabelText("Email")).toHaveValue("ana@x.com");
+    expect(screen.getByLabelText("CPF")).toHaveValue("123");
+  });
 });
 
 describe("PublishOfferForm", () => {
@@ -140,6 +154,20 @@ describe("StockControls", () => {
     await userEvent.type(screen.getByLabelText("Quantidade"), "1");
     await userEvent.click(screen.getByRole("button", { name: /registrar entrada/i }));
     expect(await screen.findByText(/entrada registrada/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("Quantidade")).toHaveValue(null);
+  });
+
+  it("keeps the adjustment and reason when it fails (VES-77)", async () => {
+    invActions.adjustStock.mockResolvedValueOnce({ error: "Estoque não pode ficar negativo" });
+    render(<StockControls variantId="v1" />);
+    await userEvent.click(screen.getByRole("button", { name: "Ajuste" }));
+    await userEvent.type(screen.getByLabelText(/ajuste/i), "-99");
+    await userEvent.type(screen.getByLabelText("Motivo"), "contagem");
+    await userEvent.click(screen.getByRole("button", { name: /aplicar ajuste/i }));
+
+    expect(await screen.findByText(/não pode ficar negativo/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/ajuste/i)).toHaveValue(-99);
+    expect(screen.getByLabelText("Motivo")).toHaveValue("contagem");
   });
 });
 
