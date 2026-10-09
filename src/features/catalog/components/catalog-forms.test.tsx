@@ -73,6 +73,94 @@ describe("EditProductForm", () => {
     const fd = updateProduct.mock.calls.at(-1)?.[1] as FormData;
     expect(JSON.parse(fd.get("existingImages") as string)).toEqual(["https://x/2.png"]);
   });
+
+  // VES-68 — variants are editable on the edit form.
+  const variant = (over: Record<string, unknown>) => ({
+    id: "v1",
+    size: "P",
+    color: "Preto",
+    sku: "SKU-P",
+    cost_price: 50,
+    retail_price: 100,
+    stock_on_hand: 4,
+    archived_at: null,
+    created_at: "2026-10-01T00:00:00Z",
+    ...over,
+  });
+  const withVariants = {
+    ...product,
+    product_variants: [
+      variant({}),
+      variant({ id: "v2", size: "M", sku: "SKU-M", created_at: "2026-10-02T00:00:00Z" }),
+      variant({ id: "v0", size: "G", archived_at: "2026-10-03T00:00:00Z" }),
+    ],
+  };
+  const submitted = () => {
+    const fd = updateProduct.mock.calls.at(-1)?.[1] as FormData;
+    return JSON.parse(fd.get("variants") as string) as Record<string, unknown>[];
+  };
+
+  it("prefills the active variants and shows their stock read-only", () => {
+    render(<EditProductForm product={withVariants} categories={CATS} />);
+    const sizes = screen.getAllByLabelText("Tamanho");
+    expect(sizes.map((i) => (i as HTMLInputElement).value)).toEqual(["P", "M"]);
+    expect(screen.getAllByLabelText("Preço de venda (R$)")[0]).toHaveValue(100);
+    expect(screen.getAllByText(/altere pelo inventário/i)).toHaveLength(2);
+    expect(screen.queryByLabelText("Estoque inicial")).toBeNull();
+  });
+
+  it("submits a changed price for the existing variant", async () => {
+    render(<EditProductForm product={withVariants} categories={CATS} />);
+    const price = screen.getAllByLabelText("Preço de venda (R$)")[0]!;
+    await userEvent.clear(price);
+    await userEvent.type(price, "129.9");
+    await userEvent.click(screen.getByRole("button", { name: /salvar alterações/i }));
+
+    expect(submitted()).toEqual([
+      expect.objectContaining({ id: "v1", retailPrice: "129.9", costPrice: "50" }),
+      expect.objectContaining({ id: "v2", retailPrice: "100" }),
+    ]);
+  });
+
+  it("adds a new variant with an initial stock", async () => {
+    render(<EditProductForm product={withVariants} categories={CATS} />);
+    await userEvent.click(screen.getByRole("button", { name: /adicionar/i }));
+    await userEvent.type(screen.getAllByLabelText("Tamanho")[2]!, "GG");
+    await userEvent.clear(screen.getByLabelText("Estoque inicial"));
+    await userEvent.type(screen.getByLabelText("Estoque inicial"), "3");
+    await userEvent.click(screen.getByRole("button", { name: /salvar alterações/i }));
+
+    expect(submitted()).toHaveLength(3);
+    expect(submitted()[2]).toMatchObject({ id: "", size: "GG", initialStock: "3" });
+  });
+
+  it("archives a removed variant on save, and can undo it", async () => {
+    render(<EditProductForm product={withVariants} categories={CATS} />);
+    await userEvent.click(screen.getAllByRole("button", { name: "Arquivar" })[1]!);
+    expect(screen.getByText(/M · Preto será arquivada ao salvar \(4 peça/)).toBeInTheDocument();
+    // the last variant left can't be removed (BR-CAT-03)
+    expect(screen.queryByRole("button", { name: "Arquivar" })).toBeNull();
+
+    await userEvent.click(screen.getByRole("button", { name: /salvar alterações/i }));
+    expect(submitted().map((v) => v.id)).toEqual(["v1"]);
+
+    await userEvent.click(screen.getByRole("button", { name: "Desfazer" }));
+    expect(screen.getAllByLabelText("Tamanho")).toHaveLength(2);
+  });
+
+  it("shows the action's field errors on the variant", async () => {
+    updateProduct.mockResolvedValueOnce({
+      error: "Preço de venda inválido",
+      fieldErrors: { "variants.1.retailPrice": "Preço de venda inválido" },
+    });
+    render(<EditProductForm product={withVariants} categories={CATS} />);
+    await userEvent.click(screen.getByRole("button", { name: /salvar alterações/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Preço de venda inválido");
+    const second = screen.getAllByLabelText("Preço de venda (R$)")[1]!;
+    expect(second).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getAllByLabelText("Preço de venda (R$)")[0]).not.toHaveAttribute("aria-invalid");
+  });
 });
 
 describe("ImageUploadField", () => {
