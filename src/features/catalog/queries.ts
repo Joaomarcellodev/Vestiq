@@ -45,7 +45,11 @@ export async function listProducts(
   if (error) throw error;
 
   return (data ?? []).map((p) => {
-    const variants = p.product_variants ?? [];
+    // An active product counts only its active variants (one can be archived on
+    // its own — VES-68); an archived product shows the ones it was archived with.
+    const variants = (p.product_variants ?? []).filter(
+      (v) => p.archived_at !== null || v.archived_at === null,
+    );
     const prices = variants.map((v) => Number(v.retail_price)).filter((n) => n > 0);
     return {
       id: p.id,

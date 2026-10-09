@@ -20,8 +20,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const product = await getProduct(id).catch(() => null);
   if (!product) notFound();
 
-  const variants = product.product_variants ?? [];
   const archived = product.archived_at !== null;
+  // Variants archived on their own (VES-68) leave the active product's list.
+  const variants = (product.product_variants ?? []).filter(
+    (v) => archived || v.archived_at === null,
+  );
   const images: string[] = product.image_urls ?? [];
 
   return (

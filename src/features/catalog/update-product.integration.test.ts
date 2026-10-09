@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { admin, makeOrg, makeProduct, makeUser, makeVariant, supabaseUp } from "@/test/supabase";
 import { clearTestClient, expectRedirect, formData, setTestClient, stockUp } from "@/test/actions";
 import { updateProduct } from "./actions";
+import { listProducts } from "./queries";
 
 const up = await supabaseUp();
 const d = up ? describe : describe.skip;
@@ -140,6 +141,10 @@ d("updateProduct edits the variants (VES-68)", () => {
     expect(p).toMatchObject({ id: ctx.p.id, stock_on_hand: 4 });
     expect(p!.archived_at).not.toBeNull();
     expect(m!.archived_at).toBeNull();
+
+    // The product list stops counting it: one variant, no stock left on display.
+    const listed = (await listProducts()).find((x) => x.id === ctx.product.id)!;
+    expect(listed).toMatchObject({ variantCount: 1, totalStock: 0 });
   });
 
   it("saves nothing when a variant SKU is taken (one transaction)", async () => {
