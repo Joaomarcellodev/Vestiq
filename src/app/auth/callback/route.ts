@@ -1,7 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-/** OAuth / PKCE code exchange landing (RF-AUTH-001, social sign-in). */
+/**
+ * PKCE code exchange landing for the password-reset email (RF-AUTH-005).
+ * A missing or rejected code is an expired/used link, like /auth/confirm.
+ */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get("code");
@@ -12,14 +15,14 @@ export async function GET(request: NextRequest) {
       : "/dashboard";
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?error=oauth`);
+    return NextResponse.redirect(`${origin}/login?error=link`);
   }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return NextResponse.redirect(`${origin}/login?error=oauth`);
+    return NextResponse.redirect(`${origin}/login?error=link`);
   }
 
   return NextResponse.redirect(`${origin}${next}`);
