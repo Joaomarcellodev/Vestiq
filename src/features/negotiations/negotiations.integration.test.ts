@@ -160,7 +160,7 @@ d("negotiation + transfer (SPEC-003/008/009, SDD §35 core)", () => {
     expect((events ?? []).map((e) => e.type)).toEqual(["CREATED", "ACCEPTED", "COMPLETED"]);
   });
 
-  it("blocks completion when the source no longer has stock (BR-NEG-10)", async () => {
+  it("keeps the stock of an accepted negotiation out of local sales (BR-NEG-10, TC-NEG-21)", async () => {
     const offerId = (ctx as unknown as { offerId: string }).offerId;
     const { data: neg } = await ctx.buyerUser.client.rpc("open_negotiation", {
       p_offer_id: offerId,
@@ -173,25 +173,27 @@ d("negotiation + transfer (SPEC-003/008/009, SDD §35 core)", () => {
       p_action: "accept",
     });
 
-    // drain the seller's stock with a local sale
+    // a local sale may not drain the unit the accepted negotiation reserved
     const current = await stock(ctx.sellerUser.client, ctx.variant.id);
-    await ctx.sellerUser.client.rpc("confirm_sale", {
+    const sale = await ctx.sellerUser.client.rpc("confirm_sale", {
       p_payment_method: "PIX",
       p_items: [{ variant_id: ctx.variant.id, quantity: current }],
     });
+    expect(sale.error?.message).toMatch(/reservado para negociações aceitas \(1 un\.\)/);
+    expect(await stock(ctx.sellerUser.client, ctx.variant.id)).toBe(current);
+
+    // the free units still sell, and the transfer still completes
+    const { error: saleErr } = await ctx.sellerUser.client.rpc("confirm_sale", {
+      p_payment_method: "PIX",
+      p_items: [{ variant_id: ctx.variant.id, quantity: current - 1 }],
+    });
+    expect(saleErr).toBeNull();
 
     const { error } = await ctx.sellerUser.client.rpc("complete_negotiation", {
       p_negotiation_id: negId,
     });
-    expect(error).not.toBeNull();
-    expect(error?.message).toMatch(/insuficiente/i);
-
-    const { data: still } = await ctx.sellerUser.client
-      .from("negotiations")
-      .select("status")
-      .eq("id", negId)
-      .single();
-    expect(still?.status).toBe("ACCEPTED");
+    expect(error).toBeNull();
+    expect(await stock(ctx.sellerUser.client, ctx.variant.id)).toBe(0);
   });
 
   it("isolates negotiations from unrelated organizations (RLS)", async () => {
