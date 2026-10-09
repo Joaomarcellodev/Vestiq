@@ -77,7 +77,15 @@ d("wholesale conditions (SPEC-004 RF-PROD-007)", () => {
         () =>
           updateProduct(
             {},
-            pForm({ id: product.id, name: "Blusa", minOrderQuantity: "24", sizeGrid: "PP, P, M" }),
+            // No variants field: only the conditions change. An empty list would
+            // ask to leave the product without variants (BR-CAT-03, VES-68).
+            pForm({
+              id: product.id,
+              name: "Blusa",
+              minOrderQuantity: "24",
+              sizeGrid: "PP, P, M",
+              variants: undefined,
+            }),
           ),
         new RegExp(`/produtos/${product.id}\\?toast=product-updated`),
       );
