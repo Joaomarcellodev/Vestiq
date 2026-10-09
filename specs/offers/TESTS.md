@@ -2,23 +2,26 @@
 
 ## Matriz de rastreabilidade
 
-| RF               | AC                   | TC          | Nível                 | Crítica §38       |
-| ---------------- | -------------------- | ----------- | --------------------- | ----------------- |
-| RF-OFFER-001     | AC-OFFER-001-01      | TC-OFFER-01 | integration           | não               |
-| RF-OFFER-002     | AC-OFFER-002-01      | TC-OFFER-02 | integration           | não               |
-| RF-OFFER-003     | AC-OFFER-003-01      | TC-OFFER-03 | integration           | sim (estoque)     |
-| RF-OFFER-004     | AC-OFFER-004-01      | TC-OFFER-04 | integration           | sim (isolamento)  |
-| RF-OFFER-005     | AC-OFFER-005-01      | TC-OFFER-05 | integration (2 redes) | sim (isolamento)  |
-| RF-OFFER-004/005 | AC-OFFER-privacidade | TC-OFFER-06 | integration           | sim (privacidade) |
-| RF-OFFER-006     | AC-OFFER-006-01      | TC-OFFER-07 | integration           | não               |
-| RF-OFFER-006     | AC-OFFER-006-02      | TC-OFFER-08 | integration           | não               |
-| RF-OFFER-007     | AC-OFFER-007-01      | TC-OFFER-09 | integration           | sim               |
-| RF-OFFER-003     | AC-OFFER-arquivada   | TC-OFFER-10 | integration           | não               |
-| RF-OFFER-004     | AC-OFFER-004-02      | TC-OFFER-11 | integration           | sim (privacidade) |
-| RF-OFFER-004     | AC-OFFER-busca       | TC-OFFER-12 | unit + e2e            | não               |
-| RF-OFFER-008     | AC-OFFER-008-01      | TC-OFFER-13 | integration + e2e     | não               |
-| RF-OFFER-008     | AC-OFFER-008-02      | TC-OFFER-14 | integration + comp.   | sim (autorização) |
-| RF-OFFER-008     | AC-OFFER-008-03      | TC-OFFER-15 | integration           | não               |
+| RF               | AC                   | TC          | Nível                  | Crítica §38       |
+| ---------------- | -------------------- | ----------- | ---------------------- | ----------------- |
+| RF-OFFER-001     | AC-OFFER-001-01      | TC-OFFER-01 | integration            | não               |
+| RF-OFFER-002     | AC-OFFER-002-01      | TC-OFFER-02 | integration            | não               |
+| RF-OFFER-003     | AC-OFFER-003-01      | TC-OFFER-03 | integration            | sim (estoque)     |
+| RF-OFFER-004     | AC-OFFER-004-01      | TC-OFFER-04 | integration            | sim (isolamento)  |
+| RF-OFFER-005     | AC-OFFER-005-01      | TC-OFFER-05 | integration (2 redes)  | sim (isolamento)  |
+| RF-OFFER-004/005 | AC-OFFER-privacidade | TC-OFFER-06 | integration            | sim (privacidade) |
+| RF-OFFER-006     | AC-OFFER-006-01      | TC-OFFER-07 | integration            | não               |
+| RF-OFFER-006     | AC-OFFER-006-02      | TC-OFFER-08 | integration            | não               |
+| RF-OFFER-007     | AC-OFFER-007-01      | TC-OFFER-09 | integration            | sim               |
+| RF-OFFER-003     | AC-OFFER-arquivada   | TC-OFFER-10 | integration            | não               |
+| RF-OFFER-004     | AC-OFFER-004-02      | TC-OFFER-11 | integration            | sim (privacidade) |
+| RF-OFFER-004     | AC-OFFER-busca       | TC-OFFER-12 | unit + e2e             | não               |
+| RF-OFFER-008     | AC-OFFER-008-01      | TC-OFFER-13 | integration + e2e      | não               |
+| RF-OFFER-008     | AC-OFFER-008-02      | TC-OFFER-14 | integration + comp.    | sim (autorização) |
+| RF-OFFER-008     | AC-OFFER-008-03      | TC-OFFER-15 | integration            | não               |
+| RF-OFFER-003     | AC-OFFER-003-02      | TC-OFFER-16 | integration (concorr.) | sim (estoque)     |
+| RF-OFFER-003     | AC-OFFER-003-02      | TC-OFFER-17 | integration            | sim (estoque)     |
+| RF-OFFER-003     | AC-OFFER-003-03      | TC-OFFER-18 | integration            | sim (estoque)     |
 
 ## Casos de teste
 
@@ -81,6 +84,18 @@ integration + component · **crítica (autorização)** · capa reordenada, foto
 ### TC-OFFER-15 — Fallback para as fotos do produto
 
 integration · não-crítica · `list_visible_offers` devolve as fotos da oferta quando houver e as do produto quando não.
+
+### TC-OFFER-16 — Estoque livre entre ofertas da mesma variação
+
+integration · **crítica** · saldo 5: oferta de 3 → outra de 3 recusada ("2 disponível"), de 2 aceita, de 1 recusada ("0 disponível"); duas publicações simultâneas de 4 → só uma passa (`offer-stock-reservation.integration.test.ts`).
+
+### TC-OFFER-17 — Arquivar e atualizar respeitam o estoque livre
+
+integration · **crítica** · `archive_product_to_offers` acima do livre → recusado; reabrir (`CANCELLED` → `ACTIVE`) uma oferta por `update` direto, com o estoque já ofertado em outra → recusado pelo trigger.
+
+### TC-OFFER-18 — Venda local reduz as ofertas mais novas
+
+integration · **crítica** · saldo 5, ofertas de 2 (antiga) e 3 (nova): venda de 2 → nova = 1, antiga = 2; venda de mais 2 → nova = 0 `CANCELLED`, antiga = 1.
 
 ## Cobertura de RF
 

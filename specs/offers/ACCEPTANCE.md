@@ -19,6 +19,21 @@ observação e status.
 **Então** recebe "Você tem apenas 3 em estoque"
 **E** a oferta não é criada.
 
+## AC-OFFER-003-02 — Ofertas da mesma variação dividem o estoque
+
+**Dado** uma variação com saldo 5 e uma oferta ativa de 3 unidades
+**Quando** a revendedora tenta publicar outra oferta de 3 da mesma variação
+**Então** recebe "Estoque livre insuficiente (2 disponível, o restante já está em ofertas ativas)"
+**E** uma oferta de 2 é aceita
+**E** duas publicações simultâneas que juntas passem do saldo resultam em apenas uma oferta.
+
+## AC-OFFER-003-03 — Venda local reduz as ofertas
+
+**Dado** uma variação com saldo 5, uma oferta antiga de 2 e uma nova de 3
+**Quando** a revendedora vende 2 unidades na loja
+**Então** a oferta nova cai para 1 e a antiga continua com 2
+**E** quando o saldo não comporta mais uma oferta, ela vira `CANCELLED`.
+
 ## AC-OFFER-004-01 — Peers da mesma rede veem ofertas ativas
 
 **Dado** as revendedoras A e B na rede X, e uma oferta `ACTIVE` de A
