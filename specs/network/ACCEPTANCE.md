@@ -25,6 +25,27 @@
 **Então** há um `network_members` `status = INVITED` com token
 **E** um email de convite é enviado.
 
+## AC-NET-003-02 — Email do convite
+
+**Dado** um convite para `loja@exemplo.com`
+**Quando** o email é enviado
+**Então** ele chega em pt-BR, com a marca Vestiq, e o link leva a `/convite/[token]` já autenticado
+**E** se o email ainda não tem conta, a conta é criada pelo convite (Supabase Auth `inviteUserByEmail`)
+**E** se já tem conta, recebe um link de acesso que leva ao mesmo convite.
+
+## AC-NET-003-03 — Falha no envio
+
+**Dado** um convite cujo email não pode ser enviado
+**Quando** o `FACTORY_ADMIN` convida
+**Então** ele vê a mensagem de erro
+**E** nenhum `network_members` fica criado (pode tentar de novo sem "já foi convidada").
+
+## AC-NET-004-04 — Definir senha ao aceitar
+
+**Dado** uma revendedora que entrou pelo link do email de convite e ainda não tem senha
+**Quando** ela aceita o convite informando uma senha (mín. 8 caracteres)
+**Então** a senha é salva e ela passa a entrar com email e senha.
+
 ## AC-NET-004-01 — Aceitar convite
 
 **Dado** um convite válido para `loja@exemplo.com`
