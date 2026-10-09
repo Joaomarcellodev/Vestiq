@@ -157,6 +157,54 @@ d("catalog actions + queries (SPEC-004)", () => {
     expect(data?.image_urls).toEqual(["https://x/1.png"]);
   });
 
+  it("updateProduct: reorders the cover, ignores foreign URLs, deletes removed photos (TC-PROD-21)", async () => {
+    const product = await makeProduct(orgId, { name: "Com fotos" });
+    await expectRedirect(
+      () =>
+        updateProduct(
+          {},
+          pForm({
+            id: product.id,
+            name: "Com fotos",
+            images: [pngFile("a.png"), pngFile("b.png")],
+          }),
+        ),
+      /product-updated/,
+    );
+    const uploaded = (
+      await admin().from("products").select("image_urls").eq("id", product.id).single()
+    ).data!.image_urls;
+    expect(uploaded).toHaveLength(2);
+    const [first, second] = uploaded as [string, string];
+    const folder = `${orgId}/${product.id}`;
+    const files = async () =>
+      ((await admin().storage.from("product-images").list(folder)).data ?? []).length;
+    expect(await files()).toBe(2);
+
+    // Second photo becomes the cover, the first one is removed, and a URL the
+    // product never had is dropped.
+    await expectRedirect(
+      () =>
+        updateProduct(
+          {},
+          pForm({
+            id: product.id,
+            name: "Com fotos",
+            existingImages: JSON.stringify([second, "https://evil.example/x.png"]),
+          }),
+        ),
+      /product-updated/,
+    );
+    const { data } = await admin()
+      .from("products")
+      .select("image_urls")
+      .eq("id", product.id)
+      .single();
+    expect(data?.image_urls).toEqual([second]);
+    expect(await files()).toBe(1);
+    expect(first).not.toBe(second);
+  });
+
   it("archiveProduct / unarchiveProduct toggle archived_at on product + variants", async () => {
     const product = await makeProduct(orgId);
     await makeVariant(product.id);

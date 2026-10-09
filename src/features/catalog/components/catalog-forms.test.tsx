@@ -104,4 +104,33 @@ describe("ImageUploadField", () => {
     await userEvent.click(screen.getByRole("button", { name: /remover imagem/i }));
     expect(onExistingChange).toHaveBeenCalledWith([]);
   });
+
+  it("marks the first photo as cover and moves another one to the front (TC-PROD-21)", async () => {
+    const onExistingChange = vi.fn();
+    render(
+      <ImageUploadField
+        files={[png("novo.png")]}
+        onFilesChange={vi.fn()}
+        existing={["https://x/a.png", "https://x/b.png"]}
+        onExistingChange={onExistingChange}
+        hint="Estas fotos aparecem para as revendedoras em Fornecedores."
+      />,
+    );
+    expect(screen.getAllByText("Capa")).toHaveLength(1);
+    // Only the second saved photo can become the cover; new files follow the saved ones.
+    const makeCover = screen.getAllByRole("button", { name: "Tornar capa" });
+    expect(makeCover).toHaveLength(1);
+    await userEvent.click(makeCover[0]!);
+    expect(onExistingChange).toHaveBeenCalledWith(["https://x/b.png", "https://x/a.png"]);
+    expect(screen.getByText(/aparecem para as revendedoras/)).toBeVisible();
+  });
+
+  it("reorders new photos while the product has none saved", async () => {
+    const onFilesChange = vi.fn();
+    const a = png("a.png");
+    const b = png("b.png");
+    render(<ImageUploadField files={[a, b]} onFilesChange={onFilesChange} />);
+    await userEvent.click(screen.getByRole("button", { name: "Tornar capa" }));
+    expect(onFilesChange).toHaveBeenCalledWith([b, a]);
+  });
 });

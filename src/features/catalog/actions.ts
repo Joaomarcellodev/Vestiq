@@ -51,6 +51,13 @@ async function uploadProductImages(
   return { urls };
 }
 
+/** `…/storage/v1/object/public/product-images/<path>` → `<path>`. */
+function storagePathFromUrl(url: string): string | null {
+  const marker = `/storage/v1/object/public/${IMAGE_BUCKET}/`;
+  const i = url.indexOf(marker);
+  return i === -1 ? null : decodeURIComponent(url.slice(i + marker.length));
+}
+
 /**
  * RF-PROD-007 / BR-CAT-13: only a factory sets wholesale conditions. A
  * reseller's form never posts them, and anything posted anyway is ignored.
@@ -219,11 +226,23 @@ export async function updateProduct(_prev: ActionState, formData: FormData): Pro
 
   const supabase = await createClient();
 
-  // Images: kept existing URLs + freshly uploaded files.
+  const { data: current } = await supabase
+    .from("products")
+    .select("image_urls")
+    .eq("id", d.id)
+    .maybeSingle();
+  if (!current) return { error: "Produto não encontrado" };
+  const previousImages = current.image_urls ?? [];
+
+  // Images: kept existing URLs (in the order chosen — the first is the cover)
+  // + freshly uploaded files. Only URLs the product already had can be kept.
   let keptImages: string[] = [];
   try {
     const raw = formData.get("existingImages");
-    keptImages = raw ? (JSON.parse(raw as string) as string[]) : [];
+    const parsedKept: unknown = raw ? JSON.parse(raw as string) : [];
+    keptImages = Array.isArray(parsedKept)
+      ? parsedKept.filter((u): u is string => previousImages.includes(u as string))
+      : [];
   } catch {
     keptImages = [];
   }
@@ -251,8 +270,21 @@ export async function updateProduct(_prev: ActionState, formData: FormData): Pro
   if (error) {
     return { error: error.code === "23505" ? "SKU já utilizado" : error.message };
   }
+
+  // AC-PROD-002-02: removed photos leave the bucket too. A failure here only
+  // leaves an orphan file behind, so it doesn't fail the save.
+  const removed = previousImages
+    .filter((u) => !imageUrls.includes(u))
+    .map(storagePathFromUrl)
+    .filter((p): p is string => p !== null);
+  if (removed.length) {
+    const { error: removeError } = await supabase.storage.from(IMAGE_BUCKET).remove(removed);
+    if (removeError) console.error("product image cleanup failed", removeError);
+  }
+
   revalidatePath("/produtos");
   revalidatePath(`/produtos/${d.id}`);
+  revalidatePath("/fornecedores", "layout");
   redirect(`/produtos/${d.id}?toast=product-updated`);
 }
 
