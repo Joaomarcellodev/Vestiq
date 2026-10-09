@@ -29,3 +29,18 @@ test("authenticated pages render without errors", async ({ page }) => {
 
   expect(errors).toEqual([]);
 });
+
+// VES-58 — unknown URLs get the Vestiq 404, not Next's default page.
+test("an unknown URL shows the custom 404", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByLabel("Email profissional").fill(RESELLER.email);
+  await page.getByLabel("Senha", { exact: true }).fill(RESELLER.password);
+  await page.getByRole("button", { name: /entrar na plataforma/i }).click();
+  await expect(page).toHaveURL(/\/dashboard/);
+
+  const response = await page.goto("/pagina-que-nao-existe");
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole("heading", { name: "Página não encontrada" })).toBeVisible();
+  await page.getByRole("link", { name: /ir para o início/i }).click();
+  await expect(page).toHaveURL(/\/dashboard/);
+});
