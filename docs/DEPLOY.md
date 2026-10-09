@@ -96,8 +96,8 @@ Vá em **Supabase → Authentication → URL Configuration**:
   (os dois asteriscos são obrigatórios; sem eles só a raiz é autorizada e o
   retorno em `/auth/callback` é recusado)
 
-Sem isso o login por **email/senha funciona**, mas login social, recuperação de
-senha e o link do email de convite falham (redirect não autorizado).
+Sem isso o login por **email/senha funciona**, mas a recuperação de senha e o
+link do email de convite falham (redirect não autorizado).
 
 **Templates de email do convite** (**Authentication → Email Templates**): copie
 assunto e corpo de `supabase/templates/invite.html` ("Invite user", assunto
@@ -107,8 +107,8 @@ assunto e corpo de `supabase/templates/invite.html` ("Invite user", assunto
 com essa rota. O SMTP padrão do Supabase tem limite baixo de envios por hora;
 para uso real, configure um SMTP próprio em **Authentication → SMTP Settings**.
 
-Login social (opcional): **Authentication → Providers** → configure Client ID /
-Secret de Google e Apple.
+Login social: **não usado** (ADR-0002, revisão de 2026-10-08). Deixe Google e
+Apple desabilitados em **Authentication → Providers**.
 
 ---
 
