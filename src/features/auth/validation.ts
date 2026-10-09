@@ -9,9 +9,6 @@ export const credentialsSchema = z.object({
 
 export type Credentials = z.infer<typeof credentialsSchema>;
 
-export const oauthProviderSchema = z.enum(["google"]);
-export type OAuthProvider = z.infer<typeof oauthProviderSchema>;
-
 /** RF-AUTH-005 — request a password-reset email. */
 export const resetRequestSchema = z.object({
   email: z.string().min(1, "Informe seu email.").email("Email inválido."),

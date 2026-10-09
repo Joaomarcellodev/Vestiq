@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { credentialsSchema, oauthProviderSchema } from "./validation";
+import { credentialsSchema } from "./validation";
 
 describe("credentialsSchema", () => {
   it("accepts a valid email + password", () => {
@@ -30,13 +30,5 @@ describe("credentialsSchema", () => {
       remember: "true",
     });
     expect(result.remember).toBe(true);
-  });
-});
-
-describe("oauthProviderSchema", () => {
-  it("allows google only", () => {
-    expect(oauthProviderSchema.safeParse("google").success).toBe(true);
-    expect(oauthProviderSchema.safeParse("apple").success).toBe(false);
-    expect(oauthProviderSchema.safeParse("facebook").success).toBe(false);
   });
 });

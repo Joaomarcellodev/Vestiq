@@ -33,7 +33,7 @@ src/
 │   ├── (app)/                  # grupo autenticado (usa AppShell + requireUser)
 │   │   ├── layout.tsx
 │   │   └── dashboard/…
-│   ├── auth/callback/route.ts  # troca de código OAuth (PKCE)
+│   ├── auth/callback/route.ts  # troca de código PKCE (link de redefinição de senha)
 │   ├── login/page.tsx
 │   ├── layout.tsx              # root: fontes, <html lang="pt-BR">
 │   └── globals.css
@@ -103,9 +103,9 @@ Server Action  ──valida (Zod)──▶  features/<f>/actions.ts  ──▶  
   profundidade caso o matcher do proxy mude.
 - Autorização por papel (RF-AUTH-004) é verificada por feature (em `queries.ts`/
   `actions.ts`) **e** garantida por RLS no banco.
-- Login social (Google, Apple) via `supabase.auth.signInWithOAuth` →
-  `/auth/callback` troca o código pela sessão. Ver
-  [ADR-0002](./adr/0002-invite-and-social-auth.md).
+- Login só por email e senha (`signInWithPassword`); não há login social. O
+  link de redefinição de senha volta por `/auth/callback` e o do convite por
+  `/auth/confirm`. Ver [ADR-0002](./adr/0002-invite-and-social-auth.md).
 
 ## Estados de UI
 

@@ -19,7 +19,7 @@ const parsedPublicEnv = publicSchema.safeParse({
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   // Netlify exposes the deploy URL as `URL` at build time; use it as a fallback
-  // so OAuth redirects work in production without extra config.
+  // so the links in reset and invite emails work in production without extra config.
   NEXT_PUBLIC_SITE_URL:
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.DEPLOY_PRIME_URL ||

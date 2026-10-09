@@ -17,7 +17,7 @@ export default async function LoginPage({
 
   return (
     <AuthScreen title="Bem-vindo de volta" subtitle="Acesse sua conta para gerenciar seu negócio.">
-      <LoginForm next={safeNext} oauthError={error === "oauth"} linkError={error === "link"} />
+      <LoginForm next={safeNext} linkError={error === "link"} />
     </AuthScreen>
   );
 }

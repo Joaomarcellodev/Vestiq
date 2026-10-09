@@ -3,12 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { publicEnv } from "@/lib/env";
-import {
-  credentialsSchema,
-  newPasswordSchema,
-  oauthProviderSchema,
-  resetRequestSchema,
-} from "./validation";
+import { credentialsSchema, newPasswordSchema, resetRequestSchema } from "./validation";
 
 export type AuthFormState = {
   error?: string;
@@ -58,26 +53,6 @@ export async function signInWithPassword(
 
   const next = sanitizeNext(formData.get("next"));
   redirect(next);
-}
-
-/** RF-AUTH-001 — sign in with a social provider (Google). */
-export async function signInWithOAuth(formData: FormData): Promise<void> {
-  const provider = oauthProviderSchema.parse(formData.get("provider"));
-  const next = sanitizeNext(formData.get("next"));
-  const supabase = await createClient();
-
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider,
-    options: {
-      redirectTo: `${publicEnv.NEXT_PUBLIC_SITE_URL}/auth/callback?next=${encodeURIComponent(next)}`,
-    },
-  });
-
-  if (error || !data.url) {
-    redirect(`/login?error=oauth`);
-  }
-
-  redirect(data.url);
 }
 
 /**
