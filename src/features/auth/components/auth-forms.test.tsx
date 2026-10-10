@@ -47,6 +47,17 @@ describe("LoginForm", () => {
     await userEvent.click(screen.getByRole("button", { name: /entrar na plataforma/i }));
     expect(await screen.findByText("Email inválido.")).toBeInTheDocument();
   });
+
+  it("keeps the email after a wrong password (VES-77)", async () => {
+    signInWithPassword.mockResolvedValueOnce({ error: "Email ou senha inválidos." });
+    render(<LoginForm next="/dashboard" />);
+    await userEvent.type(screen.getByLabelText(/email profissional/i), "ana@loja.com");
+    await userEvent.type(screen.getByLabelText("Senha", { exact: true }), "errada");
+    await userEvent.click(screen.getByRole("button", { name: /entrar na plataforma/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Email ou senha inválidos.");
+    expect(screen.getByLabelText(/email profissional/i)).toHaveValue("ana@loja.com");
+  });
 });
 
 describe("ForgotPasswordForm", () => {

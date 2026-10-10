@@ -49,6 +49,21 @@ describe("ProductForm", () => {
     await userEvent.click(screen.getByRole("button", { name: /salvar produto/i }));
     expect(await screen.findByRole("alert")).toHaveTextContent("SKU já utilizado");
   });
+
+  it("keeps what was typed when the action fails (VES-77)", async () => {
+    createProduct.mockResolvedValueOnce({ error: "Estoque inicial não pode ser negativo" });
+    render(<ProductForm categories={CATS} />);
+    await userEvent.type(screen.getByLabelText(/nome do produto/i), "Jaqueta");
+    await userEvent.type(screen.getByLabelText("Marca"), "Modah");
+    await userEvent.clear(screen.getByLabelText("Tamanho"));
+    await userEvent.type(screen.getByLabelText("Tamanho"), "M");
+    await userEvent.click(screen.getByRole("button", { name: /salvar produto/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/negativo/);
+    expect(screen.getByLabelText(/nome do produto/i)).toHaveValue("Jaqueta");
+    expect(screen.getByLabelText("Marca")).toHaveValue("Modah");
+    expect(screen.getByLabelText("Tamanho")).toHaveValue("M");
+  });
 });
 
 describe("EditProductForm", () => {
@@ -61,6 +76,17 @@ describe("EditProductForm", () => {
     description: "d",
     image_urls: ["https://x/1.png", "https://x/2.png"],
   };
+
+  it("keeps an edited field when the action fails (VES-77)", async () => {
+    updateProduct.mockResolvedValueOnce({ error: "Falha ao salvar" });
+    render(<EditProductForm product={product} categories={CATS} />);
+    await userEvent.clear(screen.getByLabelText("Marca"));
+    await userEvent.type(screen.getByLabelText("Marca"), "Nova Marca");
+    await userEvent.click(screen.getByRole("button", { name: /salvar alterações/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Falha ao salvar");
+    expect(screen.getByLabelText("Marca")).toHaveValue("Nova Marca");
+  });
 
   it("prefills fields and lets you drop an existing image before saving", async () => {
     render(<EditProductForm product={product} categories={CATS} />);
