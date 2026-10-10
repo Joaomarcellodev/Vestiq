@@ -35,7 +35,10 @@ export async function openNegotiation(
   redirect(`/negociacoes/${(data as { id: string }).id}?toast=negotiation-opened`);
 }
 
-export async function negotiationAction(formData: FormData): Promise<void> {
+export async function negotiationAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   await requireActiveOrganization();
   const parsed = negotiationActionSchema.safeParse({
     negotiationId: formData.get("negotiationId"),
@@ -43,7 +46,7 @@ export async function negotiationAction(formData: FormData): Promise<void> {
     // accept/reject/cancel/complete forms have no message field → null
     message: formData.get("message") ?? undefined,
   });
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
   const supabase = await createClient();
   const { negotiationId, action, message } = parsed.data;
@@ -57,7 +60,7 @@ export async function negotiationAction(formData: FormData): Promise<void> {
           p_message: message || undefined,
         });
 
-  if (error) throw new Error(error.message.replace(/^.*?:\s*/, ""));
+  if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
 
   revalidatePath(`/negociacoes/${negotiationId}`);
   revalidatePath("/negociacoes");
@@ -72,6 +75,7 @@ export async function negotiationAction(formData: FormData): Promise<void> {
   if (toastCode[action]) {
     redirect(`/negociacoes/${negotiationId}?toast=${toastCode[action]}`);
   }
+  return {};
 }
 
 export type SendMessageResult = { event: ChatEvent } | { error: string };

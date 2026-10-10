@@ -53,14 +53,17 @@ export async function placeSupplyOrder(
   redirect(`/pedidos/${data.id}?toast=supply-order-placed`);
 }
 
-export async function respondSupplyOrder(formData: FormData): Promise<void> {
+export async function respondSupplyOrder(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   await requireActiveOrganization();
   const parsed = respondSupplyOrderSchema.safeParse({
     orderId: formData.get("orderId"),
     decision: formData.get("decision"),
     note: formData.get("note") ?? undefined,
   });
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Dados inválidos");
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("respond_supply_order", {
@@ -68,7 +71,7 @@ export async function respondSupplyOrder(formData: FormData): Promise<void> {
     p_decision: parsed.data.decision,
     p_note: parsed.data.note || undefined,
   });
-  if (error) throw new Error(friendly(error.message));
+  if (error) return { error: friendly(error.message) };
 
   revalidateOrders(parsed.data.orderId);
   const toast =
@@ -76,20 +79,23 @@ export async function respondSupplyOrder(formData: FormData): Promise<void> {
   redirect(`/pedidos/${parsed.data.orderId}?toast=${toast}`);
 }
 
-export async function cancelSupplyOrder(formData: FormData): Promise<void> {
+export async function cancelSupplyOrder(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   await requireActiveOrganization();
   const parsed = cancelSupplyOrderSchema.safeParse({
     orderId: formData.get("orderId"),
     reason: formData.get("reason") ?? undefined,
   });
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Dados inválidos");
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("cancel_supply_order", {
     p_order_id: parsed.data.orderId,
     p_reason: parsed.data.reason || undefined,
   });
-  if (error) throw new Error(friendly(error.message));
+  if (error) return { error: friendly(error.message) };
 
   revalidateOrders(parsed.data.orderId);
   redirect(`/pedidos/${parsed.data.orderId}?toast=supply-order-cancelled`);

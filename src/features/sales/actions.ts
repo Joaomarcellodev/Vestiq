@@ -37,20 +37,23 @@ export async function confirmSale(
   redirect(`/vendas/${(data as { id: string }).id}?toast=sale-confirmed`);
 }
 
-export async function cancelSale(formData: FormData): Promise<void> {
+export async function cancelSale(
+  _prev: SaleActionState,
+  formData: FormData,
+): Promise<SaleActionState> {
   await requireActiveOrganization();
   const parsed = cancelSaleSchema.safeParse({
     saleId: formData.get("saleId"),
     reason: formData.get("reason"),
   });
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("cancel_sale", {
     p_sale_id: parsed.data.saleId,
     p_reason: parsed.data.reason,
   });
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   revalidatePath("/vendas");
   revalidatePath("/dashboard");
