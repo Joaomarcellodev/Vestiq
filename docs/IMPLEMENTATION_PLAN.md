@@ -65,7 +65,7 @@ As demais migrations acompanham cada feature.
 | 8 | **offers** | 4 | RF-OFFER-001..007 | detalhes da oferta, rede | inventory, network | ✅ publicar/cancelar + feed com busca e foto + detalhe; peers veem o produto pela projeção pública (0022); fotos próprias da oferta (0026, VES-106); filtros do feed pendentes |
 | 9 | **negotiations** | 5 | RF-NEG-001..009 | negociações, chat de negociação | offers | ✅ proposta→aceite→conclusão transacional + timeline |
 | 10 | **dashboard (revendedora)** | 3→6 | RF-DASH-001 | dashboard | sales, inventory, offers, negotiations | 🟨 KPIs principais; falta "mais vendidos", highlights da rede |
-| 11 | **dashboard (fábrica)** | 6 | RF-FACTORY-DASH-001 | (nova) | network, offers, negotiations | 🟨 `/rede-fabrica` com indicadores agregados; falta view `security_barrier` dedicada |
+| 11 | **dashboard (fábrica)** | 6 | RF-FACTORY-DASH-001 | (nova) | network, offers, negotiations | ✅ `/rede-fabrica` lê a view `security_barrier` `factory_network_stats` (migration 0028, VES-61/75): só agregados por rede; convites pendentes fora da contagem (VES-76) |
 
 Cada feature: `SPEC → ACCEPTANCE → TESTS` (em `specs/<feature>/`) → migration + RLS
 → `queries.ts`/`actions.ts` → componentes → composição da página → testes → PR

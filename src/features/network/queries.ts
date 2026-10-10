@@ -14,7 +14,10 @@ export async function getFactoryNetworkOverview() {
 
   const networkIds = (networks ?? []).map((n) => n.id);
 
-  const [{ data: members }, { data: offers }, { data: negotiations }] = networkIds.length
+  // Offers and negotiations are private to the resellers (RLS hides them from
+  // the factory admin), so the counts come from `factory_network_stats`, which
+  // exposes aggregates only (RF-FACTORY-DASH-001).
+  const [{ data: members }, { data: networkStats }] = networkIds.length
     ? await Promise.all([
         supabase
           .from("network_members")
@@ -23,26 +26,31 @@ export async function getFactoryNetworkOverview() {
           )
           .in("network_id", networkIds)
           .order("created_at"),
-        supabase.from("offers").select("id").in("network_id", networkIds),
-        supabase.from("negotiations").select("status").in("network_id", networkIds),
+        supabase.from("factory_network_stats").select("*").in("network_id", networkIds),
       ])
-    : [{ data: [] }, { data: [] }, { data: [] }];
+    : [{ data: [] }, { data: [] }];
 
-  const activeMembers = (members ?? []).filter((m) => m.status === "ACTIVE").length;
-  const negs = negotiations ?? [];
+  const sum = (key: keyof NonNullable<typeof networkStats>[number]) =>
+    (networkStats ?? []).reduce((total, row) => total + Number(row[key] ?? 0), 0);
+
+  // A pending invite is not a reseller yet: it neither counts as one nor drags
+  // the utilisation rate down (VES-76).
+  const activeResellers = sum("active_resellers");
+  const resellers = activeResellers + sum("disabled_resellers");
 
   return {
     factoryName: org.name,
     networks: networks ?? [],
     members: members ?? [],
     stats: {
-      resellers: (members ?? []).length,
-      activeResellers: activeMembers,
-      offers: (offers ?? []).length,
-      negotiationsStarted: negs.length,
-      negotiationsCompleted: negs.filter((n) => n.status === "COMPLETED").length,
-      utilizationRate:
-        (members ?? []).length > 0 ? Math.round((activeMembers / (members ?? []).length) * 100) : 0,
+      resellers,
+      activeResellers,
+      pendingInvites: sum("pending_invites"),
+      offers: sum("active_offers"),
+      totalOffers: sum("total_offers"),
+      negotiationsStarted: sum("negotiations_started"),
+      negotiationsCompleted: sum("negotiations_completed"),
+      utilizationRate: resellers > 0 ? Math.round((activeResellers / resellers) * 100) : 0,
     },
   };
 }

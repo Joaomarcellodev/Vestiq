@@ -36,6 +36,28 @@ export async function inviteReseller(_prev: ActionState, formData: FormData): Pr
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
   const supabase = await createClient();
+
+  // VES-76: `invited_email` is citext, so this match ignores case. An accepted
+  // invite keeps the address it was sent to, which is the reseller's login.
+  const { data: existing, error: lookupError } = await supabase
+    .from("network_members")
+    .select("status, invite_expires_at")
+    .eq("network_id", parsed.data.networkId)
+    .eq("invited_email", parsed.data.email);
+  if (lookupError) return { error: lookupError.message };
+  const rows = existing ?? [];
+  if (rows.some((m) => m.status === "ACTIVE")) {
+    return { error: "Essa revendedora já faz parte da rede" };
+  }
+  if (rows.some((m) => m.status === "DISABLED")) {
+    return { error: "Essa revendedora está desativada na rede — reative-a na lista de membros" };
+  }
+  // An expired invite can no longer be accepted, so it does not block a new one.
+  const now = Date.now();
+  if (rows.some((m) => m.status === "INVITED" && Date.parse(m.invite_expires_at) > now)) {
+    return { error: "Já existe um convite pendente para esse e-mail" };
+  }
+
   const { data: invite, error } = await supabase
     .from("network_members")
     .insert({

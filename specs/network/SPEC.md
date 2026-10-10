@@ -63,17 +63,18 @@ impedir acesso a redes não pertencentes.
 
 ## Regras de Negócio
 
-| ID        | Regra                                                                                                                                            |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| BR-NET-01 | Só `type = FACTORY` pode ser `factory_id` de uma rede                                                                                            |
-| BR-NET-02 | Convite tem `invited_email` + `invite_token` único; expira em 14 dias                                                                            |
-| BR-NET-03 | Aceite exige usuário autenticado cujo email confere com `invited_email` (ou fluxo de vínculo explícito)                                          |
-| BR-NET-04 | Aceite cria/ativa `network_members` (`status = ACTIVE`, `joined_at = now()`) e o `organization_members` da revendedora                           |
-| BR-NET-05 | Uma revendedora não pode ter dois vínculos ativos com a mesma rede                                                                               |
-| BR-NET-06 | `FACTORY_ADMIN` só vê/gere a própria rede                                                                                                        |
-| BR-NET-07 | Desativar (`status = DISABLED`) remove a revendedora do diretório e revoga acesso a ofertas/negociações da rede — dados próprios dela permanecem |
-| BR-NET-08 | `RESELLER` enxerga apenas redes em que tem `network_members` ativo (RF-NET-008)                                                                  |
-| BR-NET-09 | Reconvite de revendedora desativada reativa o vínculo, não duplica                                                                               |
+| ID        | Regra                                                                                                                                                |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-NET-01 | Só `type = FACTORY` pode ser `factory_id` de uma rede                                                                                                |
+| BR-NET-02 | Convite tem `invited_email` + `invite_token` único; expira em 14 dias                                                                                |
+| BR-NET-03 | Aceite exige usuário autenticado cujo email confere com `invited_email` (ou fluxo de vínculo explícito)                                              |
+| BR-NET-04 | Aceite cria/ativa `network_members` (`status = ACTIVE`, `joined_at = now()`) e o `organization_members` da revendedora                               |
+| BR-NET-05 | Uma revendedora não pode ter dois vínculos ativos com a mesma rede                                                                                   |
+| BR-NET-06 | `FACTORY_ADMIN` só vê/gere a própria rede                                                                                                            |
+| BR-NET-07 | Desativar (`status = DISABLED`) remove a revendedora do diretório e revoga acesso a ofertas/negociações da rede — dados próprios dela permanecem     |
+| BR-NET-08 | `RESELLER` enxerga apenas redes em que tem `network_members` ativo (RF-NET-008)                                                                      |
+| BR-NET-09 | Reconvite de revendedora desativada não duplica o vínculo: o convite é recusado e o admin reativa pelo switch da lista de membros                    |
+| BR-NET-10 | Não se convida um e-mail que já é membro ativo ou tem convite pendente (não expirado) na mesma rede; convites pendentes não contam como revendedoras |
 
 ## Fluxos
 

@@ -1002,7 +1002,28 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      factory_network_stats: {
+        Row: {
+          active_offers: number | null
+          active_resellers: number | null
+          disabled_resellers: number | null
+          factory_id: string | null
+          negotiations_completed: number | null
+          negotiations_started: number | null
+          network_id: string | null
+          pending_invites: number | null
+          total_offers: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factory_networks_factory_id_fkey"
+            columns: ["factory_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_network_invite: {

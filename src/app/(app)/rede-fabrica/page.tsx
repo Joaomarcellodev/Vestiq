@@ -23,10 +23,20 @@ export default async function FactoryNetworkPage() {
         <StatCard
           label="Revendedoras"
           value={String(stats.resellers)}
-          hint={`${stats.activeResellers} ativas`}
+          hint={
+            stats.pendingInvites > 0
+              ? `${stats.activeResellers} ativas · ${stats.pendingInvites} ${
+                  stats.pendingInvites === 1 ? "convite pendente" : "convites pendentes"
+                }`
+              : `${stats.activeResellers} ativas`
+          }
         />
         <StatCard label="Taxa de utilização" value={`${stats.utilizationRate}%`} />
-        <StatCard label="Ofertas" value={String(stats.offers)} />
+        <StatCard
+          label="Ofertas ativas"
+          value={String(stats.offers)}
+          hint={`${stats.totalOffers} publicadas no total`}
+        />
         <StatCard label="Negociações iniciadas" value={String(stats.negotiationsStarted)} />
         <StatCard label="Negociações concluídas" value={String(stats.negotiationsCompleted)} />
       </div>
