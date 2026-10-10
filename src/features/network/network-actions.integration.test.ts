@@ -101,6 +101,24 @@ d("network actions (SPEC-003)", () => {
     expect(reactivated.data?.joined_at).not.toBeNull();
   });
 
+  it("setMemberActive: another factory's member → error, nothing changes (VES-54)", async () => {
+    const otherAdmin = await makeUser();
+    const otherFactory = await makeOrg(otherAdmin.userId, "FACTORY", "FACTORY_ADMIN");
+    const network = await makeNetwork(otherFactory.id);
+    const reseller = await makeUser();
+    const resellerOrg = await makeOrg(reseller.userId, "RESELLER", "RESELLER");
+    const member = await addMember(network.id, resellerOrg.id, "ACTIVE");
+
+    const state = await setMemberActive(formData({ memberId: member.id, active: "false" }));
+    expect(state.error).toMatch(/Não foi possível/);
+    const { data } = await admin()
+      .from("network_members")
+      .select("status")
+      .eq("id", member.id)
+      .single();
+    expect(data?.status).toBe("ACTIVE");
+  });
+
   it("setMemberActive: rejected for a non-admin", async () => {
     const network = await makeNetwork(factoryOrgId);
     const reseller = await makeUser();

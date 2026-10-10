@@ -406,8 +406,18 @@ export async function archiveProduct(formData: FormData): Promise<void> {
   const id = formData.get("id") as string;
   const supabase = await createClient();
   const now = new Date().toISOString();
-  await supabase.from("products").update({ archived_at: now }).eq("id", id);
-  await supabase.from("product_variants").update({ archived_at: now }).eq("product_id", id);
+  const { data, error } = await supabase
+    .from("products")
+    .update({ archived_at: now })
+    .eq("id", id)
+    .select("id");
+  // RLS doesn't raise on rows it hides — an update that touched nothing failed too.
+  if (error || !data?.length) redirect(`/produtos/${id}?toast=product-archive-failed`);
+  const { error: vErr } = await supabase
+    .from("product_variants")
+    .update({ archived_at: now })
+    .eq("product_id", id);
+  if (vErr) redirect(`/produtos/${id}?toast=product-archive-failed`);
   revalidatePath("/produtos");
   redirect("/produtos?toast=product-archived");
 }
@@ -416,8 +426,17 @@ export async function unarchiveProduct(formData: FormData): Promise<void> {
   await requireActiveOrganization();
   const id = formData.get("id") as string;
   const supabase = await createClient();
-  await supabase.from("products").update({ archived_at: null }).eq("id", id);
-  await supabase.from("product_variants").update({ archived_at: null }).eq("product_id", id);
+  const { data, error } = await supabase
+    .from("products")
+    .update({ archived_at: null })
+    .eq("id", id)
+    .select("id");
+  if (error || !data?.length) redirect("/produtos?scope=archived&toast=product-unarchive-failed");
+  const { error: vErr } = await supabase
+    .from("product_variants")
+    .update({ archived_at: null })
+    .eq("product_id", id);
+  if (vErr) redirect("/produtos?scope=archived&toast=product-unarchive-failed");
   revalidatePath("/produtos");
   revalidatePath(`/produtos/${id}`);
   redirect(`/produtos/${id}?toast=product-unarchived`);

@@ -220,8 +220,9 @@ export function NotificationBell({
     };
   }, [open, refresh]);
 
-  /** Runs a "mark as read" action, then reconciles with the server. */
-  const markRead = (action: () => Promise<void>) => {
+  /** Runs a "mark as read" action, then reconciles with the server (which also
+   * undoes the optimistic update when the action reports an error). */
+  const markRead = (action: () => Promise<unknown>) => {
     readVersion.current += 1;
     startTransition(async () => {
       try {

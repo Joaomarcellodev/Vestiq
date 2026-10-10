@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 
 const createNetwork = vi.fn().mockResolvedValue({});
 const inviteReseller = vi.fn().mockResolvedValue({});
-const setMemberActive = vi.fn().mockResolvedValue(undefined);
+const setMemberActive = vi.fn().mockResolvedValue({});
 const acceptInvite = vi.fn().mockResolvedValue({});
 const toast = vi.fn();
 

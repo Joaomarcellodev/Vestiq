@@ -87,6 +87,28 @@ d("customers actions + queries (SPEC-006)", () => {
     expect(data?.archived_at).toBeNull();
   });
 
+  it("archive/unarchive of another org's customer: blocked by RLS, error toast (VES-54)", async () => {
+    const other = await makeUser();
+    const otherOrg = await makeOrg(other.userId, "RESELLER");
+    const c = await makeCustomer(otherOrg.id);
+
+    await expectRedirect(
+      () => archiveCustomer(formData({ id: c.id })),
+      new RegExp(`/clientes/${c.id}\\?toast=customer-archive-failed$`),
+    );
+    const { data } = await admin().from("customers").select("archived_at").eq("id", c.id).single();
+    expect(data?.archived_at).toBeNull();
+
+    await admin()
+      .from("customers")
+      .update({ archived_at: new Date().toISOString() })
+      .eq("id", c.id);
+    await expectRedirect(
+      () => unarchiveCustomer(formData({ id: c.id })),
+      /toast=customer-unarchive-failed$/,
+    );
+  });
+
   it("listCustomers: search (name/email) + scope", async () => {
     await makeCustomer(orgId, { name: "Bruna Costa", email: "bruna@mail.com" });
     const archived = await makeCustomer(orgId, { name: "Carlos Dias" });

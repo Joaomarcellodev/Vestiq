@@ -99,7 +99,7 @@ export async function acceptInvite(_prev: ActionState, formData: FormData): Prom
  * RF-NET-007 — toggle a reseller's access to the network with a single
  * on/off control. `active=true` (re)activates, `active=false` disables.
  */
-export async function setMemberActive(formData: FormData): Promise<void> {
+export async function setMemberActive(formData: FormData): Promise<ActionState> {
   await requireRole("FACTORY_ADMIN", "PLATFORM_ADMIN");
   const memberId = formData.get("memberId") as string;
   const active = formData.get("active") === "true";
@@ -110,6 +110,15 @@ export async function setMemberActive(formData: FormData): Promise<void> {
   };
   if (active) patch.joined_at = new Date().toISOString();
 
-  await supabase.from("network_members").update(patch).eq("id", memberId);
+  const { data, error } = await supabase
+    .from("network_members")
+    .update(patch)
+    .eq("id", memberId)
+    .select("id");
+  // RLS doesn't raise on rows it hides — an update that touched nothing failed too.
+  if (error || !data?.length) {
+    return { error: "Não foi possível alterar o acesso da revendedora. Tente novamente." };
+  }
   revalidatePath("/rede-fabrica");
+  return {};
 }
