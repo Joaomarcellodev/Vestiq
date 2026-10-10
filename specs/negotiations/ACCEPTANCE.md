@@ -29,6 +29,13 @@ mensagem opcional e status.
 **Então** `status = ACCEPTED`
 **E** há evento `ACCEPTED`.
 
+## AC-NEG-004-04 — Aceite reserva a quantidade
+
+**Dado** uma oferta com 3 unidades e duas propostas `PENDING` de 2
+**Quando** a vendedora aceita a primeira
+**Então** a segunda não pode ser aceita ("A oferta não tem quantidade livre para aceitar (restam 1 un. não reservadas)")
+**E** se a primeira for cancelada, a segunda pode ser aceita.
+
 ## AC-NEG-004-02 — Vendedora rejeita
 
 **Quando** a vendedora A rejeita a proposta `PENDING`
@@ -84,6 +91,13 @@ mensagem opcional e status.
 **Então** recebe "Estoque insuficiente na origem"
 **E** a negociação continua `ACCEPTED`
 **E** nenhum movimento é criado.
+
+## AC-NEG-008-03 — Estoque reservado não sai
+
+**Dado** uma negociação `ACCEPTED` de 2 unidades
+**Quando** a vendedora vende na loja ou ajusta o estoque para menos de 2
+**Então** recebe "Estoque reservado para negociações aceitas (2 un.)…" e nada muda
+**E** a transferência das 2 unidades continua concluindo normalmente.
 
 ## AC-NEG-009-01 — Histórico preservado
 

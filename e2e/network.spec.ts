@@ -6,7 +6,11 @@ test.describe.configure({ mode: "serial" });
 
 async function publishOffer(page: import("@playwright/test").Page, price: string) {
   await page.goto("/rede/publicar");
-  await page.locator("select[name=variantId]").selectOption({ index: 0 });
+  // offers only use free stock (VES-73) — pick the variant with the most of it
+  const variant = page.locator("select[name=variantId]");
+  const labels = await variant.locator("option").allTextContents();
+  const free = labels.map((l) => Number(/\((\d+) un\. livres\)/.exec(l)?.[1] ?? 0));
+  await variant.selectOption({ index: free.indexOf(Math.max(...free)) });
   await page.locator("select[name=networkId]").selectOption({ index: 0 });
   await page.getByLabel(/quantidade ofertada/i).fill("2");
   await page.getByLabel(/preço de transferência/i).fill(price);

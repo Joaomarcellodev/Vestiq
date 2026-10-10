@@ -90,21 +90,41 @@ export async function getOffer(id: string) {
 
 /** Reseller's own variants + the networks they belong to, for the publish form. */
 export async function getPublishOptions() {
-  await requireActiveOrganization();
+  const org = await requireActiveOrganization();
   const supabase = await createClient();
-  const [{ data: variants }, { data: networks }] = await Promise.all([
+  const [{ data: variants }, { data: networks }, { data: openOffers }] = await Promise.all([
     supabase
       .from("product_variants")
       .select("id, size, color, stock_on_hand, products(name)")
+      .eq("organization_id", org.id)
       .is("archived_at", null)
-      .gt("stock_on_hand", 0),
+      .gt("stock_on_hand", 0)
+      .order("created_at"),
     supabase.from("factory_networks").select("id, name"),
+    supabase
+      .from("offers")
+      .select("product_variant_id, quantity_remaining")
+      .eq("organization_id", org.id)
+      .in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"]),
   ]);
+
+  // BR-OFFER-11 — only the stock not already in open offers can be offered.
+  const offered = new Map<string, number>();
+  for (const o of openOffers ?? []) {
+    offered.set(
+      o.product_variant_id,
+      (offered.get(o.product_variant_id) ?? 0) + o.quantity_remaining,
+    );
+  }
+
   return {
-    variants: (variants ?? []).map((v) => ({
-      id: v.id,
-      label: `${v.products?.name ?? "—"} · ${[v.color, v.size].filter(Boolean).join(" / ") || "Único"} (${v.stock_on_hand} un.)`,
-    })),
+    variants: (variants ?? [])
+      .map((v) => ({ ...v, free: v.stock_on_hand - (offered.get(v.id) ?? 0) }))
+      .filter((v) => v.free > 0)
+      .map((v) => ({
+        id: v.id,
+        label: `${v.products?.name ?? "—"} · ${[v.color, v.size].filter(Boolean).join(" / ") || "Único"} (${v.free} un. livres)`,
+      })),
     networks: networks ?? [],
   };
 }

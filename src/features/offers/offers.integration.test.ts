@@ -267,7 +267,27 @@ d("offers actions + queries (SPEC-008)", () => {
   it("getPublishOptions: variants in stock + the seller's networks", async () => {
     const opts = await getPublishOptions();
     expect(opts.networks.map((n) => n.id)).toContain(ctx.network.id);
-    expect(opts.variants.some((v) => v.id === ctx.variant.id)).toBe(true);
+    expect(opts.variants.find((v) => v.id === ctx.variant.id)?.label).toMatch(/\(8 un\. livres\)$/);
+  });
+
+  it("getPublishOptions: counts only the stock not already offered (BR-OFFER-11)", async () => {
+    await ctx.seller.client.rpc("publish_offer", {
+      p_variant_id: ctx.variant.id,
+      p_network_id: ctx.network.id,
+      p_quantity: 5,
+      p_transfer_price: 250,
+    });
+    let opts = await getPublishOptions();
+    expect(opts.variants.find((v) => v.id === ctx.variant.id)?.label).toMatch(/\(3 un\. livres\)$/);
+
+    await ctx.seller.client.rpc("publish_offer", {
+      p_variant_id: ctx.variant.id,
+      p_network_id: ctx.network.id,
+      p_quantity: 3,
+      p_transfer_price: 250,
+    });
+    opts = await getPublishOptions();
+    expect(opts.variants.some((v) => v.id === ctx.variant.id)).toBe(false);
   });
 
   it("getOffer: returns the offer with isMine", async () => {
