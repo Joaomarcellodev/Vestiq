@@ -1191,6 +1191,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_network_invite: {
+        Args: { p_token: string }
+        Returns: {
+          email: string
+          factory_name: string
+          has_account: boolean
+          network_name: string
+          state: string
+        }[]
+      }
       get_supplier_product: {
         Args: { p_product_id: string }
         Returns: {
@@ -1213,6 +1223,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      invite_signup_user_id: { Args: { p_token: string }; Returns: string }
       is_org_member: { Args: { org: string }; Returns: boolean }
       is_supplier_of: {
         Args: { p_reseller_id: string; p_supplier_id: string }
