@@ -10,8 +10,8 @@ vi.mock("../actions", () => ({
 const { ArchiveToOffersForm } = await import("./archive-to-offers-form");
 
 const VARIANTS = [
-  { variantId: "v1", label: "Preto / P", stock: 3, costPrice: 40 },
-  { variantId: "v2", label: "Preto / M", stock: 2, costPrice: 0 },
+  { variantId: "v1", label: "Preto / P", stock: 3, onNetwork: 0, costPrice: 40 },
+  { variantId: "v2", label: "Preto / M", stock: 2, onNetwork: 0, costPrice: 0 },
 ];
 const NETWORK = [{ id: "n1", name: "Rede Modah" }];
 

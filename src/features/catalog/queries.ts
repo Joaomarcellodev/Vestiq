@@ -95,13 +95,15 @@ export interface ArchiveOption {
   variantId: string;
   label: string;
   stock: number;
+  /** Already in open offers — those stay on the network after archiving (VES-98). */
+  onNetwork: number;
   costPrice: number;
 }
 
 /**
  * AC-PROD-006-03 — what the archive step offers: the product's variants with
- * stock (prefilled with all of it at cost price) and the networks the
- * organization can publish to.
+ * stock (prefilled with the part not on the network yet, at cost price) and the
+ * networks the organization can publish to.
  */
 export async function getArchiveOptions(productId: string) {
   const org = await requireActiveOrganization();
@@ -123,14 +125,37 @@ export async function getArchiveOptions(productId: string) {
   if (error) throw error;
   if (!product) return null;
 
-  const options: ArchiveOption[] = (product.product_variants ?? [])
-    .filter((v) => v.archived_at === null && v.stock_on_hand > 0)
-    .map((v) => ({
-      variantId: v.id,
-      label: [v.color, v.size].filter(Boolean).join(" / ") || "Único",
-      stock: v.stock_on_hand,
-      costPrice: Number(v.cost_price),
-    }));
+  const stocked = (product.product_variants ?? []).filter(
+    (v) => v.archived_at === null && v.stock_on_hand > 0,
+  );
+  // Same total as `variant_offered_quantity`: an open offer holds its remaining
+  // quantity, so only the rest can become a new offer (BR-OFFER-11, VES-73).
+  const { data: open, error: offersError } = stocked.length
+    ? await supabase
+        .from("offers")
+        .select("product_variant_id, quantity_remaining")
+        .in(
+          "product_variant_id",
+          stocked.map((v) => v.id),
+        )
+        .in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"])
+    : { data: [], error: null };
+  if (offersError) throw offersError;
+  const onNetwork = new Map<string, number>();
+  for (const o of open ?? []) {
+    onNetwork.set(
+      o.product_variant_id,
+      (onNetwork.get(o.product_variant_id) ?? 0) + o.quantity_remaining,
+    );
+  }
+
+  const options: ArchiveOption[] = stocked.map((v) => ({
+    variantId: v.id,
+    label: [v.color, v.size].filter(Boolean).join(" / ") || "Único",
+    stock: v.stock_on_hand,
+    onNetwork: onNetwork.get(v.id) ?? 0,
+    costPrice: Number(v.cost_price),
+  }));
 
   return {
     product: { id: product.id, name: product.name, archived: product.archived_at !== null },
