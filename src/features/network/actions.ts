@@ -184,6 +184,79 @@ export async function signUpFromInvite(
   redirect("/dashboard?toast=network-joined");
 }
 
+/** Same lifetime as the `invite_expires_at` column default. */
+const INVITE_TTL_MS = 14 * 24 * 60 * 60 * 1000;
+
+/**
+ * VES-88 — withdraw an invite that wasn't accepted yet. Deleting the row
+ * invalidates its token and drops it from the list and the indicators. Only an
+ * `INVITED` row goes: one accepted meanwhile is a member now.
+ */
+export async function cancelInvite(formData: FormData): Promise<ActionState> {
+  await requireRole("FACTORY_ADMIN", "PLATFORM_ADMIN");
+  const memberId = formData.get("memberId") as string;
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("network_members")
+    .delete()
+    .eq("id", memberId)
+    .eq("status", "INVITED")
+    .select("id");
+  // RLS doesn't raise on rows it hides — a delete that touched nothing failed too.
+  if (error || !data?.length) {
+    return { error: "Não foi possível cancelar o convite. Atualize a página e tente novamente." };
+  }
+  revalidatePath("/rede-fabrica");
+  return {};
+}
+
+/**
+ * VES-88 — send the invite again with a fresh token and a new 14-day window:
+ * the previous link stops working and an expired invite becomes valid again.
+ * If the email can't go out, the previous token is restored.
+ */
+export async function resendInvite(formData: FormData): Promise<ActionState> {
+  await requireRole("FACTORY_ADMIN", "PLATFORM_ADMIN");
+  const memberId = formData.get("memberId") as string;
+  const supabase = await createClient();
+  const failed = {
+    error: "Não foi possível reenviar o convite. Atualize a página e tente novamente.",
+  };
+
+  const { data: current } = await supabase
+    .from("network_members")
+    .select("invited_email, invite_token, invite_expires_at")
+    .eq("id", memberId)
+    .eq("status", "INVITED")
+    .maybeSingle();
+  if (!current) return failed;
+
+  const { data: renewed, error } = await supabase
+    .from("network_members")
+    .update({
+      invite_token: crypto.randomUUID(),
+      invite_expires_at: new Date(Date.now() + INVITE_TTL_MS).toISOString(),
+    })
+    .eq("id", memberId)
+    .eq("status", "INVITED")
+    .select("invite_token")
+    .maybeSingle();
+  if (error || !renewed) return failed;
+
+  const sent = await sendInviteEmail(current.invited_email, renewed.invite_token);
+  if (sent.error) {
+    await supabase
+      .from("network_members")
+      .update({ invite_token: current.invite_token, invite_expires_at: current.invite_expires_at })
+      .eq("id", memberId);
+    return { error: sent.error };
+  }
+
+  revalidatePath("/rede-fabrica");
+  return { ok: true };
+}
+
 /**
  * RF-NET-007 — toggle a reseller's access to the network with a single
  * on/off control. `active=true` (re)activates, `active=false` disables.
