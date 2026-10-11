@@ -5,8 +5,14 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/features/auth/queries";
 import { requireRole } from "@/features/organizations/queries";
-import { acceptInviteSchema, createNetworkSchema, inviteResellerSchema } from "./validation";
+import {
+  acceptInviteSchema,
+  createNetworkSchema,
+  inviteResellerSchema,
+  inviteSignupSchema,
+} from "./validation";
 import { sendInviteEmail } from "./invite-email";
+import { claimInviteAccount } from "./invite-signup";
 import { needsPassword } from "./invite-password";
 import { newPasswordSchema } from "@/features/auth/validation";
 
@@ -111,6 +117,67 @@ export async function acceptInvite(_prev: ActionState, formData: FormData): Prom
   const { error } = await supabase.rpc("accept_network_invite", {
     p_token: parsed.data.token,
     p_reseller_name: parsed.data.resellerName || undefined,
+  });
+  if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
+
+  redirect("/dashboard?toast=network-joined");
+}
+
+export type InviteSignupState = {
+  error?: string;
+  fieldErrors?: Partial<Record<"resellerName" | "password" | "confirm", string>>;
+};
+
+/**
+ * VES-95 — someone without a session opens the invite link: create her
+ * account for the invited email, sign her in and accept the invite, in one go.
+ * The email is read from the invite, never from the form.
+ */
+export async function signUpFromInvite(
+  _prev: InviteSignupState,
+  formData: FormData,
+): Promise<InviteSignupState> {
+  const parsed = inviteSignupSchema.safeParse({
+    token: formData.get("token"),
+    resellerName: formData.get("resellerName"),
+    password: formData.get("password"),
+    confirm: formData.get("confirm"),
+  });
+  if (!parsed.success) {
+    const flat = parsed.error.flatten().fieldErrors;
+    if (flat.token) return { error: "Convite inválido" };
+    return {
+      fieldErrors: {
+        resellerName: flat.resellerName?.[0],
+        password: flat.password?.[0],
+        confirm: flat.confirm?.[0],
+      },
+    };
+  }
+  const { token, resellerName, password } = parsed.data;
+
+  const supabase = await createClient();
+  const { data: invite } = await supabase
+    .rpc("get_network_invite", { p_token: token })
+    .maybeSingle();
+  if (!invite || invite.state !== "PENDING") {
+    return { error: "Este convite não está mais disponível. Peça um novo convite à fábrica." };
+  }
+
+  const claimed = await claimInviteAccount(token, invite.email, password);
+  if (claimed.error) return { error: claimed.error };
+
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: invite.email,
+    password,
+  });
+  if (signInError) {
+    return { error: "Sua conta foi criada, mas não conseguimos entrar. Entre com email e senha." };
+  }
+
+  const { error } = await supabase.rpc("accept_network_invite", {
+    p_token: token,
+    p_reseller_name: resellerName,
   });
   if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
 
