@@ -12,6 +12,9 @@ export const MEMBER_STATUS: LabelMap<Database["public"]["Enums"]["network_member
   DISABLED: { label: "Desativada", tone: "neutral" },
 };
 
+/** An `INVITED` row past `invite_expires_at` — it can only be resent (VES-88). */
+export const EXPIRED_INVITE = { label: "Convite expirado", tone: "error" } as const;
+
 export const OFFER_STATUS: LabelMap<Database["public"]["Enums"]["offer_status"]> = {
   ACTIVE: { label: "Ativa", tone: "success" },
   PARTIALLY_NEGOTIATED: { label: "Parcialmente negociada", tone: "info" },
