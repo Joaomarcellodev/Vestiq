@@ -110,18 +110,21 @@ export async function updatePassword(
   redirect("/dashboard?toast=password-updated");
 }
 
-/** RF-AUTH-002 — end the session. */
-export async function signOut(): Promise<void> {
+/**
+ * RF-AUTH-002 — end the session. An optional `next` sends the user back to an
+ * internal page — e.g. the invite link opened while signed in as someone else.
+ */
+export async function signOut(formData?: FormData): Promise<void> {
   const supabase = await createClient();
   // "local" — end only this device's session, not every session for the user.
   await supabase.auth.signOut({ scope: "local" });
-  redirect("/login");
+  redirect(sanitizeNext(formData?.get("next") ?? null, "/login"));
 }
 
 /** Only allow redirects to internal, absolute paths. */
-function sanitizeNext(value: FormDataEntryValue | null): string {
+function sanitizeNext(value: FormDataEntryValue | null, fallback = "/dashboard"): string {
   if (typeof value === "string" && value.startsWith("/") && !value.startsWith("//")) {
     return value;
   }
-  return "/dashboard";
+  return fallback;
 }
