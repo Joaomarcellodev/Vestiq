@@ -10,6 +10,7 @@ const initialState: AuthFormState = {};
 export function LoginForm({
   next,
   linkError,
+  inviteHint = true,
 }: {
   next: string;
   /**
@@ -17,6 +18,8 @@ export function LoginForm({
    * used — see /auth/confirm and /auth/callback.
    */
   linkError?: boolean;
+  /** "Recebeu um convite?…" — redundant on the invite page itself. */
+  inviteHint?: boolean;
 }) {
   const { state, pending, formProps } = useFormSubmit(signInWithPassword, initialState);
 
@@ -72,9 +75,11 @@ export function LoginForm({
         </Button>
       </form>
 
-      <p className="mt-lg text-center font-body-md text-body-md text-on-surface-variant">
-        Recebeu um convite? Abra o link enviado pela sua fábrica para entrar na rede.
-      </p>
+      {inviteHint && (
+        <p className="mt-lg text-center font-body-md text-body-md text-on-surface-variant">
+          Recebeu um convite? Abra o link enviado pela sua fábrica para entrar na rede.
+        </p>
+      )}
     </div>
   );
 }

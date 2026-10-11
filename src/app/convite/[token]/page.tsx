@@ -102,7 +102,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
         title={title}
         subtitle={`Você já tem uma conta com ${invite.email}. Entre para aceitar o convite.`}
       >
-        <LoginForm next={here} />
+        <LoginForm next={here} inviteHint={false} />
       </AuthScreen>
     );
   }
