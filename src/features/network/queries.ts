@@ -22,7 +22,7 @@ export async function getFactoryNetworkOverview() {
         supabase
           .from("network_members")
           .select(
-            "id, status, invited_email, joined_at, network_id, reseller:organizations!network_members_reseller_id_fkey(name)",
+            "id, status, invited_email, invite_token, invite_expires_at, joined_at, network_id, reseller:organizations!network_members_reseller_id_fkey(name)",
           )
           .in("network_id", networkIds)
           .order("created_at"),
@@ -38,10 +38,15 @@ export async function getFactoryNetworkOverview() {
   const activeResellers = sum("active_resellers");
   const resellers = activeResellers + sum("disabled_resellers");
 
+  // VES-95: only an invite that can still be accepted offers its link to copy.
+  const now = Date.now();
   return {
     factoryName: org.name,
     networks: networks ?? [],
-    members: members ?? [],
+    members: (members ?? []).map((m) => ({
+      ...m,
+      invitePending: m.status === "INVITED" && Date.parse(m.invite_expires_at) > now,
+    })),
     stats: {
       resellers,
       activeResellers,
