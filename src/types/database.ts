@@ -1255,6 +1255,17 @@ export type Database = {
           product_count: number
         }[]
       }
+      list_negotiation_products: {
+        Args: { p_negotiation_id?: string }
+        Returns: {
+          brand: string
+          color: string
+          image_urls: string[]
+          negotiation_id: string
+          product_name: string
+          size: string
+        }[]
+      }
       list_visible_offers: {
         Args: { p_offer_id?: string }
         Returns: {
