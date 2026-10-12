@@ -45,7 +45,7 @@ export default async function NegotiationsPage() {
                       >
                         <div>
                           <p className="font-body-md text-body-md text-on-surface">
-                            {n.productName}
+                            {n.product?.name ?? "—"}
                           </p>
                           <p className="font-body-md text-body-md text-on-surface-variant">
                             {n.counterparty} · {n.quantity} un.

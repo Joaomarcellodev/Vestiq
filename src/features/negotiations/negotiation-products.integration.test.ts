@@ -1,6 +1,7 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { makeOrg, makeProduct, makeUser, makeVariant, supabaseUp } from "@/test/supabase";
-import { addMember, makeNetwork, stockUp } from "@/test/actions";
+import { addMember, clearTestClient, makeNetwork, setTestClient, stockUp } from "@/test/actions";
+import { getNegotiation, listNegotiations } from "./queries";
 
 const up = await supabaseUp();
 const d = up ? describe : describe.skip;
@@ -61,6 +62,7 @@ d("negotiated product for both parties (VES-97)", () => {
   beforeAll(async () => {
     ctx = await setup();
   });
+  afterEach(() => clearTestClient());
 
   const expected = {
     product_name: "Bolsa Classic Flap",
@@ -92,5 +94,21 @@ d("negotiated product for both parties (VES-97)", () => {
       p_negotiation_id: ctx.negotiationId,
     });
     expect(data ?? []).toEqual([]);
+  });
+
+  it("lists and opens the negotiation with its product for the buyer", async () => {
+    setTestClient(ctx.buyer.client);
+    const product = {
+      name: "Bolsa Classic Flap",
+      brand: "Chanel",
+      variant: "Preto / Único",
+      imageUrl: "https://img.test/bolsa.jpg",
+    };
+
+    const sent = (await listNegotiations()).find((n) => n.id === ctx.negotiationId);
+    expect(sent).toMatchObject({ direction: "sent", product });
+
+    const detail = await getNegotiation(ctx.negotiationId);
+    expect(detail.product).toEqual(product);
   });
 });

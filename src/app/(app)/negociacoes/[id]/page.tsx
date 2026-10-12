@@ -42,8 +42,7 @@ export default async function NegotiationDetailPage({
     requireUserId(),
   ]);
   if (!result?.negotiation) notFound();
-  const { negotiation: n, events, party } = result;
-  const variant = n.offers?.product_variants;
+  const { negotiation: n, product, events, party } = result;
 
   const available = ACTIONS.filter(
     (a) => !(transition(n.status as NegotiationStatus, a.action, party as Party) instanceof Error),
@@ -53,7 +52,7 @@ export default async function NegotiationDetailPage({
     <div className="space-y-lg">
       <BackButton fallback="/negociacoes" label="Negociações" />
       <PageHeader
-        title={variant?.products?.name ?? "Negociação"}
+        title={product?.name ?? "Negociação"}
         description={`${n.seller?.name} → ${n.buyer?.name}`}
         action={
           <Badge tone={NEGOTIATION_STATUS[n.status].tone}>
