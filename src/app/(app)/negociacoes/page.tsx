@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listNegotiations } from "@/features/negotiations/queries";
+import { NegotiationProductSummary } from "@/features/negotiations/components/negotiation-product";
 import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
 import { Badge } from "@/components/atoms";
@@ -41,16 +42,13 @@ export default async function NegotiationsPage() {
                     <li key={n.id}>
                       <Link
                         href={`/negociacoes/${n.id}`}
-                        className="flex items-center justify-between p-4 hover:bg-surface-container-low"
+                        className="flex items-center justify-between gap-3 p-4 hover:bg-surface-container-low"
                       >
-                        <div>
-                          <p className="font-body-md text-body-md text-on-surface">
-                            {n.product?.name ?? "—"}
-                          </p>
+                        <NegotiationProductSummary product={n.product}>
                           <p className="font-body-md text-body-md text-on-surface-variant">
                             {n.counterparty} · {n.quantity} un.
                           </p>
-                        </div>
+                        </NegotiationProductSummary>
                         <div className="flex shrink-0 items-center gap-2">
                           <Badge tone={NEGOTIATION_STATUS[n.status].tone}>
                             {NEGOTIATION_STATUS[n.status].label}
