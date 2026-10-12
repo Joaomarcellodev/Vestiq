@@ -4,6 +4,7 @@ import { BackButton } from "@/components/molecules/back-button";
 import { getNegotiation } from "@/features/negotiations/queries";
 import { requireUserId } from "@/features/auth/queries";
 import { NegotiationChat } from "@/features/negotiations/components/negotiation-chat";
+import { NegotiationProductSummary } from "@/features/negotiations/components/negotiation-product";
 import { toChatEvent } from "@/features/negotiations/chat";
 import { negotiationAction } from "@/features/negotiations/actions";
 import { transition } from "@/features/negotiations/state-machine";
@@ -62,7 +63,8 @@ export default async function NegotiationDetailPage({
       />
 
       <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
-        <div className="flex items-center justify-between">
+        <NegotiationProductSummary product={product} size={64} />
+        <div className="mt-3 flex items-center justify-between border-t border-outline-variant pt-3">
           <span className="font-body-md text-body-md text-on-surface-variant">Quantidade</span>
           <span className="font-body-md text-body-md text-on-surface">{n.quantity} un.</span>
         </div>
