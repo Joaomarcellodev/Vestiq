@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { getFactoryNetworkOverview } from "@/features/network/queries";
-import { MEMBER_STATUS } from "@/lib/i18n/labels";
+import { EXPIRED_INVITE, MEMBER_STATUS } from "@/lib/i18n/labels";
 import {
   CreateNetworkForm,
   InviteResellerForm,
 } from "@/features/network/components/factory-network-panel";
 import { MemberActiveSwitch } from "@/features/network/components/member-active-switch";
 import { CopyInviteLink } from "@/features/network/components/copy-invite-link";
+import { PendingInviteActions } from "@/features/network/components/pending-invite-actions";
 import { PageHeader } from "@/components/molecules/page-header";
 import { StatCard } from "@/components/molecules/stat-card";
 import { Badge } from "@/components/atoms";
@@ -60,7 +61,10 @@ export default async function FactoryNetworkPage() {
         ) : (
           <ul className="divide-y divide-outline-variant rounded-xl border border-outline-variant bg-surface-container-lowest">
             {members.map((m) => {
-              const status = MEMBER_STATUS[m.status];
+              const status =
+                m.status === "INVITED" && !m.invitePending
+                  ? EXPIRED_INVITE
+                  : MEMBER_STATUS[m.status];
               return (
                 <li
                   key={m.id}
@@ -74,10 +78,13 @@ export default async function FactoryNetworkPage() {
                       {m.invited_email}
                     </p>
                   </div>
-                  <div className="flex shrink-0 items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end">
                     <Badge tone={status.tone}>{status.label}</Badge>
                     {m.invitePending && (
                       <CopyInviteLink token={m.invite_token} email={m.invited_email} />
+                    )}
+                    {m.status === "INVITED" && (
+                      <PendingInviteActions memberId={m.id} email={m.invited_email} />
                     )}
                     {m.status !== "INVITED" && (
                       <MemberActiveSwitch

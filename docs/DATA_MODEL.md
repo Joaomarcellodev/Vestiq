@@ -103,7 +103,8 @@ Espelha `auth.users`. Criado por trigger `on_auth_user_created`.
 | `reseller_id` | uuid → organizations | `type = RESELLER` |
 | `status` | `network_member_status` | |
 | `invited_email` | citext | usado antes do aceite (RF-NET-003) |
-| `invite_token` | uuid | único, consumido no aceite (RF-NET-004) |
+| `invite_token` | uuid | único, consumido no aceite (RF-NET-004); trocado ao reenviar o convite (VES-88) |
+| `invite_expires_at` | timestamptz | 14 dias; renovado ao reenviar. Cancelar um convite `INVITED` apaga a linha (VES-88) |
 | `joined_at` | timestamptz | null até o aceite |
 | | | unique `(network_id, reseller_id)` |
 
