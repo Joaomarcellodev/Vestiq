@@ -103,5 +103,10 @@ d("auth actions (SPEC-002)", () => {
     it("ends the session and redirects to /login", async () => {
       await expectRedirect(() => signOut(), "/login");
     });
+
+    it("returns to an internal `next`, never an external one", async () => {
+      await expectRedirect(() => signOut(formData({ next: "/convite/abc" })), "/convite/abc");
+      await expectRedirect(() => signOut(formData({ next: "//evil.com" })), "/login");
+    });
   });
 });

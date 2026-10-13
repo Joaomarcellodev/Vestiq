@@ -6,6 +6,7 @@ import {
   InviteResellerForm,
 } from "@/features/network/components/factory-network-panel";
 import { MemberActiveSwitch } from "@/features/network/components/member-active-switch";
+import { CopyInviteLink } from "@/features/network/components/copy-invite-link";
 import { PageHeader } from "@/components/molecules/page-header";
 import { StatCard } from "@/components/molecules/stat-card";
 import { Badge } from "@/components/atoms";
@@ -75,6 +76,9 @@ export default async function FactoryNetworkPage() {
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
                     <Badge tone={status.tone}>{status.label}</Badge>
+                    {m.invitePending && (
+                      <CopyInviteLink token={m.invite_token} email={m.invited_email} />
+                    )}
                     {m.status !== "INVITED" && (
                       <MemberActiveSwitch
                         memberId={m.id}

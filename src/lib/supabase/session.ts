@@ -3,8 +3,11 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { publicEnv } from "@/lib/env";
 import type { Database } from "@/types/database";
 
-/** Public routes reachable without an authenticated session. */
-const PUBLIC_PATHS = ["/login", "/auth", "/recuperar-senha", "/redefinir-senha"];
+/**
+ * Public routes reachable without an authenticated session. `/convite` — the
+ * invitee creates her account from the invite link (VES-95).
+ */
+const PUBLIC_PATHS = ["/login", "/auth", "/recuperar-senha", "/redefinir-senha", "/convite"];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
