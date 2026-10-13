@@ -64,8 +64,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       />
       {archived && (
         <p className="rounded-lg bg-warning-container px-4 py-3 font-body-md text-body-md text-on-warning-container">
-          Este produto está arquivado — não aparece nas vendas. As ofertas publicadas ao arquivar
-          continuam na rede.
+          Este produto está arquivado — não aparece nas vendas. As ofertas dele na rede, publicadas
+          antes ou ao arquivar, continuam ativas até serem canceladas ou esgotadas.
         </p>
       )}
       {images.length > 0 && (

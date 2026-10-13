@@ -10,8 +10,8 @@ vi.mock("../actions", () => ({
 const { ArchiveToOffersForm } = await import("./archive-to-offers-form");
 
 const VARIANTS = [
-  { variantId: "v1", label: "Preto / P", stock: 3, costPrice: 40 },
-  { variantId: "v2", label: "Preto / M", stock: 2, costPrice: 0 },
+  { variantId: "v1", label: "Preto / P", stock: 3, onNetwork: 0, costPrice: 40 },
+  { variantId: "v2", label: "Preto / M", stock: 2, onNetwork: 0, costPrice: 0 },
 ];
 const NETWORK = [{ id: "n1", name: "Rede Modah" }];
 
@@ -56,6 +56,45 @@ describe("ArchiveToOffersForm (TC-PROD-19)", () => {
     await userEvent.click(screen.getByRole("button", { name: "Arquivar produto" }));
     const fd = archiveProductToOffers.mock.calls.at(-1)![1] as FormData;
     expect(fd.get("items")).toBe("[]");
+  });
+
+  it("only proposes the stock that isn't on the network yet (VES-98)", async () => {
+    render(
+      <ArchiveToOffersForm
+        productId="p1"
+        variants={[
+          { variantId: "v1", label: "Preto / P", stock: 3, onNetwork: 1, costPrice: 40 },
+          { variantId: "v2", label: "Preto / M", stock: 2, onNetwork: 2, costPrice: 45 },
+        ]}
+        networks={NETWORK}
+      />,
+    );
+
+    expect(screen.getByText(/3 peças já estão em ofertas na rede/)).toBeVisible();
+    expect(screen.getByText(/continuam ativas depois de arquivar/)).toBeVisible();
+    const qty1 = screen.getByLabelText("Quantidade", { selector: "#qty-v1" });
+    expect(qty1).toHaveValue(2);
+    expect(qty1).toHaveAttribute("max", "2");
+    expect(screen.getByText("Todo o estoque já está na rede.")).toBeVisible();
+    expect(screen.queryByLabelText("Quantidade", { selector: "#qty-v2" })).toBeNull();
+
+    await userEvent.click(screen.getByRole("button", { name: "Arquivar e publicar 1 oferta" }));
+    const fd = archiveProductToOffers.mock.calls.at(-1)![1] as FormData;
+    expect(JSON.parse(fd.get("items") as string)).toEqual([
+      { variantId: "v1", quantity: 2, transferPrice: 40 },
+    ]);
+  });
+
+  it("only archives when all the stock is on the network already (VES-98)", () => {
+    render(
+      <ArchiveToOffersForm
+        productId="p1"
+        variants={[{ variantId: "v1", label: "P", stock: 2, onNetwork: 2, costPrice: 40 }]}
+        networks={NETWORK}
+      />,
+    );
+    expect(screen.getByText(/Todo o estoque deste produto já está na rede/)).toBeVisible();
+    expect(screen.getByRole("button", { name: "Arquivar produto" })).toBeVisible();
   });
 
   it("shows the error returned by the action", async () => {
