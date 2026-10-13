@@ -14,7 +14,8 @@ async function inviteAndCopyLink(browser: import("@playwright/test").Browser, em
 
   const row = factory.locator("li", { hasText: email });
   await row.getByRole("button", { name: /copiar link/i }).click();
-  await expect(toast(factory)).toContainText("Link do convite copiado.");
+  // "Convite enviado." may still be on screen: pick the copy toast by its text.
+  await expect(toast(factory).filter({ hasText: "Link do convite copiado." })).toBeVisible();
   const link = await factory.evaluate(() => navigator.clipboard.readText());
   await ctx.close();
   expect(link).toMatch(/\/convite\/[0-9a-f-]{36}$/);
