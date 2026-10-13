@@ -12,6 +12,9 @@ test("the buyer sees the negotiated product in the list and the detail", async (
     .getByRole("link", { name: /ver detalhes/i })
     .first()
     .click();
+  // Read the title only once the offer page replaced the feed's "Rede de oportunidades".
+  await expect(page).toHaveURL(/\/rede\/ofertas\/[0-9a-f-]{36}/);
+  await expect(page.getByRole("heading", { level: 1 })).not.toHaveText("Rede de oportunidades");
   const productName = (await page.getByRole("heading", { level: 1 }).textContent())!.trim();
 
   await page.getByLabel(/quantidade/i).fill("1");
