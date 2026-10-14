@@ -19,7 +19,11 @@ export function isValidCPF(raw: string): boolean {
   return check(9) === digits[9] && check(10) === digits[10];
 }
 
+/** "52998224725" → "529.982.247-25"; also masks a partial CPF while typing (VES-80). */
 export function formatCPF(raw: string): string {
   const cpf = raw.replace(/\D/g, "").slice(0, 11);
-  return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
+  return cpf
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
 }

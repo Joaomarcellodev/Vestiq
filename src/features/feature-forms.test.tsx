@@ -85,6 +85,47 @@ describe("CustomerForm", () => {
     expect(screen.getByLabelText("Email")).toHaveValue("ana@x.com");
     expect(screen.getByLabelText("CPF")).toHaveValue("123");
   });
+
+  it("masks the phone and the CPF while typing (VES-80)", async () => {
+    render(<CustomerForm />);
+    await userEvent.type(screen.getByLabelText("Telefone"), "11a987654321");
+    await userEvent.type(screen.getByLabelText("CPF"), "52998224725");
+    expect(screen.getByLabelText("Telefone")).toHaveValue("(11) 98765-4321");
+    expect(screen.getByLabelText("CPF")).toHaveValue("529.982.247-25");
+  });
+
+  it("prefills the stored digits with their masks (VES-80)", () => {
+    render(
+      <CustomerForm
+        customer={{
+          id: "c1",
+          name: "Ana",
+          email: null,
+          phone: "1134567890",
+          document: "52998224725",
+          notes: null,
+        }}
+      />,
+    );
+    expect(screen.getByLabelText("Telefone")).toHaveValue("(11) 3456-7890");
+    expect(screen.getByLabelText("CPF")).toHaveValue("529.982.247-25");
+  });
+
+  it("shows the phone error next to the field (VES-80)", async () => {
+    customerActions.createCustomer.mockResolvedValueOnce({
+      error: "Telefone inválido: informe DDD + número",
+      fieldErrors: { phone: "Telefone inválido: informe DDD + número" },
+    });
+    render(<CustomerForm />);
+    await userEvent.type(screen.getByLabelText("Nome"), "Ana");
+    await userEvent.type(screen.getByLabelText("Telefone"), "987");
+    await userEvent.click(screen.getByRole("button", { name: /salvar cliente/i }));
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    const phone = screen.getByLabelText("Telefone");
+    expect(phone).toHaveAttribute("aria-invalid", "true");
+    expect(phone).toHaveAccessibleDescription("Telefone inválido: informe DDD + número");
+  });
 });
 
 describe("PublishOfferForm", () => {

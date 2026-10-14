@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
 import { FilterTabs } from "@/components/molecules/filter-tabs";
 import { Badge, Button, Icon } from "@/components/atoms";
+import { formatPhone } from "@/lib/utils/phone";
 
 export const metadata: Metadata = { title: "Clientes" };
 
@@ -77,7 +78,7 @@ export default async function CustomersPage({
                 <div className="min-w-0">
                   <p className="truncate font-body-md text-body-md text-on-surface">{c.name}</p>
                   <p className="truncate font-body-md text-body-md text-on-surface-variant">
-                    {c.email ?? c.phone ?? "Sem contato"}
+                    {c.email ?? (c.phone ? formatPhone(c.phone) : "Sem contato")}
                   </p>
                 </div>
               </Link>

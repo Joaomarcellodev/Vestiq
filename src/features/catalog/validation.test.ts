@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { editVariantsSchema, fieldErrorsOf, productSchema, variantSchema } from "./validation";
+import { fieldErrorsOf } from "@/lib/zod";
+import { editVariantsSchema, productSchema, variantSchema } from "./validation";
 
 describe("catalog validation", () => {
   it("requires a product name", () => {

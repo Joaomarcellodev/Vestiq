@@ -64,4 +64,14 @@ export const ptBRErrorMap: ZodErrorMap = (issue, ctx) => {
 
 z.setErrorMap(ptBRErrorMap);
 
+/** Zod issues keyed by field path ("name", "variants.0.retailPrice"), first message wins. */
+export function fieldErrorsOf(error: z.ZodError, prefix = ""): Record<string, string> {
+  const errors: Record<string, string> = {};
+  for (const issue of error.issues) {
+    const key = [prefix, ...issue.path].filter((p) => p !== "").join(".");
+    if (key && !(key in errors)) errors[key] = issue.message;
+  }
+  return errors;
+}
+
 export { z };
