@@ -18,6 +18,17 @@ const eslintConfig = [
     },
   },
   {
+    // VES-78 — schemas take `z` from @/lib/zod, which installs the pt-BR messages.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/lib/zod.ts", "**/*.test.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        { paths: [{ name: "zod", message: 'Import z from "@/lib/zod" (pt-BR messages).' }] },
+      ],
+    },
+  },
+  {
     files: ["**/*.test.{ts,tsx}", "**/tests/**", "e2e/**", "supabase/**"],
     rules: {
       "no-console": "off",
