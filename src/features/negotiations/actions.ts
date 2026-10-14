@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { rpcErrorMessage } from "@/lib/supabase/errors";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import { negotiationActionSchema, openNegotiationSchema, sendMessageSchema } from "./validation";
 import { toChatEvent, type ChatEvent } from "./chat";
@@ -29,7 +30,7 @@ export async function openNegotiation(
     p_amount: parsed.data.amount,
     p_message: parsed.data.message || undefined,
   });
-  if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
+  if (error) return { error: rpcErrorMessage(error) };
 
   revalidatePath("/negociacoes");
   redirect(`/negociacoes/${(data as { id: string }).id}?toast=negotiation-opened`);
@@ -60,7 +61,7 @@ export async function negotiationAction(
           p_message: message || undefined,
         });
 
-  if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
+  if (error) return { error: rpcErrorMessage(error) };
 
   revalidatePath(`/negociacoes/${negotiationId}`);
   revalidatePath("/negociacoes");
