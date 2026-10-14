@@ -26,6 +26,19 @@ export const emptyVariant: VariantRow = {
   initialStock: "0",
 };
 
+/** The messages of variant `i` from the action's `fieldErrors` ("variants.0.retailPrice"). */
+export function variantErrorsAt(
+  errors: Record<string, string>,
+  i: number,
+): Partial<Record<keyof VariantRow, string>> {
+  const prefix = `variants.${i}.`;
+  return Object.fromEntries(
+    Object.entries(errors)
+      .filter(([key]) => key.startsWith(prefix))
+      .map(([key, message]) => [key.slice(prefix.length), message]),
+  );
+}
+
 /** Colour, size, SKU, prices and — for a new variant — the initial stock. */
 export function VariantFields({
   row,
