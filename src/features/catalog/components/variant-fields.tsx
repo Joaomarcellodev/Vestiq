@@ -93,6 +93,8 @@ export function VariantFields({
           <TextField
             label="Estoque inicial"
             type="number"
+            min={0}
+            step={1}
             value={row.initialStock}
             onChange={(e) => onChange({ initialStock: e.target.value })}
             error={errors.initialStock}
@@ -101,6 +103,7 @@ export function VariantFields({
         <TextField
           label="Custo (R$)"
           type="number"
+          min={0}
           step="0.01"
           value={row.costPrice}
           onChange={(e) => onChange({ costPrice: e.target.value })}
@@ -109,6 +112,7 @@ export function VariantFields({
         <TextField
           label="Preço de venda (R$)"
           type="number"
+          min={0}
           step="0.01"
           value={row.retailPrice}
           onChange={(e) => onChange({ retailPrice: e.target.value })}
