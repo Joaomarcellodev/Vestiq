@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 export const createNetworkSchema = z.object({
   name: z.string().trim().min(1, "Informe o nome da rede").max(120),

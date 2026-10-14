@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 export const categorySchema = z.object({
   name: z.string().trim().min(1, "Informe o nome da categoria").max(80),
