@@ -54,16 +54,6 @@ export const editVariantsSchema = z
 
 export type EditVariantInput = z.infer<typeof editVariantSchema>;
 
-/** Zod issues keyed by field path ("name", "variants.0.retailPrice"), first message wins. */
-export function fieldErrorsOf(error: z.ZodError, prefix = ""): Record<string, string> {
-  const errors: Record<string, string> = {};
-  for (const issue of error.issues) {
-    const key = [prefix, ...issue.path].filter((p) => p !== "").join(".");
-    if (key && !(key in errors)) errors[key] = issue.message;
-  }
-  return errors;
-}
-
 /** Product photos — Storage bucket `product-images`. */
 export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 export const PRODUCT_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
