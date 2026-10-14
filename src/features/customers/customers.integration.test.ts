@@ -63,6 +63,34 @@ d("customers actions + queries (SPEC-006)", () => {
     expect(state.error).toMatch(/CPF já existe/i);
   });
 
+  it("createCustomer: stores the masked phone and CPF as digits (VES-80)", async () => {
+    await expectRedirect(
+      () =>
+        createCustomer(
+          {},
+          cForm({ name: "Ana", phone: "(11) 98765-4321", document: "529.982.247-25" }),
+        ),
+      /^\/clientes\?toast=customer-created$/,
+    );
+    const { data } = await admin()
+      .from("customers")
+      .select("phone, document")
+      .eq("organization_id", orgId)
+      .single();
+    expect(data).toEqual({ phone: "11987654321", document: CPF });
+  });
+
+  it("createCustomer: a masked CPF is still a duplicate (VES-80)", async () => {
+    await makeCustomer(orgId, { document: CPF });
+    const state = await createCustomer({}, cForm({ name: "Outro", document: "529.982.247-25" }));
+    expect(state.error).toMatch(/CPF já existe/i);
+  });
+
+  it("createCustomer: rejects a phone with letters, on the field (VES-80)", async () => {
+    const state = await createCustomer({}, cForm({ name: "X", phone: "abcdef" }));
+    expect(state.fieldErrors).toEqual({ phone: "Telefone inválido: informe DDD + número" });
+  });
+
   it("updateCustomer: edits and redirects to the detail", async () => {
     const c = await makeCustomer(orgId, { name: "Velho Nome" });
     await expectRedirect(
