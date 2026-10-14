@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { rpcErrorMessage } from "@/lib/supabase/errors";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import {
   cancelSupplyOrderSchema,
@@ -12,14 +13,6 @@ import {
 } from "./validation";
 
 export type ActionState = { error?: string };
-
-/** Database errors are already in Portuguese; only the auth ones need a friendly text. */
-function friendly(message: string): string {
-  if (/not authorized|not authenticated|permission denied/i.test(message)) {
-    return "Você não tem permissão para esta ação";
-  }
-  return message;
-}
 
 function revalidateOrders(orderId: string) {
   revalidatePath("/pedidos");
@@ -47,7 +40,7 @@ export async function placeSupplyOrder(
     p_items: parsed.data.items.map((i) => ({ variant_id: i.variantId, quantity: i.quantity })),
     p_note: parsed.data.note || undefined,
   });
-  if (error) return { error: friendly(error.message) };
+  if (error) return { error: rpcErrorMessage(error) };
 
   revalidateOrders(data.id);
   redirect(`/pedidos/${data.id}?toast=supply-order-placed`);
@@ -71,7 +64,7 @@ export async function respondSupplyOrder(
     p_decision: parsed.data.decision,
     p_note: parsed.data.note || undefined,
   });
-  if (error) return { error: friendly(error.message) };
+  if (error) return { error: rpcErrorMessage(error) };
 
   revalidateOrders(parsed.data.orderId);
   const toast =
@@ -95,7 +88,7 @@ export async function cancelSupplyOrder(
     p_order_id: parsed.data.orderId,
     p_reason: parsed.data.reason || undefined,
   });
-  if (error) return { error: friendly(error.message) };
+  if (error) return { error: rpcErrorMessage(error) };
 
   revalidateOrders(parsed.data.orderId);
   redirect(`/pedidos/${parsed.data.orderId}?toast=supply-order-cancelled`);
