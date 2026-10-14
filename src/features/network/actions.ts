@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { rpcErrorMessage } from "@/lib/supabase/errors";
 import { requireUser } from "@/features/auth/queries";
 import { requireRole } from "@/features/organizations/queries";
 import {
@@ -118,7 +119,7 @@ export async function acceptInvite(_prev: ActionState, formData: FormData): Prom
     p_token: parsed.data.token,
     p_reseller_name: parsed.data.resellerName || undefined,
   });
-  if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
+  if (error) return { error: rpcErrorMessage(error) };
 
   redirect("/dashboard?toast=network-joined");
 }
@@ -179,7 +180,7 @@ export async function signUpFromInvite(
     p_token: token,
     p_reseller_name: resellerName,
   });
-  if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
+  if (error) return { error: rpcErrorMessage(error) };
 
   redirect("/dashboard?toast=network-joined");
 }
