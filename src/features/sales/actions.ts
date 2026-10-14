@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { rpcErrorMessage } from "@/lib/supabase/errors";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import { cancelSaleSchema, saleSchema } from "./validation";
 
@@ -30,7 +31,7 @@ export async function confirmSale(
     p_items: parsed.data.items.map((i) => ({ variant_id: i.variantId, quantity: i.quantity })),
   });
 
-  if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
+  if (error) return { error: rpcErrorMessage(error) };
 
   revalidatePath("/vendas");
   revalidatePath("/dashboard");

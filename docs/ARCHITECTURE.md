@@ -101,6 +101,9 @@ Server Action  ──valida (Zod)──▶  features/<f>/actions.ts  ──▶  
   mensagem junto do campo; os `min` dos inputs numéricos seguem o schema.
 - Erros de negócio retornam um estado tipado (`{ error, fieldErrors }`); exceções
   inesperadas sobem para o `error.tsx` do segmento.
+- Erro de RPC vira mensagem com `rpcErrorMessage` (`@/lib/supabase/errors`, VES-79):
+  o texto do `raise exception` (P0001 ou `check_violation`) aparece inteiro; guardas
+  em inglês ("not authorized") e erros inesperados do banco ganham texto fixo em pt-BR.
 
 ## Autenticação e proteção de rotas
 
