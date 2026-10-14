@@ -64,6 +64,22 @@ describe("ProductForm", () => {
     expect(screen.getByLabelText("Marca")).toHaveValue("Modah");
     expect(screen.getByLabelText("Tamanho")).toHaveValue("M");
   });
+
+  it("shows the action's field errors next to their fields (VES-78)", async () => {
+    createProduct.mockResolvedValueOnce({
+      error: "O estoque inicial não pode ser negativo",
+      fieldErrors: { "variants.0.initialStock": "O estoque inicial não pode ser negativo" },
+    });
+    render(<ProductForm categories={CATS} />);
+    await userEvent.type(screen.getByLabelText(/nome do produto/i), "Jaqueta");
+    await userEvent.click(screen.getByRole("button", { name: /salvar produto/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("estoque inicial");
+    const stock = screen.getByLabelText("Estoque inicial");
+    expect(stock).toHaveAttribute("aria-invalid", "true");
+    expect(stock).toHaveAccessibleDescription("O estoque inicial não pode ser negativo");
+    expect(stock).toHaveAttribute("min", "0");
+  });
 });
 
 describe("EditProductForm", () => {
