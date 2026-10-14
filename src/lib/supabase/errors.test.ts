@@ -6,6 +6,9 @@ describe("rpcErrorMessage (VES-79)", () => {
     expect(rpcErrorMessage({ code: "P0001", message: "Estoque insuficiente: saldo atual 8" })).toBe(
       "Estoque insuficiente: saldo atual 8",
     );
+    expect(rpcErrorMessage({ code: "23514", message: "Estoque insuficiente: saldo atual 8" })).toBe(
+      "Estoque insuficiente: saldo atual 8",
+    );
     expect(rpcErrorMessage({ code: "P0001", message: "Ação desconhecida: foo" })).toBe(
       "Ação desconhecida: foo",
     );
@@ -22,6 +25,12 @@ describe("rpcErrorMessage (VES-79)", () => {
   it("hides any other database error behind a generic message", () => {
     expect(
       rpcErrorMessage({ code: "23503", message: 'insert or update on table "x" violates ...' }),
+    ).toBe(UNEXPECTED);
+    expect(
+      rpcErrorMessage({
+        code: "23514",
+        message: 'new row for relation "offers" violates check constraint "offers_quantity_check"',
+      }),
     ).toBe(UNEXPECTED);
     expect(rpcErrorMessage({ message: "TypeError: fetch failed" })).toBe(UNEXPECTED);
   });
