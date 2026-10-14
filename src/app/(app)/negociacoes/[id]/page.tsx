@@ -4,6 +4,7 @@ import { BackButton } from "@/components/molecules/back-button";
 import { getNegotiation } from "@/features/negotiations/queries";
 import { requireUserId } from "@/features/auth/queries";
 import { NegotiationChat } from "@/features/negotiations/components/negotiation-chat";
+import { NegotiationProductSummary } from "@/features/negotiations/components/negotiation-product";
 import { toChatEvent } from "@/features/negotiations/chat";
 import { negotiationAction } from "@/features/negotiations/actions";
 import { transition } from "@/features/negotiations/state-machine";
@@ -42,8 +43,7 @@ export default async function NegotiationDetailPage({
     requireUserId(),
   ]);
   if (!result?.negotiation) notFound();
-  const { negotiation: n, events, party } = result;
-  const variant = n.offers?.product_variants;
+  const { negotiation: n, product, events, party } = result;
 
   const available = ACTIONS.filter(
     (a) => !(transition(n.status as NegotiationStatus, a.action, party as Party) instanceof Error),
@@ -53,7 +53,7 @@ export default async function NegotiationDetailPage({
     <div className="space-y-lg">
       <BackButton fallback="/negociacoes" label="Negociações" />
       <PageHeader
-        title={variant?.products?.name ?? "Negociação"}
+        title={product?.name ?? "Negociação"}
         description={`${n.seller?.name} → ${n.buyer?.name}`}
         action={
           <Badge tone={NEGOTIATION_STATUS[n.status].tone}>
@@ -63,7 +63,8 @@ export default async function NegotiationDetailPage({
       />
 
       <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
-        <div className="flex items-center justify-between">
+        <NegotiationProductSummary product={product} size={64} />
+        <div className="mt-3 flex items-center justify-between border-t border-outline-variant pt-3">
           <span className="font-body-md text-body-md text-on-surface-variant">Quantidade</span>
           <span className="font-body-md text-body-md text-on-surface">{n.quantity} un.</span>
         </div>

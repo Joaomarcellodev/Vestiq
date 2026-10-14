@@ -299,6 +299,17 @@ transferência, observação, nome, marca, descrição, cor, tamanho e fotos. Nu
 `cost_price`, `retail_price`, `stock_on_hand` nem `sku` (SDD §8). O feed `/rede`
 e o detalhe da oferta leem por ela.
 
+### Produto das negociações (VES-97)
+
+Migration `0031`. A compradora também não lê o produto da negociação: a oferta
+só fica visível para ela enquanto está `ACTIVE`/`PARTIALLY_NEGOTIATED`, e a
+negociação continua no histórico depois que a oferta esgota ou é cancelada. Por
+isso `list_visible_offers` não serve aqui. `list_negotiation_products(p_negotiation_id?)`
+(`security definer`, só `authenticated`) usa a regra da policy
+`negotiations_select` (as duas partes) e devolve, por negociação, só nome, marca,
+cor, tamanho e fotos (as da oferta, ou as do produto, como em `0026`). A lista
+`/negociacoes` e o detalhe da negociação leem por ela.
+
 ## Funções de leitura — Fornecedores (SPEC-011)
 
 Migration `0017`. A revendedora lê o catálogo das fábricas das suas redes sem
