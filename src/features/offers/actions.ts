@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { rpcErrorMessage } from "@/lib/supabase/errors";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import { keptImages, readImageFiles, removeImages, uploadImages } from "@/features/catalog/images";
 import { PRODUCT_IMAGE_MAX_COUNT } from "@/features/catalog/validation";
@@ -41,7 +42,7 @@ export async function publishOffer(_prev: ActionState, formData: FormData): Prom
   });
   if (error) {
     await removeImages(supabase, uploaded.urls);
-    return { error: error.message.replace(/^.*?:\s*/, "") };
+    return { error: rpcErrorMessage(error) };
   }
   if (uploaded.urls.length) {
     const { error: photoError } = await supabase
