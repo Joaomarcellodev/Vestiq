@@ -26,6 +26,19 @@ export const emptyVariant: VariantRow = {
   initialStock: "0",
 };
 
+/** The messages of variant `i` from the action's `fieldErrors` ("variants.0.retailPrice"). */
+export function variantErrorsAt(
+  errors: Record<string, string>,
+  i: number,
+): Partial<Record<keyof VariantRow, string>> {
+  const prefix = `variants.${i}.`;
+  return Object.fromEntries(
+    Object.entries(errors)
+      .filter(([key]) => key.startsWith(prefix))
+      .map(([key, message]) => [key.slice(prefix.length), message]),
+  );
+}
+
 /** Colour, size, SKU, prices and — for a new variant — the initial stock. */
 export function VariantFields({
   row,
@@ -80,6 +93,8 @@ export function VariantFields({
           <TextField
             label="Estoque inicial"
             type="number"
+            min={0}
+            step={1}
             value={row.initialStock}
             onChange={(e) => onChange({ initialStock: e.target.value })}
             error={errors.initialStock}
@@ -88,6 +103,7 @@ export function VariantFields({
         <TextField
           label="Custo (R$)"
           type="number"
+          min={0}
           step="0.01"
           value={row.costPrice}
           onChange={(e) => onChange({ costPrice: e.target.value })}
@@ -96,6 +112,7 @@ export function VariantFields({
         <TextField
           label="Preço de venda (R$)"
           type="number"
+          min={0}
           step="0.01"
           value={row.retailPrice}
           onChange={(e) => onChange({ retailPrice: e.target.value })}

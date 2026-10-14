@@ -30,7 +30,14 @@ export function ProposeForm({ offerId, remaining }: { offerId: string; remaining
         max={remaining}
         required
       />
-      <TextField label="Valor proposto (R$)" name="amount" type="number" step="0.01" required />
+      <TextField
+        label="Valor proposto (R$)"
+        name="amount"
+        type="number"
+        min="0.01"
+        step="0.01"
+        required
+      />
       <TextField label="Mensagem" name="message" placeholder="Apresente sua proposta" />
       <div className="flex justify-end">
         <Button type="submit" size="lg" loading={pending} className="w-full sm:w-auto sm:px-10">

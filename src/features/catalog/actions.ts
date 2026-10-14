@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import {
@@ -137,7 +137,12 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
     variants: JSON.parse((formData.get("variants") as string) || "[]"),
   };
   const parsed = productSchema.safeParse(raw);
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  if (!parsed.success) {
+    return {
+      error: parsed.error.issues[0]?.message ?? "Dados inválidos",
+      fieldErrors: fieldErrorsOf(parsed.error),
+    };
+  }
   const input = parsed.data;
   const { wholesale, error: wholesaleError } = readWholesale(org.type, formData);
   if (wholesaleError) return { error: wholesaleError };

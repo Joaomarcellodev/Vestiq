@@ -7,7 +7,7 @@ import { createProduct, type ActionState } from "../actions";
 import { ImageUploadField } from "./image-upload-field";
 import { WholesaleFields } from "./wholesale-fields";
 import { CategoryField } from "./category-field";
-import { emptyVariant, VariantFields, type VariantRow } from "./variant-fields";
+import { emptyVariant, VariantFields, variantErrorsAt, type VariantRow } from "./variant-fields";
 
 export function ProductForm({
   categories,
@@ -38,6 +38,7 @@ export function ProductForm({
     fd.delete("images");
     images.forEach((f) => fd.append("images", f));
   });
+  const errors = state.fieldErrors ?? {};
 
   const update = (i: number, patch: Partial<VariantRow>) =>
     setVariants((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
@@ -67,6 +68,7 @@ export function ProductForm({
           name="name"
           required
           placeholder="Ex: Jaqueta de Couro Vintage"
+          error={errors.name}
         />
         <TextField label="SKU (código interno)" name="internalSku" placeholder="VST-001" />
         <TextField label="Marca" name="brand" placeholder="Ex: Chanel" />
@@ -130,6 +132,7 @@ export function ProductForm({
             key={i}
             row={v}
             onChange={(patch) => update(i, patch)}
+            errors={variantErrorsAt(errors, i)}
             onRemove={
               variants.length > 1
                 ? () => setVariants((r) => r.filter((_, idx) => idx !== i))

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { isValidCPF } from "@/lib/utils/cpf";
 
 export const customerSchema = z.object({

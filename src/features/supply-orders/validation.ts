@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { MAX_QUANTITY, MAX_VARIANTS } from "./order-math";
 
 const note = z.string().trim().max(1000, "O texto pode ter até 1.000 caracteres").optional();

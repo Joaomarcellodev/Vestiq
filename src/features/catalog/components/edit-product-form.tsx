@@ -7,7 +7,7 @@ import { updateProduct, type ActionState } from "../actions";
 import { ImageUploadField } from "./image-upload-field";
 import { WholesaleFields } from "./wholesale-fields";
 import { CategoryField } from "./category-field";
-import { emptyVariant, VariantFields, type VariantRow } from "./variant-fields";
+import { emptyVariant, VariantFields, variantErrorsAt, type VariantRow } from "./variant-fields";
 
 interface Variant {
   id: string;
@@ -102,13 +102,6 @@ export function EditProductForm({
     setVariants((rows) => rows.filter((_, idx) => idx !== i));
   };
 
-  const variantErrors = (i: number) =>
-    Object.fromEntries(
-      Object.entries(errors)
-        .filter(([key]) => key.startsWith(`variants.${i}.`))
-        .map(([key, message]) => [key.slice(`variants.${i}.`.length), message]),
-    );
-
   return (
     <form {...formProps} className="space-y-md">
       <input type="hidden" name="id" value={product.id} />
@@ -189,7 +182,7 @@ export function EditProductForm({
             onChange={(patch) => update(i, patch)}
             onRemove={variants.length > 1 ? () => remove(i) : undefined}
             removeLabel={v.id ? "Arquivar" : "Remover"}
-            errors={variantErrors(i)}
+            errors={variantErrorsAt(errors, i)}
           />
         ))}
         {errors.variants && (
