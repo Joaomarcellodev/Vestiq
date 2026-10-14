@@ -84,6 +84,7 @@ export function PublishOfferForm({
         label="Preço de transferência (R$)"
         name="transferPrice"
         type="number"
+        min="0"
         step="0.01"
         required
       />
