@@ -164,8 +164,8 @@ Append-only. Sem `update`/`delete` via RLS (RF-INV-006).
 | `organization_id` | uuid | **tenant** (RF-CUSTOMER-003) |
 | `name` | text | not null |
 | `email` | citext | null |
-| `phone` | text | null |
-| `document` | text | null — CPF |
+| `phone` | text | null — só dígitos, DDD + número (VES-80) |
+| `document` | text | null — CPF, só dígitos (VES-80) |
 | `archived_at` | timestamptz | |
 
 ### `sales` — RF-SALE-001..009
