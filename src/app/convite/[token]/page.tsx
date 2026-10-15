@@ -100,7 +100,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
     return (
       <AuthScreen
         title={title}
-        subtitle={`Você já tem uma conta com ${invite.email}. Entre para aceitar o convite.`}
+        subtitle={`Você já tem uma conta com ${invite.email}. Entre para aceitar o convite — se ainda não criou uma senha, use “Esqueci minha senha”.`}
       >
         <LoginForm next={here} inviteHint={false} />
       </AuthScreen>
