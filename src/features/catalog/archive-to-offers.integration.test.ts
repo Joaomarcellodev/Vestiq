@@ -75,6 +75,34 @@ d("archive product to offers (VES-69, AC-PROD-006-03/04)", () => {
     expect(options?.networks).toEqual([{ id: ctx.network.id, name: ctx.network.name }]);
   });
 
+  it("only proposes the stock that isn't on the network already (VES-98)", async () => {
+    const publish = (variantId: string, quantity: number) =>
+      ctx.seller.client.rpc("publish_offer", {
+        p_network_id: ctx.network.id,
+        p_variant_id: variantId,
+        p_quantity: quantity,
+        p_transfer_price: 60,
+      });
+    expect((await publish(ctx.p.id, 2)).error).toBeNull();
+    expect((await publish(ctx.m.id, 2)).error).toBeNull();
+
+    const options = await getArchiveOptions(ctx.product.id);
+    expect(options?.variants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ variantId: ctx.p.id, stock: 3, onNetwork: 2 }),
+        expect.objectContaining({ variantId: ctx.m.id, stock: 2, onNetwork: 2 }),
+      ]),
+    );
+
+    // Offering the free stock goes through; the earlier offers stay on the network.
+    await expectRedirect(
+      () => archive(ctx.network.id, [{ variantId: ctx.p.id, quantity: 1, transferPrice: 40 }]),
+      "/produtos?toast=product-archived-offered",
+    );
+    const { offers } = await state();
+    expect(offers.filter((o) => o.status === "ACTIVE")).toHaveLength(3);
+  });
+
   it("publishes one offer per variant with quantity and archives the product (TC-PROD-19)", async () => {
     await expectRedirect(
       () =>

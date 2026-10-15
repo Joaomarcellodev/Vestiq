@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 export const categorySchema = z.object({
   name: z.string().trim().min(1, "Informe o nome da categoria").max(80),
@@ -17,9 +17,13 @@ export const variantSchema = z.object({
   size: z.string().trim().max(20).optional().or(z.literal("")),
   color: z.string().trim().max(40).optional().or(z.literal("")),
   sku: z.string().trim().max(40).optional().or(z.literal("")),
-  costPrice: z.coerce.number().min(0, "Custo inválido").default(0),
-  retailPrice: z.coerce.number().min(0, "Preço de venda inválido"),
-  initialStock: z.coerce.number().int().min(0).default(0),
+  costPrice: z.coerce.number().min(0, "O custo não pode ser negativo").default(0),
+  retailPrice: z.coerce.number().min(0, "O preço de venda não pode ser negativo"),
+  initialStock: z.coerce
+    .number()
+    .int("O estoque inicial deve ser um número inteiro")
+    .min(0, "O estoque inicial não pode ser negativo")
+    .default(0),
 });
 
 export const productSchema = z.object({
@@ -49,16 +53,6 @@ export const editVariantsSchema = z
   .min(1, "O produto precisa de pelo menos uma variação");
 
 export type EditVariantInput = z.infer<typeof editVariantSchema>;
-
-/** Zod issues keyed by field path ("name", "variants.0.retailPrice"), first message wins. */
-export function fieldErrorsOf(error: z.ZodError, prefix = ""): Record<string, string> {
-  const errors: Record<string, string> = {};
-  for (const issue of error.issues) {
-    const key = [prefix, ...issue.path].filter((p) => p !== "").join(".");
-    if (key && !(key in errors)) errors[key] = issue.message;
-  }
-  return errors;
-}
 
 /** Product photos — Storage bucket `product-images`. */
 export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;

@@ -11,10 +11,14 @@ const fieldClass =
 
 type Row = { quantity: string; price: string };
 
+/** Stock not held by an open offer — the most a new offer can take. */
+const free = (v: ArchiveOption) => Math.max(v.stock - v.onNetwork, 0);
+
 /**
- * AC-PROD-006-03/04 — archive step. Each variant with stock comes prefilled
- * with all of it at cost price; quantity 0 keeps that variant out of the
- * network. Without a network or stock, confirming only archives.
+ * AC-PROD-006-03/04 — archive step. Each variant comes prefilled with its free
+ * stock (what isn't in an open offer yet) at cost price; quantity 0 keeps that
+ * variant out of the network. Offers published earlier stay on the network
+ * (VES-98). Without a network or free stock, confirming only archives.
  */
 export function ArchiveToOffersForm({
   productId,
@@ -33,13 +37,15 @@ export function ArchiveToOffersForm({
     Object.fromEntries(
       variants.map((v) => [
         v.variantId,
-        { quantity: String(v.stock), price: v.costPrice > 0 ? String(v.costPrice) : "" },
+        { quantity: String(free(v)), price: v.costPrice > 0 ? String(v.costPrice) : "" },
       ]),
     ),
   );
-  const canOffer = variants.length > 0 && networks.length > 0;
+  const offerable = variants.filter((v) => free(v) > 0);
+  const onNetwork = variants.reduce((total, v) => total + v.onNetwork, 0);
+  const canOffer = offerable.length > 0 && networks.length > 0;
   const items = canOffer
-    ? variants.map((v) => ({
+    ? offerable.map((v) => ({
         variantId: v.variantId,
         quantity: Number(rows[v.variantId]!.quantity || 0),
         transferPrice: Number(rows[v.variantId]!.price || 0),
@@ -64,11 +70,21 @@ export function ArchiveToOffersForm({
         </p>
       )}
 
+      {onNetwork > 0 && (
+        <p className="rounded-lg bg-info-container px-4 py-3 font-body-md text-body-md text-on-info-container">
+          {onNetwork === 1 ? "1 peça já está" : `${onNetwork} peças já estão`} em ofertas na rede.
+          Essas ofertas continuam ativas depois de arquivar — para tirá-las da rede, use
+          &ldquo;Cancelar oferta&rdquo; na página de cada uma, em Rede.
+        </p>
+      )}
+
       {!canOffer ? (
         <p className="rounded-lg bg-surface-container-low px-4 py-3 font-body-md text-body-md text-on-surface-variant">
           {networks.length === 0
             ? "Você não participa de nenhuma rede, então nenhuma oferta será publicada."
-            : "Este produto está sem estoque, então nenhuma oferta será publicada."}{" "}
+            : variants.length > 0
+              ? "Todo o estoque deste produto já está na rede, então nenhuma oferta nova será publicada."
+              : "Este produto está sem estoque, então nenhuma oferta será publicada."}{" "}
           O produto só será arquivado.
         </p>
       ) : (
@@ -113,45 +129,55 @@ export function ArchiveToOffersForm({
                     {v.label}
                   </p>
                   <p className="font-body-md text-body-md text-on-surface-variant">
-                    {v.stock} em estoque · custo {formatBRL(v.costPrice)}
+                    {v.stock} em estoque
+                    {v.onNetwork > 0 && ` · ${v.onNetwork} já na rede`} · custo{" "}
+                    {formatBRL(v.costPrice)}
                   </p>
                 </div>
-                <div>
-                  <label
-                    htmlFor={`qty-${v.variantId}`}
-                    className="mb-1 block font-body-md text-body-md text-on-surface-variant"
-                  >
-                    Quantidade
-                  </label>
-                  <input
-                    id={`qty-${v.variantId}`}
-                    type="number"
-                    min={0}
-                    max={v.stock}
-                    step={1}
-                    value={rows[v.variantId]!.quantity}
-                    onChange={(e) => update(v.variantId, { quantity: e.target.value })}
-                    className={fieldClass}
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor={`price-${v.variantId}`}
-                    className="mb-1 block font-body-md text-body-md text-on-surface-variant"
-                  >
-                    Preço de repasse (R$)
-                  </label>
-                  <input
-                    id={`price-${v.variantId}`}
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    required={Number(rows[v.variantId]!.quantity) > 0}
-                    value={rows[v.variantId]!.price}
-                    onChange={(e) => update(v.variantId, { price: e.target.value })}
-                    className={fieldClass}
-                  />
-                </div>
+                {free(v) === 0 ? (
+                  <p className="font-body-md text-body-md text-on-surface-variant sm:col-span-2">
+                    Todo o estoque já está na rede.
+                  </p>
+                ) : (
+                  <>
+                    <div>
+                      <label
+                        htmlFor={`qty-${v.variantId}`}
+                        className="mb-1 block font-body-md text-body-md text-on-surface-variant"
+                      >
+                        Quantidade
+                      </label>
+                      <input
+                        id={`qty-${v.variantId}`}
+                        type="number"
+                        min={0}
+                        max={free(v)}
+                        step={1}
+                        value={rows[v.variantId]!.quantity}
+                        onChange={(e) => update(v.variantId, { quantity: e.target.value })}
+                        className={fieldClass}
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor={`price-${v.variantId}`}
+                        className="mb-1 block font-body-md text-body-md text-on-surface-variant"
+                      >
+                        Preço de repasse (R$)
+                      </label>
+                      <input
+                        id={`price-${v.variantId}`}
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        required={Number(rows[v.variantId]!.quantity) > 0}
+                        value={rows[v.variantId]!.price}
+                        onChange={(e) => update(v.variantId, { price: e.target.value })}
+                        className={fieldClass}
+                      />
+                    </div>
+                  </>
+                )}
               </li>
             ))}
           </ul>

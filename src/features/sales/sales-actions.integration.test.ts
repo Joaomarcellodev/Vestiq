@@ -111,7 +111,7 @@ d("sales actions + queries (SPEC-007)", () => {
     const id = dest.split("/")[2]!.split("?")[0]!;
 
     await expectRedirect(
-      () => cancelSale(formData({ saleId: id, reason: "cliente desistiu" })),
+      () => cancelSale({}, formData({ saleId: id, reason: "cliente desistiu" })),
       new RegExp(`/vendas/${id}\\?toast=sale-cancelled`),
     );
     const { data } = await admin()
@@ -120,6 +120,32 @@ d("sales actions + queries (SPEC-007)", () => {
       .eq("id", ctx.v1.id)
       .single();
     expect(data?.stock_on_hand).toBe(10);
+  });
+
+  it("cancelSale: returns the error when the sale can't be cancelled (VES-74)", async () => {
+    const dest = await expectRedirect(
+      () =>
+        confirmSale(
+          {},
+          formData({
+            paymentMethod: "PIX",
+            items: items([{ variantId: ctx.v1.id, quantity: 1, unitPrice: 300 }]),
+          }),
+        ),
+      /sale-confirmed/,
+    );
+    const id = dest.split("/")[2]!.split("?")[0]!;
+    await expectRedirect(
+      () => cancelSale({}, formData({ saleId: id, reason: "primeira vez" })),
+      /sale-cancelled/,
+    );
+
+    expect(await cancelSale({}, formData({ saleId: id, reason: "de novo" }))).toEqual({
+      error: "Venda já cancelada",
+    });
+    expect(await cancelSale({}, formData({ saleId: id, reason: "" }))).toEqual({
+      error: "Informe o motivo do cancelamento",
+    });
   });
 
   it("listSales / getSalesSummary reflect confirmed sales", async () => {

@@ -30,7 +30,11 @@ export function MemberActiveSwitch({
         fd.set("memberId", memberId);
         fd.set("active", String(next));
         startTransition(async () => {
-          await setMemberActive(fd);
+          const { error } = await setMemberActive(fd);
+          if (error) {
+            toast({ message: error, variant: "error" });
+            return;
+          }
           toast(
             next
               ? { message: `${resellerName} reativada.`, variant: "success" }

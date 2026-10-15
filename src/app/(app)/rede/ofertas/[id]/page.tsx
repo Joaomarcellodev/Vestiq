@@ -7,7 +7,8 @@ import { cancelOffer } from "@/features/offers/actions";
 import { ProposeForm } from "@/features/negotiations/components/propose-form";
 import { OfferPhotosForm } from "@/features/offers/components/offer-photos-form";
 import { PageHeader } from "@/components/molecules/page-header";
-import { Badge, Button, Icon } from "@/components/atoms";
+import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
+import { Badge, Icon } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { OFFER_STATUS } from "@/lib/i18n/labels";
 
@@ -71,12 +72,12 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
       )}
       {isMine ? (
         offer.status !== "CANCELLED" && (
-          <form action={cancelOffer}>
+          <ActionForm action={cancelOffer} className="space-y-sm">
             <input type="hidden" name="offerId" value={offer.id} />
-            <Button type="submit" variant="danger" size="sm">
+            <SubmitButton variant="danger" size="sm">
               Cancelar oferta
-            </Button>
-          </form>
+            </SubmitButton>
+          </ActionForm>
         )
       ) : (
         <ProposeForm offerId={offer.id} remaining={offer.remaining} />

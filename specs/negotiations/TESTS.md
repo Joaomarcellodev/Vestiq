@@ -23,6 +23,8 @@
 | RF-NEG-010 | AC-NEG-010-02    | TC-NEG-17 | integration                   | sim (isolamento)    |
 | RF-NEG-010 | AC-NEG-010-03    | TC-NEG-18 | integration                   | não                 |
 | RF-NEG-011 | AC-NEG-011-01    | TC-NEG-19 | component + e2e               | não                 |
+| RF-NEG-004 | AC-NEG-004-04    | TC-NEG-20 | integration                   | sim (estoque)       |
+| RF-NEG-008 | AC-NEG-008-03    | TC-NEG-21 | integration                   | sim (estoque)       |
 
 ## Casos de teste
 
@@ -85,6 +87,14 @@ integration · **crítica** · venda local reduz o saldo abaixo de `quantity` �
 ### TC-NEG-15 — Histórico permanece
 
 integration · **crítica (RF-NEG-009)** · após `COMPLETED`, todos os eventos consultáveis, em ordem; nenhum evento apagável.
+
+### TC-NEG-20 — Aceite reserva dentro da oferta
+
+integration · **crítica** · oferta de 3, duas propostas de 2: aceitar a 1ª ok, a 2ª recusada ("restam 1"); cancelar a 1ª → a 2ª é aceita (`offer-stock-reservation.integration.test.ts`).
+
+### TC-NEG-21 — Estoque reservado não sai
+
+integration · **crítica** · venda local do saldo todo com 1 un. reservada → recusada, saldo intacto; venda do restante ok e a conclusão passa (`negotiations.integration.test.ts`). Ajuste de 5 → 2 com 2 reservadas reduz a oferta de 3 para 2; ajuste abaixo de 2 → recusado; a conclusão leva a oferta a `FULFILLED`.
 
 ## Cobertura de RF
 

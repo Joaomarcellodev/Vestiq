@@ -46,7 +46,7 @@ test("a product outside the reseller's networks is not found", async ({ page }) 
   // The (app) loading.tsx streams the response, so the status is already 200
   // when notFound() runs — assert on the rendered not-found page instead.
   await page.goto("/fornecedores/produtos/00000000-0000-0000-0000-000000000000");
-  await expect(page.getByText(/could not be found/i)).toBeVisible();
+  await expect(page.getByText("Não encontramos o que você procura")).toBeVisible();
 });
 
 // VES-107 TC-PROD-21 — the factory's photos are what resellers see.

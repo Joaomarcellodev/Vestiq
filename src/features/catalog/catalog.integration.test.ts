@@ -236,6 +236,34 @@ d("catalog actions + queries (SPEC-004)", () => {
     expect(data?.product_variants[0]?.archived_at).toBeNull();
   });
 
+  it("archive/unarchive of another org's product: blocked by RLS, error toast (VES-54)", async () => {
+    const other = await makeUser();
+    const otherOrg = await makeOrg(other.userId, "RESELLER");
+    const product = await makeProduct(otherOrg.id);
+    await makeVariant(product.id);
+
+    await expectRedirect(
+      () => archiveProduct(formData({ id: product.id })),
+      new RegExp(`/produtos/${product.id}\\?toast=product-archive-failed$`),
+    );
+    const { data } = await admin()
+      .from("products")
+      .select("archived_at, product_variants(archived_at)")
+      .eq("id", product.id)
+      .single();
+    expect(data?.archived_at).toBeNull();
+    expect(data?.product_variants[0]?.archived_at).toBeNull();
+
+    await admin()
+      .from("products")
+      .update({ archived_at: new Date().toISOString() })
+      .eq("id", product.id);
+    await expectRedirect(
+      () => unarchiveProduct(formData({ id: product.id })),
+      /toast=product-unarchive-failed$/,
+    );
+  });
+
   it("createCategory: ok + duplicate name", async () => {
     const ok = await createCategory({}, formData({ name: "Bolsas" }));
     expect(ok).toMatchObject({ ok: true, category: { name: "Bolsas" } });

@@ -71,7 +71,8 @@ export async function updateProfile(
     // há avatar próprio — sem limpar isso, "remover" não removeria nada.
     if (avatarUrl === null) metadata.picture = null;
   }
-  await supabase.auth.updateUser({ data: metadata });
+  const { error: metaErr } = await supabase.auth.updateUser({ data: metadata });
+  if (metaErr) return { error: "Não foi possível atualizar o perfil. Tente novamente." };
 
   let emailNote = "";
   if (email && email !== user.email) {

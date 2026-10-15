@@ -9,6 +9,7 @@ import { StockBadge } from "./stock-badge";
 import { BackButton } from "./back-button";
 import { StatCard } from "./stat-card";
 import { SearchForm } from "./search-form";
+import { ErrorScreen } from "./error-screen";
 
 describe("FilterTabs", () => {
   it("marks the current tab and builds hrefs preserving extra params", () => {
@@ -116,5 +117,25 @@ describe("SearchForm", () => {
     expect(hidden).toHaveLength(1);
     expect(hidden[0]).toHaveAttribute("name", "view");
     expect(hidden[0]).toHaveAttribute("value", "fornecedores");
+  });
+});
+
+describe("ErrorScreen (VES-58)", () => {
+  it("renders the title, description and actions", () => {
+    render(
+      <ErrorScreen
+        title="Página não encontrada"
+        description="O endereço pode estar errado."
+        actions={<button>Ir para o início</button>}
+      />,
+    );
+    expect(screen.getByRole("heading", { name: "Página não encontrada" })).toBeInTheDocument();
+    expect(screen.getByText("O endereço pode estar errado.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Ir para o início" })).toBeInTheDocument();
+  });
+
+  it("omits the actions row when there are none", () => {
+    const { container } = render(<ErrorScreen tone="neutral" title="T" description="D" />);
+    expect(container.querySelectorAll("button")).toHaveLength(0);
   });
 });

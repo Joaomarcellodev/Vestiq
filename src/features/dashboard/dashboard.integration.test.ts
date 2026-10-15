@@ -155,10 +155,10 @@ d("dashboard + factory overview queries", () => {
     expect(overview.stats.utilizationRate).toBe(50);
     expect(overview.members).toHaveLength(2);
 
-    // NOTE: `offers` RLS only lets the org owner and reseller peers read offers —
-    // the factory admin is neither, so this stat reads 0 in the current model.
-    // The `rede-fabrica` "Ofertas / Negociações" cards are effectively always 0.
-    expect(overview.stats.offers).toBe(0);
+    // VES-75: the counts come from the `factory_network_stats` aggregate view,
+    // so the factory sees the offer even though `offers` RLS hides the row.
+    expect(overview.stats.offers).toBe(1);
+    expect(overview.stats.totalOffers).toBe(1);
     expect(overview.stats.negotiationsStarted).toBe(0);
   });
 

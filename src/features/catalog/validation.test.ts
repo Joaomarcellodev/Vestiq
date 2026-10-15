@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { editVariantsSchema, fieldErrorsOf, productSchema, variantSchema } from "./validation";
+import { fieldErrorsOf } from "@/lib/zod";
+import { editVariantsSchema, productSchema, variantSchema } from "./validation";
 
 describe("catalog validation", () => {
   it("requires a product name", () => {
@@ -16,6 +17,16 @@ describe("catalog validation", () => {
 
   it("rejects negative retail price", () => {
     expect(variantSchema.safeParse({ retailPrice: -1 }).success).toBe(false);
+  });
+
+  it("names the field of a negative initial stock in pt-BR (VES-78)", () => {
+    const result = productSchema.safeParse({
+      name: "Vestido Floral",
+      variants: [{ retailPrice: 100, initialStock: "-5" }],
+    });
+    expect(fieldErrorsOf(result.error!)).toEqual({
+      "variants.0.initialStock": "O estoque inicial não pode ser negativo",
+    });
   });
 
   it("coerces numeric strings", () => {
@@ -52,8 +63,8 @@ describe("catalog validation", () => {
         { id: "", retailPrice: -1, costPrice: -2 },
       ]);
       expect(fieldErrorsOf(result.error!, "variants")).toEqual({
-        "variants.1.retailPrice": "Preço de venda inválido",
-        "variants.1.costPrice": "Custo inválido",
+        "variants.1.retailPrice": "O preço de venda não pode ser negativo",
+        "variants.1.costPrice": "O custo não pode ser negativo",
       });
     });
   });

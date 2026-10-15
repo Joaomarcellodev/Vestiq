@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 /** RF-AUTH-001 — credential sign-in. */
 export const credentialsSchema = z.object({

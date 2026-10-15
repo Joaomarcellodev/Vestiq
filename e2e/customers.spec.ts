@@ -28,4 +28,18 @@ test.describe("Customers", () => {
     await page.getByRole("button", { name: /salvar cliente/i }).click();
     await expect(formAlert(page)).toHaveText(/cpf inválido/i);
   });
+
+  test("masks the phone and rejects one without DDD (VES-80)", async ({ page }) => {
+    await login(page, "revenda@vestiq.dev");
+    await page.goto("/clientes/novo");
+    await page.getByLabel("Nome").fill("Telefone Curto");
+    const phone = page.getByLabel("Telefone");
+    await phone.pressSequentially("abc11987654321");
+    await expect(phone).toHaveValue("(11) 98765-4321");
+    await phone.fill("");
+    await phone.pressSequentially("98765");
+    await page.getByRole("button", { name: /salvar cliente/i }).click();
+    await expect(formAlert(page)).toHaveText(/telefone inválido/i);
+    await expect(phone).toHaveAttribute("aria-invalid", "true");
+  });
 });

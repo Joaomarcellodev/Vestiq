@@ -13,6 +13,8 @@
 | RF-FACTORY-DASH-001 | AC-FACTORY-DASH-001-02 | TC-DASH-07 | integration + contract   | sim (privacidade) |
 | RF-FACTORY-DASH-001 | AC-FACTORY-DASH-001-03 | TC-DASH-08 | integration (2 fábricas) | sim (isolamento)  |
 | RF-FACTORY-DASH-001 | AC-FACTORY-DASH-001-04 | TC-DASH-09 | component                | não               |
+| RF-FACTORY-DASH-001 | AC-FACTORY-DASH-001-05 | TC-DASH-10 | integration              | não               |
+| RF-FACTORY-DASH-001 | AC-FACTORY-DASH-001-06 | TC-DASH-11 | integration (RLS)        | sim (privacidade) |
 
 ## Casos de teste
 
@@ -51,6 +53,14 @@ integration (2 fábricas) · **crítica (isolamento)** · admin de F1 só conta 
 ### TC-DASH-09 — Rede vazia
 
 component · estado vazio + CTA; taxa de utilização 0%.
+
+### TC-DASH-10 — Convites pendentes fora da contagem
+
+integration · rede com 1 ativa + 1 convite pendente + 1 convite expirado → `resellers = 1`, `pendingInvites = 1`, utilização 100% (`src/features/network/network-stats.integration.test.ts`).
+
+### TC-DASH-11 — View só com agregados
+
+integration (RLS) · **crítica (SDD §18)** · duas revendedoras negociando entre si: a fábrica vê as contagens reais pela view, mas `select` em `offers`/`negotiations` volta vazio; a view só tem as colunas de contagem; revendedora (da própria rede ou de outra) e visitante anônimo não leem a view (`src/features/network/network-stats.integration.test.ts`).
 
 ## Cobertura de RF
 

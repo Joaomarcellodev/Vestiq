@@ -39,9 +39,20 @@ export async function sendInviteEmail(
       options: { shouldCreateUser: false, emailRedirectTo: redirectTo },
     });
     if (!link.error) return {};
+    if (isRateLimited(link.error)) return { error: RATE_LIMITED };
     console.error("invite magic link failed", link.error);
+  } else if (isRateLimited(invited.error)) {
+    return { error: RATE_LIMITED };
   } else {
     console.error("invite email failed", invited.error);
   }
   return { error: "Não foi possível enviar o email de convite. Tente novamente em instantes." };
+}
+
+const RATE_LIMITED =
+  "Muitos emails enviados em pouco tempo. Aguarde alguns minutos e tente de novo — enquanto isso, você pode copiar o link do convite.";
+
+/** Auth caps how often it emails (per address and per hour) — VES-88 resend. */
+function isRateLimited(error: { status?: number; code?: string }): boolean {
+  return error.status === 429 || error.code === "over_email_send_rate_limit";
 }

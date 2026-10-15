@@ -1,6 +1,6 @@
 # ADR-0002 — Onboarding por convite + login por email e senha
 
-- **Status:** Aceito (revisado em 2026-10-08: login social removido — VES-96)
+- **Status:** Aceito (revisado em 2026-10-08: login social removido — VES-96; 2026-10-11: conta criada pelo convite — VES-95)
 - **Data:** 2026-08-28
 - **Requisitos:** RF-AUTH-001, RF-NET-003, RF-NET-004, SDD §7
 
@@ -48,6 +48,34 @@ login é **só por email e senha** da própria aplicação (VES-96).
 - Continua valendo tudo sobre o convite (itens 2–4).
 - Os provedores seguem desabilitados em `supabase/config.toml`; reabrir o login
   social exige um novo ADR.
+
+## Revisão 2026-10-11 — conta criada pelo link do convite (VES-95)
+
+`/convite/[token]` exigia sessão, mas não havia como criar conta: só entrava
+quem abrisse o link do email de convite no mesmo navegador e dentro do prazo
+do link do Auth. A conta da revendedora agora nasce do próprio convite.
+
+- `/convite/[token]` é pública (fora do grupo `(app)` e listada no proxy). A
+  página lê o convite com `get_network_invite(token)` — `security definer`,
+  liberada para `anon` — que devolve só aquele convite: email, rede, fábrica e
+  estado (`PENDING`, `EXPIRED`, `USED`). O token é um uuid secreto que só vai
+  para a convidada (ou fica com a fábrica que o emitiu).
+- Sem sessão, a página mostra o cadastro com o email do convite bloqueado. A
+  action `signUpFromInvite` lê o email **do convite**, nunca do formulário,
+  cria a conta (ou define a senha da conta sem senha criada pelo email de
+  convite), entra e aceita o convite numa única etapa.
+- Uma conta que **já tem senha** nunca é alterada: a página mostra o login, que
+  volta para o convite. Logada com outro email, a página oferece sair e voltar.
+- A conta sem senha só é assumida pelo link enquanto está vazia: sem
+  organização e sem convite aberto de **outra** rede (migration `0032`). Como a
+  fábrica também tem o token, sem essa regra a fábrica B poderia definir a
+  senha da revendedora que a fábrica A convidou primeiro. Nesses casos a
+  página mostra o login, e a convidada entra pelo link do email ou por
+  "Esqueci minha senha".
+- A fábrica copia o link de um convite pendente em `/rede-fabrica` para enviá-lo
+  por outro canal.
+- O cliente service role entra só em `invite-signup.ts`;
+  `invite_signup_user_id(token)` é executável apenas por `service_role`.
 
 ## Alternativas consideradas
 

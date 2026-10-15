@@ -311,13 +311,13 @@ d("supply orders (SPEC-012)", () => {
     const id = await placeOk([[ctx.pants38.id, 6]]);
 
     setTestClient(ctx.reseller.client);
-    await expect(
-      respondSupplyOrder(formData({ orderId: id, decision: "confirm" })),
-    ).rejects.toThrow("Você não tem permissão para esta ação");
+    expect(await respondSupplyOrder({}, formData({ orderId: id, decision: "confirm" }))).toEqual({
+      error: "Você não tem permissão para esta ação",
+    });
 
     setTestClient(ctx.factoryAdmin.client);
     await expectRedirect(
-      () => respondSupplyOrder(formData({ orderId: id, decision: "confirm" })),
+      () => respondSupplyOrder({}, formData({ orderId: id, decision: "confirm" })),
       /toast=supply-order-confirmed/,
     );
     const order = await getSupplyOrder(id);
@@ -331,6 +331,7 @@ d("supply orders (SPEC-012)", () => {
     await expectRedirect(
       () =>
         respondSupplyOrder(
+          {},
           formData({ orderId: id, decision: "reject", note: "Sem tecido até março" }),
         ),
       /toast=supply-order-rejected/,
@@ -345,26 +346,26 @@ d("supply orders (SPEC-012)", () => {
     const id = await placeOk([[ctx.pants38.id, 6]]);
 
     setTestClient(ctx.factoryAdmin.client);
-    await expect(cancelSupplyOrder(formData({ orderId: id }))).rejects.toThrow(
-      "Você não tem permissão para esta ação",
-    );
+    expect(await cancelSupplyOrder({}, formData({ orderId: id }))).toEqual({
+      error: "Você não tem permissão para esta ação",
+    });
 
     setTestClient(ctx.reseller.client);
     await expectRedirect(
-      () => cancelSupplyOrder(formData({ orderId: id, reason: "Pedi errado" })),
+      () => cancelSupplyOrder({}, formData({ orderId: id, reason: "Pedi errado" })),
       /toast=supply-order-cancelled/,
     );
     const order = await getSupplyOrder(id);
     expect(order).toMatchObject({ status: "CANCELLED", cancelReason: "Pedi errado" });
     expect(order!.cancelledAt).not.toBeNull();
 
-    await expect(cancelSupplyOrder(formData({ orderId: id }))).rejects.toThrow(
-      "Este pedido não está mais pendente",
-    );
+    expect(await cancelSupplyOrder({}, formData({ orderId: id }))).toEqual({
+      error: "Este pedido não está mais pendente",
+    });
     setTestClient(ctx.factoryAdmin.client);
-    await expect(
-      respondSupplyOrder(formData({ orderId: id, decision: "confirm" })),
-    ).rejects.toThrow("Este pedido não está mais pendente");
+    expect(await respondSupplyOrder({}, formData({ orderId: id, decision: "confirm" }))).toEqual({
+      error: "Este pedido não está mais pendente",
+    });
   });
 
   it("notifies the other party on every step (TC-ORD-11)", async () => {
@@ -388,7 +389,7 @@ d("supply orders (SPEC-012)", () => {
     ]);
     setTestClient(ctx.factoryAdmin.client);
     await expectRedirect(
-      () => respondSupplyOrder(formData({ orderId: confirmed, decision: "confirm" })),
+      () => respondSupplyOrder({}, formData({ orderId: confirmed, decision: "confirm" })),
       /toast=/,
     );
     expect(await notes(ctx.shop.id, `/pedidos/${confirmed}`)).toEqual([
@@ -398,7 +399,7 @@ d("supply orders (SPEC-012)", () => {
     const rejected = await placeOk([[ctx.pants38.id, 6]]);
     setTestClient(ctx.factoryAdmin.client);
     await expectRedirect(
-      () => respondSupplyOrder(formData({ orderId: rejected, decision: "reject" })),
+      () => respondSupplyOrder({}, formData({ orderId: rejected, decision: "reject" })),
       /toast=/,
     );
     expect(await notes(ctx.shop.id, `/pedidos/${rejected}`)).toEqual([
@@ -406,7 +407,7 @@ d("supply orders (SPEC-012)", () => {
     ]);
 
     const cancelled = await placeOk([[ctx.pants38.id, 6]]);
-    await expectRedirect(() => cancelSupplyOrder(formData({ orderId: cancelled })), /toast=/);
+    await expectRedirect(() => cancelSupplyOrder({}, formData({ orderId: cancelled })), /toast=/);
     expect((await notes(ctx.factory.id, `/pedidos/${cancelled}`)).map((n) => n.type)).toEqual([
       "SUPPLY_ORDER_PLACED",
       "SUPPLY_ORDER_CANCELLED",

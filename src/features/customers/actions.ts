@@ -2,12 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { z } from "zod";
+import { fieldErrorsOf, z } from "@/lib/zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import { customerSchema } from "./validation";
 
-export type ActionState = { error?: string };
+export type ActionState = {
+  error?: string;
+  /** Per-field messages ("phone", "document") shown next to the field (VES-80). */
+  fieldErrors?: Record<string, string>;
+};
 
 function payload(formData: FormData) {
   return {
@@ -22,7 +26,12 @@ function payload(formData: FormData) {
 export async function createCustomer(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const org = await requireActiveOrganization();
   const parsed = customerSchema.safeParse(payload(formData));
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  if (!parsed.success) {
+    return {
+      error: parsed.error.issues[0]?.message ?? "Dados inválidos",
+      fieldErrors: fieldErrorsOf(parsed.error),
+    };
+  }
   const d = parsed.data;
 
   const supabase = await createClient();
@@ -47,7 +56,8 @@ export async function updateCustomer(_prev: ActionState, formData: FormData): Pr
   const id = z.string().uuid().safeParse(formData.get("id"));
   const parsed = customerSchema.safeParse(payload(formData));
   if (!id.success || !parsed.success) {
-    return { error: parsed.success ? "Cliente inválido" : parsed.error.issues[0]?.message };
+    if (parsed.success) return { error: "Cliente inválido" };
+    return { error: parsed.error.issues[0]?.message, fieldErrors: fieldErrorsOf(parsed.error) };
   }
   const d = parsed.data;
 
@@ -75,7 +85,13 @@ export async function archiveCustomer(formData: FormData): Promise<void> {
   await requireActiveOrganization();
   const id = formData.get("id") as string;
   const supabase = await createClient();
-  await supabase.from("customers").update({ archived_at: new Date().toISOString() }).eq("id", id);
+  const { data, error } = await supabase
+    .from("customers")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", id)
+    .select("id");
+  // RLS doesn't raise on rows it hides — an update that touched nothing failed too.
+  if (error || !data?.length) redirect(`/clientes/${id}?toast=customer-archive-failed`);
   revalidatePath("/clientes");
   redirect("/clientes?toast=customer-archived");
 }
@@ -84,7 +100,12 @@ export async function unarchiveCustomer(formData: FormData): Promise<void> {
   await requireActiveOrganization();
   const id = formData.get("id") as string;
   const supabase = await createClient();
-  await supabase.from("customers").update({ archived_at: null }).eq("id", id);
+  const { data, error } = await supabase
+    .from("customers")
+    .update({ archived_at: null })
+    .eq("id", id)
+    .select("id");
+  if (error || !data?.length) redirect("/clientes?scope=archived&toast=customer-unarchive-failed");
   revalidatePath("/clientes");
   revalidatePath(`/clientes/${id}`);
   redirect(`/clientes/${id}?toast=customer-unarchived`);

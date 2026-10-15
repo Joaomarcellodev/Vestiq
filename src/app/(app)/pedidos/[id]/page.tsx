@@ -7,7 +7,8 @@ import { availableActions, orderCode } from "@/features/supply-orders/state";
 import { variantLabel } from "@/features/suppliers/format";
 import { BackButton } from "@/components/molecules/back-button";
 import { PageHeader } from "@/components/molecules/page-header";
-import { Badge, Button } from "@/components/atoms";
+import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
+import { Badge } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { SUPPLY_ORDER_STATUS } from "@/lib/i18n/labels";
 
@@ -169,7 +170,7 @@ export default async function SupplyOrderPage({ params }: { params: Promise<{ id
       </section>
 
       {actions.includes("confirm") && (
-        <form
+        <ActionForm
           action={respondSupplyOrder}
           className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-surface"
         >
@@ -192,18 +193,18 @@ export default async function SupplyOrderPage({ params }: { params: Promise<{ id
             />
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <Button type="submit" name="decision" value="reject" variant="danger">
+            <SubmitButton name="decision" value="reject" variant="danger">
               Recusar pedido
-            </Button>
-            <Button type="submit" name="decision" value="confirm">
+            </SubmitButton>
+            <SubmitButton name="decision" value="confirm">
               Confirmar pedido
-            </Button>
+            </SubmitButton>
           </div>
-        </form>
+        </ActionForm>
       )}
 
       {actions.includes("cancel") && (
-        <form
+        <ActionForm
           action={cancelSupplyOrder}
           className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-surface"
         >
@@ -227,11 +228,9 @@ export default async function SupplyOrderPage({ params }: { params: Promise<{ id
             />
           </div>
           <div className="flex justify-end">
-            <Button type="submit" variant="secondary">
-              Cancelar pedido
-            </Button>
+            <SubmitButton variant="secondary">Cancelar pedido</SubmitButton>
           </div>
-        </form>
+        </ActionForm>
       )}
     </div>
   );

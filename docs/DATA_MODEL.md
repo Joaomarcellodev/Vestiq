@@ -103,7 +103,8 @@ Espelha `auth.users`. Criado por trigger `on_auth_user_created`.
 | `reseller_id` | uuid → organizations | `type = RESELLER` |
 | `status` | `network_member_status` | |
 | `invited_email` | citext | usado antes do aceite (RF-NET-003) |
-| `invite_token` | uuid | único, consumido no aceite (RF-NET-004) |
+| `invite_token` | uuid | único, consumido no aceite (RF-NET-004); trocado ao reenviar o convite (VES-88) |
+| `invite_expires_at` | timestamptz | 14 dias; renovado ao reenviar. Cancelar um convite `INVITED` apaga a linha (VES-88) |
 | `joined_at` | timestamptz | null até o aceite |
 | | | unique `(network_id, reseller_id)` |
 
@@ -163,8 +164,8 @@ Append-only. Sem `update`/`delete` via RLS (RF-INV-006).
 | `organization_id` | uuid | **tenant** (RF-CUSTOMER-003) |
 | `name` | text | not null |
 | `email` | citext | null |
-| `phone` | text | null |
-| `document` | text | null — CPF |
+| `phone` | text | null — só dígitos, DDD + número (VES-80) |
+| `document` | text | null — CPF, só dígitos (VES-80) |
 | `archived_at` | timestamptz | |
 
 ### `sales` — RF-SALE-001..009
@@ -267,7 +268,7 @@ Ver [ADR-0004](./adr/0004-atomic-operations-via-postgres-functions.md).
 | `record_inventory_entry(variant_id uuid, qty int, note text)` | movimento `ENTRADA` |
 | `send_negotiation_message(p_negotiation_id uuid, p_body text)` | evento `MESSAGE` (1–1.000 caracteres, só as partes, negociação aberta); devolve o evento (ADR-0010) |
 | `update_product(p_product_id uuid, p_product jsonb, p_variants jsonb)` | migration `0027`: grava os campos do produto e, quando recebe a lista, atualiza / cria / arquiva variações na mesma transação; variação nova pode trazer estoque inicial (movimento `ENTRADA`); nunca altera `stock_on_hand` de uma existente; ao menos uma variação (AC-PROD-005-02, VES-68) |
-| `archive_product_to_offers(p_product_id uuid, p_network_id uuid, p_items jsonb)` | migration `0025`: cria uma oferta `ACTIVE` por variação com quantidade > 0 (≤ `stock_on_hand`, preço > 0, revendedora `ACTIVE` na rede) e arquiva produto + variações; erro em qualquer item → nada muda (AC-PROD-006-03/04, VES-69) |
+| `archive_product_to_offers(p_product_id uuid, p_network_id uuid, p_items jsonb)` | migration `0025`: cria uma oferta `ACTIVE` por variação com quantidade > 0 (≤ `stock_on_hand`, preço > 0, revendedora `ACTIVE` na rede) e arquiva produto + variações; erro em qualquer item → nada muda (AC-PROD-006-03/04, VES-69). Cada oferta nova só usa o estoque livre (trigger da `0029`); as ofertas abertas antes de arquivar continuam `ACTIVE` (VES-98) |
 
 Todas `security definer`, `set search_path = ''`, e revalidam a associação do
 usuário à organização antes de escrever.
@@ -297,6 +298,17 @@ apenas os campos públicos: vendedora, status, quantidade restante, preço de
 transferência, observação, nome, marca, descrição, cor, tamanho e fotos. Nunca
 `cost_price`, `retail_price`, `stock_on_hand` nem `sku` (SDD §8). O feed `/rede`
 e o detalhe da oferta leem por ela.
+
+### Produto das negociações (VES-97)
+
+Migration `0031`. A compradora também não lê o produto da negociação: a oferta
+só fica visível para ela enquanto está `ACTIVE`/`PARTIALLY_NEGOTIATED`, e a
+negociação continua no histórico depois que a oferta esgota ou é cancelada. Por
+isso `list_visible_offers` não serve aqui. `list_negotiation_products(p_negotiation_id?)`
+(`security definer`, só `authenticated`) usa a regra da policy
+`negotiations_select` (as duas partes) e devolve, por negociação, só nome, marca,
+cor, tamanho e fotos (as da oferta, ou as do produto, como em `0026`). A lista
+`/negociacoes` e o detalhe da negociação leem por ela.
 
 ## Funções de leitura — Fornecedores (SPEC-011)
 

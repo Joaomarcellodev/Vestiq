@@ -18,12 +18,28 @@ export const FLASH_MESSAGES: Record<string, { message: string; variant: ToastVar
     variant: "success",
   },
   "product-unarchived": { message: "Produto desarquivado.", variant: "success" },
+  "product-archive-failed": {
+    message: "Não foi possível arquivar o produto. Tente novamente.",
+    variant: "error",
+  },
+  "product-unarchive-failed": {
+    message: "Não foi possível desarquivar o produto. Tente novamente.",
+    variant: "error",
+  },
 
   // customers
   "customer-created": { message: "Cliente cadastrado.", variant: "success" },
   "customer-updated": { message: "Cliente atualizado.", variant: "success" },
   "customer-archived": { message: "Cliente arquivado.", variant: "success" },
   "customer-unarchived": { message: "Cliente reativado.", variant: "success" },
+  "customer-archive-failed": {
+    message: "Não foi possível arquivar o cliente. Tente novamente.",
+    variant: "error",
+  },
+  "customer-unarchive-failed": {
+    message: "Não foi possível reativar o cliente. Tente novamente.",
+    variant: "error",
+  },
 
   // sales
   "sale-confirmed": { message: "Venda registrada.", variant: "success" },

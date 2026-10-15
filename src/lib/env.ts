@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 /**
  * Runtime env validation. Fails fast at boot if required vars are missing.

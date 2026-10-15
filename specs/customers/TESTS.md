@@ -52,6 +52,10 @@ integration · **crítica (privacidade)** · nota não aparece para outra org.
 
 integration · **crítica** · `archived_at` set; some do seletor; vendas intactas; `DELETE` bloqueado.
 
+### TC-CUS-10 — Falha ao arquivar não mostra sucesso
+
+integration · não-crítica · arquivar/reativar cliente de outra organização (bloqueado pela RLS) não altera nada e redireciona com toast de erro, nunca de sucesso (VES-54).
+
 ## Cobertura de RF
 
 `RF-CUSTOMER-001..004` ✔

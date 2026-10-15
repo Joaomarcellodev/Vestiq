@@ -119,6 +119,10 @@ integration + component + e2e · **crítica (estoque)** · `archive_product_to_o
 
 integration · não-crítica · lista de itens vazia só arquiva o produto.
 
+### TC-PROD-21 — Falha ao arquivar não mostra sucesso
+
+integration · não-crítica · arquivar/desarquivar produto de outra organização (bloqueado pela RLS) não altera nada e redireciona com toast de erro, nunca de sucesso (VES-54).
+
 ## Cobertura de RF
 
 `RF-PROD-001..007` ✔

@@ -1,19 +1,26 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, TextField } from "@/components/atoms";
+import { useFormSubmit } from "@/lib/hooks/use-form-submit";
 import { adjustStock, recordEntry, type ActionState } from "../actions";
 
 export function StockControls({ variantId }: { variantId: string }) {
   const [mode, setMode] = useState<"entry" | "adjust" | null>(null);
-  const [entryState, entryAction, entryPending] = useActionState<ActionState, FormData>(
-    recordEntry,
-    {},
-  );
-  const [adjustState, adjustAction, adjustPending] = useActionState<ActionState, FormData>(
-    adjustStock,
-    {},
-  );
+  const entry = useFormSubmit<ActionState>(recordEntry, {});
+  const adjust = useFormSubmit<ActionState>(adjustStock, {});
+  const entryState = entry.state;
+  const adjustState = adjust.state;
+  const entryForm = useRef<HTMLFormElement>(null);
+  const adjustForm = useRef<HTMLFormElement>(null);
+
+  // Fields survive a failed submission (VES-77); a recorded one clears them.
+  useEffect(() => {
+    if (entryState.ok) entryForm.current?.reset();
+  }, [entryState]);
+  useEffect(() => {
+    if (adjustState.ok) adjustForm.current?.reset();
+  }, [adjustState]);
 
   if (mode === null) {
     return (
@@ -31,7 +38,8 @@ export function StockControls({ variantId }: { variantId: string }) {
   if (mode === "entry") {
     return (
       <form
-        action={entryAction}
+        ref={entryForm}
+        {...entry.formProps}
         className="space-y-sm rounded-lg border border-outline-variant p-3"
       >
         <input type="hidden" name="variantId" value={variantId} />
@@ -44,7 +52,7 @@ export function StockControls({ variantId }: { variantId: string }) {
         <TextField label="Quantidade" name="quantity" type="number" min="1" required />
         <TextField label="Observação" name="note" placeholder="Ex: compra de janeiro" />
         <div className="flex gap-2">
-          <Button type="submit" size="sm" loading={entryPending}>
+          <Button type="submit" size="sm" loading={entry.pending}>
             Registrar entrada
           </Button>
           <Button type="button" variant="ghost" size="sm" onClick={() => setMode(null)}>
@@ -56,7 +64,11 @@ export function StockControls({ variantId }: { variantId: string }) {
   }
 
   return (
-    <form action={adjustAction} className="space-y-sm rounded-lg border border-outline-variant p-3">
+    <form
+      ref={adjustForm}
+      {...adjust.formProps}
+      className="space-y-sm rounded-lg border border-outline-variant p-3"
+    >
       <input type="hidden" name="variantId" value={variantId} />
       {adjustState.error && (
         <p className="font-body-md text-body-md text-error">{adjustState.error}</p>
@@ -72,7 +84,7 @@ export function StockControls({ variantId }: { variantId: string }) {
         placeholder="Ex: perda, correção de contagem"
       />
       <div className="flex gap-2">
-        <Button type="submit" size="sm" loading={adjustPending}>
+        <Button type="submit" size="sm" loading={adjust.pending}>
           Aplicar ajuste
         </Button>
         <Button type="button" variant="ghost" size="sm" onClick={() => setMode(null)}>

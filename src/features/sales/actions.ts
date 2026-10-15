@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { rpcErrorMessage } from "@/lib/supabase/errors";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import { cancelSaleSchema, saleSchema } from "./validation";
 
@@ -30,27 +31,30 @@ export async function confirmSale(
     p_items: parsed.data.items.map((i) => ({ variant_id: i.variantId, quantity: i.quantity })),
   });
 
-  if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
+  if (error) return { error: rpcErrorMessage(error) };
 
   revalidatePath("/vendas");
   revalidatePath("/dashboard");
   redirect(`/vendas/${(data as { id: string }).id}?toast=sale-confirmed`);
 }
 
-export async function cancelSale(formData: FormData): Promise<void> {
+export async function cancelSale(
+  _prev: SaleActionState,
+  formData: FormData,
+): Promise<SaleActionState> {
   await requireActiveOrganization();
   const parsed = cancelSaleSchema.safeParse({
     saleId: formData.get("saleId"),
     reason: formData.get("reason"),
   });
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("cancel_sale", {
     p_sale_id: parsed.data.saleId,
     p_reason: parsed.data.reason,
   });
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   revalidatePath("/vendas");
   revalidatePath("/dashboard");

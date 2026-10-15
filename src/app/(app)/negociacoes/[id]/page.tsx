@@ -4,6 +4,7 @@ import { BackButton } from "@/components/molecules/back-button";
 import { getNegotiation } from "@/features/negotiations/queries";
 import { requireUserId } from "@/features/auth/queries";
 import { NegotiationChat } from "@/features/negotiations/components/negotiation-chat";
+import { NegotiationProductSummary } from "@/features/negotiations/components/negotiation-product";
 import { toChatEvent } from "@/features/negotiations/chat";
 import { negotiationAction } from "@/features/negotiations/actions";
 import { transition } from "@/features/negotiations/state-machine";
@@ -13,7 +14,8 @@ import type {
   Party,
 } from "@/features/negotiations/state-machine";
 import { PageHeader } from "@/components/molecules/page-header";
-import { Badge, Button } from "@/components/atoms";
+import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
+import { Badge } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { NEGOTIATION_STATUS } from "@/lib/i18n/labels";
 
@@ -41,8 +43,7 @@ export default async function NegotiationDetailPage({
     requireUserId(),
   ]);
   if (!result?.negotiation) notFound();
-  const { negotiation: n, events, party } = result;
-  const variant = n.offers?.product_variants;
+  const { negotiation: n, product, events, party } = result;
 
   const available = ACTIONS.filter(
     (a) => !(transition(n.status as NegotiationStatus, a.action, party as Party) instanceof Error),
@@ -52,7 +53,7 @@ export default async function NegotiationDetailPage({
     <div className="space-y-lg">
       <BackButton fallback="/negociacoes" label="Negociações" />
       <PageHeader
-        title={variant?.products?.name ?? "Negociação"}
+        title={product?.name ?? "Negociação"}
         description={`${n.seller?.name} → ${n.buyer?.name}`}
         action={
           <Badge tone={NEGOTIATION_STATUS[n.status].tone}>
@@ -62,7 +63,8 @@ export default async function NegotiationDetailPage({
       />
 
       <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
-        <div className="flex items-center justify-between">
+        <NegotiationProductSummary product={product} size={64} />
+        <div className="mt-3 flex items-center justify-between border-t border-outline-variant pt-3">
           <span className="font-body-md text-body-md text-on-surface-variant">Quantidade</span>
           <span className="font-body-md text-body-md text-on-surface">{n.quantity} un.</span>
         </div>
@@ -73,17 +75,22 @@ export default async function NegotiationDetailPage({
       </div>
 
       {available.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {available.map((a) => (
-            <form key={a.action} action={negotiationAction}>
-              <input type="hidden" name="negotiationId" value={n.id} />
-              <input type="hidden" name="action" value={a.action} />
-              <Button type="submit" variant={a.variant} size="sm">
+        <ActionForm action={negotiationAction} className="space-y-sm">
+          <input type="hidden" name="negotiationId" value={n.id} />
+          <div className="flex flex-wrap gap-2">
+            {available.map((a) => (
+              <SubmitButton
+                key={a.action}
+                name="action"
+                value={a.action}
+                variant={a.variant}
+                size="sm"
+              >
                 {a.label}
-              </Button>
-            </form>
-          ))}
-        </div>
+              </SubmitButton>
+            ))}
+          </div>
+        </ActionForm>
       )}
 
       <NegotiationChat

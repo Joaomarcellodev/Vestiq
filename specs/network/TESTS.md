@@ -10,6 +10,7 @@
 | RF-NET-003 | AC-NET-003-01 | TC-NET-04 | integration             |
 | RF-NET-003 | AC-NET-003-02 | TC-NET-13 | integration (Mailpit)   |
 | RF-NET-003 | AC-NET-003-03 | TC-NET-14 | integration             |
+| RF-NET-003 | AC-NET-003-04 | TC-NET-16 | integration             |
 | RF-NET-004 | AC-NET-004-04 | TC-NET-15 | component + integration |
 | RF-NET-004 | AC-NET-004-01 | TC-NET-05 | e2e                     |
 | RF-NET-004 | AC-NET-004-02 | TC-NET-06 | unit + integration      |
@@ -45,6 +46,10 @@
 ### TC-NET-14 — Falha no envio desfaz o convite
 
 - integration · não-crítica · envio falha → action devolve `{ error }` e o `network_members` não existe.
+
+### TC-NET-16 — Convite duplicado
+
+- integration · não-crítica · convite pendente (mesmo e-mail em outra caixa), membro ativo e membro desativado → `{ error }` e a rede continua com uma linha; convite expirado e outra rede → convite aceito (`network-actions.integration.test.ts`).
 
 ### TC-NET-15 — Senha definida no aceite
 

@@ -1002,7 +1002,28 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      factory_network_stats: {
+        Row: {
+          active_offers: number | null
+          active_resellers: number | null
+          disabled_resellers: number | null
+          factory_id: string | null
+          negotiations_completed: number | null
+          negotiations_started: number | null
+          network_id: string | null
+          pending_invites: number | null
+          total_offers: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factory_networks_factory_id_fkey"
+            columns: ["factory_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_network_invite: {
@@ -1170,6 +1191,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_network_invite: {
+        Args: { p_token: string }
+        Returns: {
+          email: string
+          factory_name: string
+          has_account: boolean
+          network_name: string
+          state: string
+        }[]
+      }
       get_supplier_product: {
         Args: { p_product_id: string }
         Returns: {
@@ -1192,6 +1223,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      invite_signup_user_id: { Args: { p_token: string }; Returns: string }
       is_org_member: { Args: { org: string }; Returns: boolean }
       is_supplier_of: {
         Args: { p_reseller_id: string; p_supplier_id: string }
@@ -1232,6 +1264,17 @@ export type Database = {
           name: string
           network_names: string[]
           product_count: number
+        }[]
+      }
+      list_negotiation_products: {
+        Args: { p_negotiation_id?: string }
+        Returns: {
+          brand: string
+          color: string
+          image_urls: string[]
+          negotiation_id: string
+          product_name: string
+          size: string
         }[]
       }
       list_visible_offers: {

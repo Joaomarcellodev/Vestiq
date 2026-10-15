@@ -169,7 +169,9 @@ d("updateProduct edits the variants (VES-68)", () => {
 
   it("returns per-field errors for an invalid price and keeps a variant (BR-CAT-03)", async () => {
     const bad = await save([row(ctx.p), row(ctx.m, { retailPrice: "-1" })]);
-    expect(bad.fieldErrors).toEqual({ "variants.1.retailPrice": "Preço de venda inválido" });
+    expect(bad.fieldErrors).toEqual({
+      "variants.1.retailPrice": "O preço de venda não pode ser negativo",
+    });
 
     const none = await save([]);
     expect(none.error).toBe("O produto precisa de pelo menos uma variação");

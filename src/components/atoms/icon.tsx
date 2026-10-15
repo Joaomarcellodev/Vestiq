@@ -14,6 +14,7 @@ type IconName =
   | "check_circle"
   | "chevron_right"
   | "chevron_left"
+  | "content_copy"
   | "dashboard"
   | "delete"
   | "edit"
@@ -59,6 +60,12 @@ const PATHS: Record<IconName, React.ReactNode> = {
   ),
   chevron_right: <path d="m9 6 6 6-6 6" />,
   chevron_left: <path d="m15 6-6 6 6 6" />,
+  content_copy: (
+    <>
+      <rect x="8" y="8" width="12" height="12" rx="2" />
+      <path d="M4 16V6a2 2 0 0 1 2-2h10" />
+    </>
+  ),
   edit: <path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3ZM13.5 6.5l4 4" />,
   archive: (
     <>

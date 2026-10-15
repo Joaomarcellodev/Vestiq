@@ -21,4 +21,12 @@ describe("isValidCPF", () => {
   it("formats a CPF", () => {
     expect(formatCPF("52998224725")).toBe("529.982.247-25");
   });
+
+  it("masks a partial CPF while typing (VES-80)", () => {
+    expect(formatCPF("529")).toBe("529");
+    expect(formatCPF("5299")).toBe("529.9");
+    expect(formatCPF("5299822")).toBe("529.982.2");
+    expect(formatCPF("5299822472")).toBe("529.982.247-2");
+    expect(formatCPF("529.982.247-255")).toBe("529.982.247-25");
+  });
 });

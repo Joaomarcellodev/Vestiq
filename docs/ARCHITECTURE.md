@@ -54,6 +54,7 @@ src/
 │
 ├── lib/
 │   ├── env.ts                  # validação de env com Zod (fail-fast)
+│   ├── zod.ts                  # `z` com mensagens em pt-BR — importar daqui, nunca de "zod"
 │   ├── supabase/
 │   │   ├── client.ts           # browser client
 │   │   ├── server.ts           # RSC / Server Action / Route Handler client
@@ -92,8 +93,17 @@ Server Action  ──valida (Zod)──▶  features/<f>/actions.ts  ──▶  
 
 - **Nunca** chamar Supabase direto de uma página; passar por `queries.ts`/`actions.ts`.
 - `actions.ts` sempre valida a entrada com o schema Zod da feature antes de tocar o banco.
+- Schemas importam `z` de `@/lib/zod`, que traz as mensagens padrão em pt-BR (VES-78;
+  o ESLint barra `import ... from "zod"` fora dos testes). Campos que o usuário
+  preenche ganham mensagem própria que nomeia o campo ("O custo não pode ser negativo").
+- Com erro de validação, a action devolve também `fieldErrors` por caminho
+  (`fieldErrorsOf`, ex.: `variants.0.initialStock`) para o formulário mostrar a
+  mensagem junto do campo; os `min` dos inputs numéricos seguem o schema.
 - Erros de negócio retornam um estado tipado (`{ error, fieldErrors }`); exceções
   inesperadas sobem para o `error.tsx` do segmento.
+- Erro de RPC vira mensagem com `rpcErrorMessage` (`@/lib/supabase/errors`, VES-79):
+  o texto do `raise exception` (P0001 ou `check_violation`) aparece inteiro; guardas
+  em inglês ("not authorized") e erros inesperados do banco ganham texto fixo em pt-BR.
 
 ## Autenticação e proteção de rotas
 

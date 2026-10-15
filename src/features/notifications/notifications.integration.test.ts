@@ -127,7 +127,7 @@ d("notifications — triggers, queries, actions, RLS (SPEC-008/009)", () => {
     // seller accepts → buyer is notified (the action redirects, hence the catch)
     setTestClient(ctx.seller.client);
     await expectRedirect(
-      () => negotiationAction(formData({ negotiationId: negId, action: "accept" })),
+      () => negotiationAction({}, formData({ negotiationId: negId, action: "accept" })),
       /negociacoes\//,
     );
     const buyerNotifs = await orgNotifications(ctx.buyerOrg.id);

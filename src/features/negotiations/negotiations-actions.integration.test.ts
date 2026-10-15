@@ -56,7 +56,7 @@ d("negotiations actions + queries (SPEC-009)", () => {
       .eq("product_variant_id", variant.id)
       .single();
 
-    return { seller, sellerOrg, buyer, buyerOrg, offerId: offer!.id as string };
+    return { seller, sellerOrg, buyer, buyerOrg, variant, offerId: offer!.id as string };
   }
 
   beforeEach(async () => {
@@ -97,7 +97,7 @@ d("negotiations actions + queries (SPEC-009)", () => {
     const negId = await openNeg();
     setTestClient(ctx.seller.client);
     await expectRedirect(
-      () => negotiationAction(formData({ negotiationId: negId, action: "accept" })),
+      () => negotiationAction({}, formData({ negotiationId: negId, action: "accept" })),
       new RegExp(`/negociacoes/${negId}\\?toast=negotiation-accepted`),
     );
     const { negotiation } = await getNegotiation(negId);
@@ -108,7 +108,7 @@ d("negotiations actions + queries (SPEC-009)", () => {
     const negId = await openNeg();
     setTestClient(ctx.seller.client);
     await expectRedirect(
-      () => negotiationAction(formData({ negotiationId: negId, action: "reject" })),
+      () => negotiationAction({}, formData({ negotiationId: negId, action: "reject" })),
       /toast=negotiation-rejected/,
     );
     expect((await getNegotiation(negId)).negotiation?.status).toBe("REJECTED");
@@ -118,9 +118,10 @@ d("negotiations actions + queries (SPEC-009)", () => {
     const negId = await openNeg();
     setTestClient(ctx.seller.client);
     const res = await negotiationAction(
+      {},
       formData({ negotiationId: negId, action: "message", message: "Consigo por 650?" }),
     );
-    expect(res).toBeUndefined();
+    expect(res).toEqual({});
     const { events } = await getNegotiation(negId);
     expect(events.some((e) => e.body === "Consigo por 650?")).toBe(true);
   });
@@ -129,14 +130,28 @@ d("negotiations actions + queries (SPEC-009)", () => {
     const negId = await openNeg();
     setTestClient(ctx.seller.client);
     await expectRedirect(
-      () => negotiationAction(formData({ negotiationId: negId, action: "accept" })),
+      () => negotiationAction({}, formData({ negotiationId: negId, action: "accept" })),
       /negotiation-accepted/,
     );
     await expectRedirect(
-      () => negotiationAction(formData({ negotiationId: negId, action: "complete" })),
+      () => negotiationAction({}, formData({ negotiationId: negId, action: "complete" })),
       /toast=negotiation-completed/,
     );
     expect((await getNegotiation(negId)).negotiation?.status).toBe("COMPLETED");
+  });
+
+  it("negotiationAction: returns the database error instead of throwing (VES-74)", async () => {
+    // A pending proposal can't be completed — the RPC refuses it. (Zeroing the
+    // stock under an accepted one no longer works: reserved stock is guarded.)
+    const negId = await openNeg();
+    setTestClient(ctx.seller.client);
+
+    const state = await negotiationAction(
+      {},
+      formData({ negotiationId: negId, action: "complete" }),
+    );
+    expect(state.error).toBeTruthy();
+    expect((await getNegotiation(negId)).negotiation?.status).toBe("PENDING");
   });
 
   it("listNegotiations: visible only to the two parties (RLS)", async () => {

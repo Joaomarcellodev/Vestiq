@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 export const profileSchema = z.object({
   fullName: z.string().trim().min(2, "Informe seu nome").max(120),

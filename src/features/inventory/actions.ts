@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { rpcErrorMessage } from "@/lib/supabase/errors";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import { inventoryAdjustSchema, inventoryEntrySchema } from "./validation";
 
@@ -22,7 +23,7 @@ export async function recordEntry(_prev: ActionState, formData: FormData): Promi
     p_quantity: parsed.data.quantity,
     p_note: parsed.data.note || undefined,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: rpcErrorMessage(error) };
 
   // Product page, inventory list and the variant's movement history.
   revalidatePath("/produtos", "layout");
@@ -44,7 +45,7 @@ export async function adjustStock(_prev: ActionState, formData: FormData): Promi
     p_delta: parsed.data.delta,
     p_note: parsed.data.note,
   });
-  if (error) return { error: error.message.replace(/^.*?:\s*/, "") };
+  if (error) return { error: rpcErrorMessage(error) };
 
   // Product page, inventory list and the variant's movement history.
   revalidatePath("/produtos", "layout");

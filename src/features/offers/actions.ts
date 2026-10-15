@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { rpcErrorMessage } from "@/lib/supabase/errors";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import { keptImages, readImageFiles, removeImages, uploadImages } from "@/features/catalog/images";
 import { PRODUCT_IMAGE_MAX_COUNT } from "@/features/catalog/validation";
@@ -41,7 +42,7 @@ export async function publishOffer(_prev: ActionState, formData: FormData): Prom
   });
   if (error) {
     await removeImages(supabase, uploaded.urls);
-    return { error: error.message.replace(/^.*?:\s*/, "") };
+    return { error: rpcErrorMessage(error) };
   }
   if (uploaded.urls.length) {
     const { error: photoError } = await supabase
@@ -61,10 +62,10 @@ export async function publishOffer(_prev: ActionState, formData: FormData): Prom
   redirect("/rede?toast=offer-published");
 }
 
-export async function cancelOffer(formData: FormData): Promise<void> {
+export async function cancelOffer(_prev: ActionState, formData: FormData): Promise<ActionState> {
   await requireActiveOrganization();
   const parsed = cancelOfferSchema.safeParse({ offerId: formData.get("offerId") });
-  if (!parsed.success) throw new Error("Oferta inválida");
+  if (!parsed.success) return { error: "Oferta inválida" };
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -72,7 +73,7 @@ export async function cancelOffer(formData: FormData): Promise<void> {
     .update({ status: "CANCELLED" })
     .eq("id", parsed.data.offerId)
     .in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"]);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   revalidatePath("/rede");
   redirect("/rede?toast=offer-cancelled");

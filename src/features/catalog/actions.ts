@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { z } from "zod";
+import { fieldErrorsOf, z } from "@/lib/zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import {
@@ -10,7 +10,6 @@ import {
   categoryArchiveSchema,
   categorySchema,
   editVariantsSchema,
-  fieldErrorsOf,
   PRODUCT_IMAGE_MAX_COUNT,
   productSchema,
   renameCategorySchema,
@@ -137,7 +136,12 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
     variants: JSON.parse((formData.get("variants") as string) || "[]"),
   };
   const parsed = productSchema.safeParse(raw);
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  if (!parsed.success) {
+    return {
+      error: parsed.error.issues[0]?.message ?? "Dados inválidos",
+      fieldErrors: fieldErrorsOf(parsed.error),
+    };
+  }
   const input = parsed.data;
   const { wholesale, error: wholesaleError } = readWholesale(org.type, formData);
   if (wholesaleError) return { error: wholesaleError };
@@ -406,8 +410,18 @@ export async function archiveProduct(formData: FormData): Promise<void> {
   const id = formData.get("id") as string;
   const supabase = await createClient();
   const now = new Date().toISOString();
-  await supabase.from("products").update({ archived_at: now }).eq("id", id);
-  await supabase.from("product_variants").update({ archived_at: now }).eq("product_id", id);
+  const { data, error } = await supabase
+    .from("products")
+    .update({ archived_at: now })
+    .eq("id", id)
+    .select("id");
+  // RLS doesn't raise on rows it hides — an update that touched nothing failed too.
+  if (error || !data?.length) redirect(`/produtos/${id}?toast=product-archive-failed`);
+  const { error: vErr } = await supabase
+    .from("product_variants")
+    .update({ archived_at: now })
+    .eq("product_id", id);
+  if (vErr) redirect(`/produtos/${id}?toast=product-archive-failed`);
   revalidatePath("/produtos");
   redirect("/produtos?toast=product-archived");
 }
@@ -416,8 +430,17 @@ export async function unarchiveProduct(formData: FormData): Promise<void> {
   await requireActiveOrganization();
   const id = formData.get("id") as string;
   const supabase = await createClient();
-  await supabase.from("products").update({ archived_at: null }).eq("id", id);
-  await supabase.from("product_variants").update({ archived_at: null }).eq("product_id", id);
+  const { data, error } = await supabase
+    .from("products")
+    .update({ archived_at: null })
+    .eq("id", id)
+    .select("id");
+  if (error || !data?.length) redirect("/produtos?scope=archived&toast=product-unarchive-failed");
+  const { error: vErr } = await supabase
+    .from("product_variants")
+    .update({ archived_at: null })
+    .eq("product_id", id);
+  if (vErr) redirect("/produtos?scope=archived&toast=product-unarchive-failed");
   revalidatePath("/produtos");
   revalidatePath(`/produtos/${id}`);
   redirect(`/produtos/${id}?toast=product-unarchived`);

@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
 import Link from "next/link";
 import { Button, Checkbox, TextField } from "@/components/atoms";
+import { useFormSubmit } from "@/lib/hooks/use-form-submit";
 import { signInWithPassword, type AuthFormState } from "../actions";
 
 const initialState: AuthFormState = {};
@@ -10,6 +10,7 @@ const initialState: AuthFormState = {};
 export function LoginForm({
   next,
   linkError,
+  inviteHint = true,
 }: {
   next: string;
   /**
@@ -17,8 +18,10 @@ export function LoginForm({
    * used — see /auth/confirm and /auth/callback.
    */
   linkError?: boolean;
+  /** "Recebeu um convite?…" — redundant on the invite page itself. */
+  inviteHint?: boolean;
 }) {
-  const [state, formAction, pending] = useActionState(signInWithPassword, initialState);
+  const { state, pending, formProps } = useFormSubmit(signInWithPassword, initialState);
 
   return (
     <div className="w-full max-w-md">
@@ -32,7 +35,7 @@ export function LoginForm({
         </div>
       )}
 
-      <form action={formAction} className="space-y-md" noValidate>
+      <form {...formProps} className="space-y-md" noValidate>
         <input type="hidden" name="next" value={next} />
 
         <TextField
@@ -72,9 +75,11 @@ export function LoginForm({
         </Button>
       </form>
 
-      <p className="mt-lg text-center font-body-md text-body-md text-on-surface-variant">
-        Recebeu um convite? Abra o link enviado pela sua fábrica para entrar na rede.
-      </p>
+      {inviteHint && (
+        <p className="mt-lg text-center font-body-md text-body-md text-on-surface-variant">
+          Recebeu um convite? Abra o link enviado pela sua fábrica para entrar na rede.
+        </p>
+      )}
     </div>
   );
 }

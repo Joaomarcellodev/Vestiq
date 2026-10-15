@@ -67,6 +67,15 @@ d("inventory actions + queries (SPEC-005)", () => {
     expect(state.error).toBeTruthy();
   });
 
+  it("adjustStock shows the whole insufficient-stock message (VES-79)", async () => {
+    await recordEntry({}, formData({ variantId: ctx.variantId, quantity: 8, note: "x" }));
+    const state = await adjustStock(
+      {},
+      formData({ variantId: ctx.variantId, delta: -100, note: "erro" }),
+    );
+    expect(state.error).toBe("Estoque insuficiente: saldo atual 8");
+  });
+
   it("listInventory filters by level and search", async () => {
     await recordEntry({}, formData({ variantId: ctx.variantId, quantity: 2, note: "x" })); // low
 

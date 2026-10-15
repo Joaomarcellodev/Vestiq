@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/molecules/empty-state";
 import { Badge, Button, Icon } from "@/components/atoms";
 import { archiveCustomer, unarchiveCustomer } from "@/features/customers/actions";
 import { formatBRL } from "@/lib/utils/currency";
+import { formatPhone } from "@/lib/utils/phone";
 
 export const metadata: Metadata = { title: "Cliente" };
 
@@ -24,7 +25,9 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
       <BackButton fallback="/clientes" label="Clientes" />
       <PageHeader
         title={customer.name}
-        description={[customer.email, customer.phone].filter(Boolean).join(" · ")}
+        description={[customer.email, customer.phone && formatPhone(customer.phone)]
+          .filter(Boolean)
+          .join(" · ")}
         action={
           <div className="flex flex-wrap gap-2">
             {!archived && (
