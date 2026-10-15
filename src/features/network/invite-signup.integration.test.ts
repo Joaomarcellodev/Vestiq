@@ -131,6 +131,46 @@ d("signup from the invite link (VES-95)", () => {
     expect(signIn.data.user?.user_metadata.password_set).toBe(true);
   });
 
+  it("won't claim an account another network's open invite created", async () => {
+    // Factory A invited her first: the invite email created her account, still
+    // without a password. Factory B, holding its own token, must not set one.
+    const otherFactory = await makeUser();
+    const otherOrg = await makeOrg(otherFactory.userId, "FACTORY", "FACTORY_ADMIN");
+    const otherNetwork = await makeNetwork(otherOrg.id);
+    const email = uniqueEmail("de-outra-rede");
+    await admin()
+      .from("network_members")
+      .insert({ network_id: otherNetwork.id, invited_email: email, status: "INVITED" });
+    expect((await admin().auth.admin.inviteUserByEmail(email)).error).toBeNull();
+    const token = await invite(email);
+
+    const { data } = await anon().rpc("get_network_invite", { p_token: token }).maybeSingle();
+    expect(data?.has_account).toBe(true);
+
+    expect(await signup(token, "senha-da-fabrica")).toEqual({
+      error: "Você já tem uma conta com esse email. Entre para aceitar o convite.",
+    });
+    const taken = await anon().auth.signInWithPassword({ email, password: "senha-da-fabrica" });
+    expect(taken.error).not.toBeNull();
+  });
+
+  it("won't claim a password-less account that already has an organization", async () => {
+    const email = uniqueEmail("com-loja");
+    const invited = await admin().auth.admin.inviteUserByEmail(email);
+    expect(invited.error).toBeNull();
+    await makeOrg(invited.data.user!.id);
+    const token = await invite(email);
+
+    const { data } = await anon().rpc("get_network_invite", { p_token: token }).maybeSingle();
+    expect(data?.has_account).toBe(true);
+
+    expect(await signup(token, "senha-da-fabrica")).toEqual({
+      error: "Você já tem uma conta com esse email. Entre para aceitar o convite.",
+    });
+    const taken = await anon().auth.signInWithPassword({ email, password: "senha-da-fabrica" });
+    expect(taken.error).not.toBeNull();
+  });
+
   it("never overwrites the password of an existing account", async () => {
     const existing = await makeUser(uniqueEmail("ja-tem"));
     const token = await invite(existing.email);
