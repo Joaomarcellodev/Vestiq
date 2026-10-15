@@ -66,6 +66,12 @@ do link do Auth. A conta da revendedora agora nasce do próprio convite.
   convite), entra e aceita o convite numa única etapa.
 - Uma conta que **já tem senha** nunca é alterada: a página mostra o login, que
   volta para o convite. Logada com outro email, a página oferece sair e voltar.
+- A conta sem senha só é assumida pelo link enquanto está vazia: sem
+  organização e sem convite aberto de **outra** rede (migration `0032`). Como a
+  fábrica também tem o token, sem essa regra a fábrica B poderia definir a
+  senha da revendedora que a fábrica A convidou primeiro. Nesses casos a
+  página mostra o login, e a convidada entra pelo link do email ou por
+  "Esqueci minha senha".
 - A fábrica copia o link de um convite pendente em `/rede-fabrica` para enviá-lo
   por outro canal.
 - O cliente service role entra só em `invite-signup.ts`;
