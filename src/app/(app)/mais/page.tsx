@@ -19,7 +19,12 @@ export default async function MorePage() {
       ? [{ href: "/fornecedores", label: "Fornecedores", icon: "factory" }]
       : []),
     { href: "/pedidos", label: "Pedidos de abastecimento", icon: "receipt_long" },
-    ...(isFactory ? [{ href: "/rede-fabrica", label: "Rede da fábrica", icon: "factory" }] : []),
+    ...(isFactory
+      ? [
+          { href: "/rede-fabrica", label: "Rede da fábrica", icon: "factory" },
+          { href: "/recebimentos", label: "Recebimentos", icon: "account_balance" },
+        ]
+      : []),
   ];
 
   return (

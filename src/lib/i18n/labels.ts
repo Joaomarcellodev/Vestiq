@@ -49,6 +49,46 @@ export const SUPPLY_ORDER_STATUS: LabelMap<Database["public"]["Enums"]["supply_o
   CANCELLED: { label: "Cancelado", tone: "neutral" },
 };
 
+/** VES-27 — the factory's Stripe Connect account (`stripe_transfers` capability). */
+export const PAYOUT_ACCOUNT_STATUS: Record<
+  "none" | "active" | "pending" | "restricted" | "rejected" | "unsupported",
+  { label: string; tone: Tone; description: string }
+> = {
+  none: {
+    label: "Não cadastrada",
+    tone: "warning",
+    description:
+      "Cadastre a conta onde a fábrica recebe. Sem ela, as revendedoras não conseguem pagar os pedidos pelo Vestiq.",
+  },
+  pending: {
+    label: "Cadastro pendente",
+    tone: "warning",
+    description:
+      "O cadastro no Stripe ainda não foi concluído ou está em análise. Continue o cadastro para começar a receber.",
+  },
+  active: {
+    label: "Pronta para receber",
+    tone: "success",
+    description: "As revendedoras já podem pagar os pedidos confirmados pela fábrica.",
+  },
+  restricted: {
+    label: "Precisa de atenção",
+    tone: "error",
+    description:
+      "O Stripe pediu mais informações. Até completar, os pedidos não podem ser pagos pelo Vestiq.",
+  },
+  rejected: {
+    label: "Recusada",
+    tone: "error",
+    description: "O Stripe recusou esta conta. Fale com o Vestiq para resolver.",
+  },
+  unsupported: {
+    label: "Indisponível",
+    tone: "error",
+    description: "O Stripe não oferece recebimento para esta conta. Fale com o Vestiq.",
+  },
+};
+
 export const PAYMENT_STATUS: LabelMap<Database["public"]["Enums"]["payment_status"]> = {
   PENDING: { label: "Aguardando pagamento", tone: "warning" },
   PAID: { label: "Pago", tone: "success" },
