@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { eventOutcome, fromCents, isCheckoutEvent, sessionOutcome, toCents } from "./status";
 
-describe("payment status (SPEC-013)", () => {
+describe("payment status (SPEC-014)", () => {
   it("settles a session only once it is paid or expired", () => {
     expect(sessionOutcome({ status: "complete", payment_status: "paid" })).toBe("PAID");
     expect(sessionOutcome({ status: "expired", payment_status: "unpaid" })).toBe("EXPIRED");

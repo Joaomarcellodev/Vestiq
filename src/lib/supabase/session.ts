@@ -7,7 +7,7 @@ import type { Database } from "@/types/database";
  * Public routes reachable without an authenticated session. `/convite` — the
  * invitee creates her account from the invite link (VES-95).
  * `/api/payments/webhook` — Stripe calls it with no session; the route checks
- * the event signature instead (SPEC-013).
+ * the event signature instead (SPEC-014).
  */
 const PUBLIC_PATHS = [
   "/login",

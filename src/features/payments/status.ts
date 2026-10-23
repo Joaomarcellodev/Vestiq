@@ -1,6 +1,6 @@
 import type { Database } from "@/types/database";
 
-/** Payment lifecycle (SPEC-013). Mirrors `apply_supply_order_payment_status`. */
+/** Payment lifecycle (SPEC-014). Mirrors `apply_supply_order_payment_status`. */
 
 export type PaymentStatus = Database["public"]["Enums"]["payment_status"];
 

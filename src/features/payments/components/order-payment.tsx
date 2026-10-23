@@ -16,7 +16,7 @@ const LAST_ATTEMPT: Partial<Record<SupplyOrderPayment["status"], string>> = {
 };
 
 /**
- * Payment block of a confirmed supply order (SPEC-013). The reseller pays by
+ * Payment block of a confirmed supply order (SPEC-014). The reseller pays by
  * card on the Stripe checkout; the supplier follows the status.
  */
 export function OrderPayment({

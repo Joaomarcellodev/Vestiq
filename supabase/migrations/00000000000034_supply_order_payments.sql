@@ -1,4 +1,4 @@
--- SPEC-013 (VES-24) — a revendedora paga com cartão, à vista, um pedido de
+-- SPEC-014 (VES-24) — a revendedora paga com cartão, à vista, um pedido de
 -- abastecimento que a fábrica confirmou. O cartão é digitado no Checkout do
 -- Stripe (ADR-0012): o Vestiq guarda só a sessão de checkout e o status.
 --

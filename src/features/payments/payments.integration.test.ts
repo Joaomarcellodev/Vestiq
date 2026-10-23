@@ -67,7 +67,7 @@ const WEBHOOK_SECRET = "whsec_vestiq_integration_test";
 
 type User = Awaited<ReturnType<typeof makeUser>>;
 
-d("supply order payments (SPEC-013)", () => {
+d("supply order payments (SPEC-014)", () => {
   let ctx: Awaited<ReturnType<typeof setup>>;
 
   async function setup() {

@@ -1,4 +1,4 @@
--- SPEC-013 (VES-24) — notification type for a paid supply order.
+-- SPEC-014 (VES-24) — notification type for a paid supply order.
 -- Kept apart from 0034: a value added with ALTER TYPE ... ADD VALUE cannot be
 -- used in the same transaction that adds it.
 
