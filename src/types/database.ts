@@ -151,6 +151,41 @@ export type Database = {
           },
         ]
       }
+      factory_payment_accounts: {
+        Row: {
+          created_at: string
+          organization_id: string
+          platform_fee_percent: number
+          stripe_account_id: string | null
+          transfers_status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          organization_id: string
+          platform_fee_percent?: number
+          stripe_account_id?: string | null
+          transfers_status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          organization_id?: string
+          platform_fee_percent?: number
+          stripe_account_id?: string | null
+          transfers_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factory_payment_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_movements: {
         Row: {
           balance_after: number
@@ -945,10 +980,14 @@ export type Database = {
           created_at: string
           created_by: string | null
           currency: string
+          destination_account_id: string | null
           id: string
+          net_amount: number | null
           order_id: string
           paid_at: string | null
           payment_intent_id: string | null
+          platform_fee_amount: number
+          platform_fee_percent: number | null
           provider: string
           refund_reason: string | null
           refunded_amount: number
@@ -963,10 +1002,14 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           currency?: string
+          destination_account_id?: string | null
           id?: string
+          net_amount?: number | null
           order_id: string
           paid_at?: string | null
           payment_intent_id?: string | null
+          platform_fee_amount?: number
+          platform_fee_percent?: number | null
           provider?: string
           refund_reason?: string | null
           refunded_amount?: number
@@ -981,10 +1024,14 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           currency?: string
+          destination_account_id?: string | null
           id?: string
+          net_amount?: number | null
           order_id?: string
           paid_at?: string | null
           payment_intent_id?: string | null
+          platform_fee_amount?: number
+          platform_fee_percent?: number | null
           provider?: string
           refund_reason?: string | null
           refunded_amount?: number
@@ -1216,10 +1263,14 @@ export type Database = {
           created_at: string
           created_by: string | null
           currency: string
+          destination_account_id: string | null
           id: string
+          net_amount: number | null
           order_id: string
           paid_at: string | null
           payment_intent_id: string | null
+          platform_fee_amount: number
+          platform_fee_percent: number | null
           provider: string
           refund_reason: string | null
           refunded_amount: number
@@ -1248,10 +1299,14 @@ export type Database = {
           created_at: string
           created_by: string | null
           currency: string
+          destination_account_id: string | null
           id: string
+          net_amount: number | null
           order_id: string
           paid_at: string | null
           payment_intent_id: string | null
+          platform_fee_amount: number
+          platform_fee_percent: number | null
           provider: string
           refund_reason: string | null
           refunded_amount: number
@@ -1282,10 +1337,14 @@ export type Database = {
           created_at: string
           created_by: string | null
           currency: string
+          destination_account_id: string | null
           id: string
+          net_amount: number | null
           order_id: string
           paid_at: string | null
           payment_intent_id: string | null
+          platform_fee_amount: number
+          platform_fee_percent: number | null
           provider: string
           refund_reason: string | null
           refunded_amount: number
@@ -1450,6 +1509,27 @@ export type Database = {
         Args: { p_reseller_id: string; p_supplier_id: string }
         Returns: boolean
       }
+      link_factory_payment_account: {
+        Args: {
+          p_organization_id: string
+          p_stripe_account_id: string
+          p_transfers_status: string
+        }
+        Returns: {
+          created_at: string
+          organization_id: string
+          platform_fee_percent: number
+          stripe_account_id: string | null
+          transfers_status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "factory_payment_accounts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       list_negotiation_products: {
         Args: { p_negotiation_id?: string }
         Returns: {
@@ -1601,6 +1681,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      platform_fee_percent_of: {
+        Args: { p_organization_id: string }
+        Returns: number
+      }
       publish_offer: {
         Args: {
           p_network_id: string
@@ -1630,6 +1714,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      quote_supply_order_payment: {
+        Args: { p_order_id: string }
+        Returns: {
+          amount: number
+          destination_account_id: string
+          destination_status: string
+          platform_fee_amount: number
+          platform_fee_percent: number
+        }[]
+      }
       record_inventory_entry: {
         Args: { p_note?: string; p_quantity: number; p_variant_id: string }
         Returns: {
@@ -1656,7 +1750,9 @@ export type Database = {
         Args: {
           p_amount: number
           p_checkout_session_id: string
+          p_destination_account_id: string
           p_order_id: string
+          p_platform_fee_amount: number
         }
         Returns: {
           amount: number
@@ -1664,10 +1760,14 @@ export type Database = {
           created_at: string
           created_by: string | null
           currency: string
+          destination_account_id: string | null
           id: string
+          net_amount: number | null
           order_id: string
           paid_at: string | null
           payment_intent_id: string | null
+          platform_fee_amount: number
+          platform_fee_percent: number | null
           provider: string
           refund_reason: string | null
           refunded_amount: number
@@ -1746,6 +1846,40 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "negotiation_events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      set_factory_payment_account_status: {
+        Args: { p_stripe_account_id: string; p_transfers_status: string }
+        Returns: {
+          created_at: string
+          organization_id: string
+          platform_fee_percent: number
+          stripe_account_id: string | null
+          transfers_status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "factory_payment_accounts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      set_factory_platform_fee: {
+        Args: { p_organization_id: string; p_percent: number }
+        Returns: {
+          created_at: string
+          organization_id: string
+          platform_fee_percent: number
+          stripe_account_id: string | null
+          transfers_status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "factory_payment_accounts"
           isOneToOne: true
           isSetofReturn: false
         }

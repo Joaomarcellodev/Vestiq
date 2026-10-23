@@ -30,6 +30,13 @@ export const PRIMARY_NAV: NavItem[] = [
     match: "/rede-fabrica",
     roles: ["FACTORY_ADMIN", "PLATFORM_ADMIN"],
   },
+  {
+    href: "/recebimentos",
+    label: "Recebimentos",
+    icon: "account_balance",
+    match: "/recebimentos",
+    roles: ["FACTORY_ADMIN", "PLATFORM_ADMIN"],
+  },
 ];
 
 /** The 5 items shown in the mobile bottom bar. */

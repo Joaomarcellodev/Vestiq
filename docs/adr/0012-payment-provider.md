@@ -34,7 +34,7 @@ precisam ser confirmados no painel de cada conta.**
 | Cartão de crédito à vista             | ~4,98% (recebe na hora) · ~3,98% (30 dias)                                                    | ~4,19% (tabela pública antiga; hoje só no painel)                    | ~3,99% + R$ 0,39                                                           |
 | Pix                                   | 0% para a maioria das contas (0,49% para CNPJ novo acima de R$ 15 mil/mês)                    | ~0,99%                                                               | ~1,19%, **só por convite** (exige histórico na conta)                      |
 | Prazo de recebimento                  | Escolhido pelo vendedor (na hora, 14 ou 30 dias): quanto mais longo, menor a taxa             | Configurável por recebedor (antecipação opcional)                    | D+2 a D+30, conforme o país e o risco                                      |
-| Parcelamento (VES-26)                 | Até 12x; juros repassados ao comprador ou absorvidos pelo vendedor                            | Até 12x, com tabela de juros por recebedor                           | Parcelamento BR suportado, com menos opções de configuração                |
+| Parcelamento (VES-26)                 | Até 12x; juros repassados ao comprador ou absorvidos pelo vendedor                            | Até 12x, com tabela de juros por recebedor                           | **Sem parcelamento para contas Brasil** (só México, Japão e Mastercard Installments; revisto em 23/10) |
 | Split / comissão (VES-27)             | **Checkout API com `marketplace_fee`**: o vendedor conecta a própria conta MP por OAuth      | **Split nativo por recebedores** (regras em % ou valor por pedido)  | **Connect**: US$ 2 por conta ativa/mês + 0,25% + 25¢ por repasse (preço global) |
 | Onboarding do recebedor               | Login com uma conta MP que a revendedora provavelmente já tem                                 | Cadastro de recebedor com dados bancários e KYC feito pela plataforma | Onboarding Connect (KYC da Stripe), pensado para empresas                  |
 | Tokenização no navegador              | Card Payment Brick / `MercadoPago.js`                                                         | `tokenizecard.js` / checkout próprio                                 | Stripe Elements                                                            |
@@ -58,9 +58,10 @@ Stripe (área restrita/sandbox, país Brasil) e decidiu seguir com ele:
    melhor SDK Node da comparação.
 3. **Esforço baixo para a VES-24.** Uma Server Action cria a sessão, e um Route
    Handler recebe o webhook. Não há componente de cartão no cliente.
-4. **Caminho para as próximas histórias.** Parcelamento no Brasil (VES-26) e
-   split via Connect (VES-27) existem na mesma API. O custo do Connect em dólar
-   continua sendo o principal ponto contra e será reavaliado na VES-27.
+4. **Caminho para as próximas histórias.** O split via Connect (VES-27) existe na
+   mesma API. O parcelamento (VES-26) **não**: revisto em 23/10, o parcelamento
+   nativo do Stripe é documentado só para contas do México, do Japão e para
+   Mastercard Installments. A VES-26 voltou para o backlog.
 
 O que perdemos em relação ao Mercado Pago, registrado na tabela acima: **Pix só
 por convite** e um onboarding de recebedores (Connect) mais pesado do que o OAuth
@@ -106,8 +107,16 @@ alternativa se o split por recebedores virar requisito forte.
 
 ## Consequências
 
-- Nesta etapa o valor do pedido cai na conta Stripe da **plataforma**. Repassar
-  para a fábrica exige o Connect (VES-27), com onboarding e KYC de cada recebedor.
+- **Comissão (VES-27, [SPEC-015](../../specs/commission/SPEC.md)):** marketplace com
+  **cobranças com destino**. Cada fábrica tem uma conta conectada **v2 de recebedor**
+  (`configuration.recipient` com `stripe_balance.stripe_transfers`, Dashboard
+  Express, Brasil), cadastrada pelo Account Link hospedado. A plataforma paga as
+  tarifas do Stripe e cobre perdas (`fees_collector` e `losses_collector:
+  application`). O checkout leva `transfer_data.destination` e
+  `application_fee_amount` (percentual por fábrica, padrão 10%). O reembolso usa
+  `reverse_transfer` e `refund_application_fee`.
+- O Connect precisa ser **ativado no painel** (configuração de plataforma), e a
+  plataforma assume as perdas de contas conectadas (saldo negativo, contestações).
 - Sem Pix até o Stripe liberar o meio para a conta. Como os pedidos são pagos por
   cartão, o fluxo de status já trata meios assíncronos (`async_payment_*`) para
   quando o Pix entrar.

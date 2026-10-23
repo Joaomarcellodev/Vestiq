@@ -108,6 +108,22 @@ Só duas — ambas públicas (protegidas por RLS):
 > em produção. Cartão de teste aprovado: `4242 4242 4242 4242`, qualquer
 > validade futura e qualquer CVC.
 
+> **Comissão e recebimento das fábricas (SPEC-015, VES-27).** Os pagamentos são
+> cobranças com destino do **Stripe Connect**. Antes de qualquer pagamento:
+>
+> 1. No painel do Stripe (área restrita primeiro), **Configurações → Connect →
+>    Configuração da plataforma**: escolha o modelo **marketplace**, com a
+>    plataforma responsável pelas tarifas e pelas perdas das contas conectadas, e
+>    revise as responsabilidades. Sem isso, a API responde
+>    `Accounts v2 is not enabled`.
+> 2. Cada fábrica abre **Recebimentos** no Vestiq e faz o cadastro no Stripe. Na
+>    área restrita, o cadastro aceita [dados de teste](https://docs.stripe.com/connect/testing).
+> 3. Se usar chave restrita (`rk_`), inclua escrita em **Accounts (v2)** e
+>    **Account Links**.
+>
+> Sem a conta da fábrica ativa, a revendedora vê "O fornecedor ainda não pode
+> receber pagamentos pelo Vestiq".
+
 Depois de adicionar as variáveis: **Deploys → Trigger deploy → Deploy site**.
 
 ## 4. Configurar o Supabase para o domínio do Netlify
