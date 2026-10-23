@@ -322,6 +322,13 @@ export type Database = {
             foreignKeyName: "negotiations_network_id_fkey"
             columns: ["network_id"]
             isOneToOne: false
+            referencedRelation: "factory_network_stats"
+            referencedColumns: ["network_id"]
+          },
+          {
+            foreignKeyName: "negotiations_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
             referencedRelation: "factory_networks"
             referencedColumns: ["id"]
           },
@@ -379,6 +386,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "network_members_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "factory_network_stats"
+            referencedColumns: ["network_id"]
+          },
           {
             foreignKeyName: "network_members_network_id_fkey"
             columns: ["network_id"]
@@ -480,6 +494,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "offers_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "factory_network_stats"
+            referencedColumns: ["network_id"]
+          },
           {
             foreignKeyName: "offers_network_id_fkey"
             columns: ["network_id"]
@@ -917,6 +938,85 @@ export type Database = {
           },
         ]
       }
+      supply_order_payments: {
+        Row: {
+          amount: number
+          checkout_session_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          order_id: string
+          paid_at: string | null
+          payment_intent_id: string | null
+          provider: string
+          refund_reason: string | null
+          refunded_amount: number
+          refunded_at: string | null
+          refunded_by: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          checkout_session_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          order_id: string
+          paid_at?: string | null
+          payment_intent_id?: string | null
+          provider?: string
+          refund_reason?: string | null
+          refunded_amount?: number
+          refunded_at?: string | null
+          refunded_by?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          checkout_session_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          order_id?: string
+          paid_at?: string | null
+          payment_intent_id?: string | null
+          provider?: string
+          refund_reason?: string | null
+          refunded_amount?: number
+          refunded_at?: string | null
+          refunded_by?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supply_order_payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_order_payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "supply_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_order_payments_refunded_by_fkey"
+            columns: ["refunded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supply_orders: {
         Row: {
           cancel_reason: string | null
@@ -1014,6 +1114,28 @@ export type Database = {
           pending_invites: number | null
           total_offers: number | null
         }
+        Insert: {
+          active_offers?: never
+          active_resellers?: never
+          disabled_resellers?: never
+          factory_id?: string | null
+          negotiations_completed?: never
+          negotiations_started?: never
+          network_id?: string | null
+          pending_invites?: never
+          total_offers?: never
+        }
+        Update: {
+          active_offers?: never
+          active_resellers?: never
+          disabled_resellers?: never
+          factory_id?: string | null
+          negotiations_completed?: never
+          negotiations_started?: never
+          network_id?: string | null
+          pending_invites?: never
+          total_offers?: never
+        }
         Relationships: [
           {
             foreignKeyName: "factory_networks_factory_id_fkey"
@@ -1081,6 +1203,70 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      apply_supply_order_payment_refund: {
+        Args: {
+          p_amount_refunded: number
+          p_payment_intent_id: string
+          p_reason?: string
+          p_refunded_by?: string
+        }
+        Returns: {
+          amount: number
+          checkout_session_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          order_id: string
+          paid_at: string | null
+          payment_intent_id: string | null
+          provider: string
+          refund_reason: string | null
+          refunded_amount: number
+          refunded_at: string | null
+          refunded_by: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "supply_order_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      apply_supply_order_payment_status: {
+        Args: {
+          p_amount?: number
+          p_checkout_session_id: string
+          p_payment_intent_id?: string
+          p_status: Database["public"]["Enums"]["payment_status"]
+        }
+        Returns: {
+          amount: number
+          checkout_session_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          order_id: string
+          paid_at: string | null
+          payment_intent_id: string | null
+          provider: string
+          refund_reason: string | null
+          refunded_amount: number
+          refunded_at: string | null
+          refunded_by: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "supply_order_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       archive_product_to_offers: {
         Args: { p_items?: Json; p_network_id?: string; p_product_id: string }
         Returns: number
@@ -1088,6 +1274,33 @@ export type Database = {
       auth_network_ids: { Args: never; Returns: string[] }
       auth_org_ids: { Args: never; Returns: string[] }
       auth_supplier_ids: { Args: never; Returns: string[] }
+      authorize_supply_order_refund: {
+        Args: { p_order_id: string; p_reason?: string }
+        Returns: {
+          amount: number
+          checkout_session_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          order_id: string
+          paid_at: string | null
+          payment_intent_id: string | null
+          provider: string
+          refund_reason: string | null
+          refunded_amount: number
+          refunded_at: string | null
+          refunded_by: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "supply_order_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       can_access_negotiation: { Args: { neg_id: string }; Returns: boolean }
       cancel_sale: {
         Args: { p_reason: string; p_sale_id: string }
@@ -1191,6 +1404,14 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      create_product: {
+        Args: { p_organization_id: string; p_product: Json; p_variants: Json }
+        Returns: string
+      }
+      fit_offers_to_stock: {
+        Args: { p_variant_id: string }
+        Returns: undefined
+      }
       get_network_invite: {
         Args: { p_token: string }
         Returns: {
@@ -1229,6 +1450,17 @@ export type Database = {
         Args: { p_reseller_id: string; p_supplier_id: string }
         Returns: boolean
       }
+      list_negotiation_products: {
+        Args: { p_negotiation_id?: string }
+        Returns: {
+          brand: string
+          color: string
+          image_urls: string[]
+          negotiation_id: string
+          product_name: string
+          size: string
+        }[]
+      }
       list_supplier_order_catalog: {
         Args: { p_supplier_id: string }
         Returns: {
@@ -1264,17 +1496,6 @@ export type Database = {
           name: string
           network_names: string[]
           product_count: number
-        }[]
-      }
-      list_negotiation_products: {
-        Args: { p_negotiation_id?: string }
-        Returns: {
-          brand: string
-          color: string
-          image_urls: string[]
-          negotiation_id: string
-          product_name: string
-          size: string
         }[]
       }
       list_visible_offers: {
@@ -1320,6 +1541,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      offer_reserved_quantity: { Args: { p_offer_id: string }; Returns: number }
       open_negotiation: {
         Args: {
           p_amount: number
@@ -1430,6 +1652,37 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      register_supply_order_payment: {
+        Args: {
+          p_amount: number
+          p_checkout_session_id: string
+          p_order_id: string
+        }
+        Returns: {
+          amount: number
+          checkout_session_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          order_id: string
+          paid_at: string | null
+          payment_intent_id: string | null
+          provider: string
+          refund_reason: string | null
+          refunded_amount: number
+          refunded_at: string | null
+          refunded_by: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "supply_order_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       respond_supply_order: {
         Args: { p_decision: string; p_note?: string; p_order_id: string }
         Returns: {
@@ -1497,6 +1750,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      set_product_archived: {
+        Args: { p_archived: boolean; p_product_id: string }
+        Returns: string
+      }
       shares_network: {
         Args: { org_a: string; org_b: string }
         Returns: boolean
@@ -1504,6 +1761,14 @@ export type Database = {
       update_product: {
         Args: { p_product: Json; p_product_id: string; p_variants?: Json }
         Returns: undefined
+      }
+      variant_offered_quantity: {
+        Args: { p_variant_id: string }
+        Returns: number
+      }
+      variant_reserved_quantity: {
+        Args: { p_variant_id: string }
+        Returns: number
       }
     }
     Enums: {
@@ -1543,6 +1808,8 @@ export type Database = {
         | "SUPPLY_ORDER_CONFIRMED"
         | "SUPPLY_ORDER_REJECTED"
         | "SUPPLY_ORDER_CANCELLED"
+        | "SUPPLY_ORDER_PAID"
+        | "SUPPLY_ORDER_REFUNDED"
       offer_status:
         | "ACTIVE"
         | "PARTIALLY_NEGOTIATED"
@@ -1551,6 +1818,7 @@ export type Database = {
       organization_status: "ACTIVE" | "SUSPENDED"
       organization_type: "FACTORY" | "RESELLER" | "PLATFORM"
       payment_method: "PIX" | "CARTAO" | "DINHEIRO"
+      payment_status: "PENDING" | "PAID" | "FAILED" | "EXPIRED" | "REFUNDED"
       sale_status: "CONFIRMED" | "CANCELLED"
       supply_order_status: "PENDING" | "CONFIRMED" | "REJECTED" | "CANCELLED"
     }
@@ -1722,6 +1990,8 @@ export const Constants = {
         "SUPPLY_ORDER_CONFIRMED",
         "SUPPLY_ORDER_REJECTED",
         "SUPPLY_ORDER_CANCELLED",
+        "SUPPLY_ORDER_PAID",
+        "SUPPLY_ORDER_REFUNDED",
       ],
       offer_status: [
         "ACTIVE",
@@ -1732,6 +2002,7 @@ export const Constants = {
       organization_status: ["ACTIVE", "SUSPENDED"],
       organization_type: ["FACTORY", "RESELLER", "PLATFORM"],
       payment_method: ["PIX", "CARTAO", "DINHEIRO"],
+      payment_status: ["PENDING", "PAID", "FAILED", "EXPIRED", "REFUNDED"],
       sale_status: ["CONFIRMED", "CANCELLED"],
       supply_order_status: ["PENDING", "CONFIRMED", "REJECTED", "CANCELLED"],
     },
