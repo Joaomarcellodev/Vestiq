@@ -1,9 +1,9 @@
-# ADR-0012 — Provedor de pagamentos: Mercado Pago
+# ADR-0012 — Provedor de pagamentos: Stripe
 
-- **Status:** Proposto (aguarda validação do professor e criação da conta sandbox)
-- **Data:** 2026-10-09
-- **Requisitos:** VES-70; prepara VES-24 (cartão à vista), VES-26 (parcelamento) e
-  VES-27 (comissão da plataforma)
+- **Status:** Aceito pelo time (falta a validação com o professor)
+- **Data:** 2026-10-09 (proposta: Mercado Pago) · revisada em 2026-10-23 (decisão: Stripe)
+- **Requisitos:** VES-70; VES-24 (cartão à vista, [SPEC-014](../../specs/payments/SPEC.md));
+  prepara VES-26 (parcelamento) e VES-27 (comissão da plataforma)
 
 ## Contexto
 
@@ -44,57 +44,70 @@ precisam ser confirmados no painel de cada conta.**
 
 ## Decisão
 
-Adotar o **Mercado Pago** (Checkout API com Card Payment Brick e split via
-`marketplace_fee`).
+Adotar o **Stripe**, com o **Checkout hospedado** (Checkout Sessions API) para o
+pagamento com cartão à vista (VES-24).
 
-1. **Comissão sem custódia (VES-27).** Cada vendedor conecta a própria conta Mercado
-   Pago por OAuth. O pagamento é criado com o token de acesso do vendedor, e o
-   `marketplace_fee` fica com o Vestiq. O Vestiq nunca guarda o dinheiro do vendedor.
-2. **Onboarding mais leve para quem recebe.** A maioria das revendedoras já tem conta
-   Mercado Pago. Com Pagar.me, o Vestiq precisaria coletar dados bancários e conduzir o
-   KYC de cada recebedor.
-3. **Pix a custo zero** para a maioria das contas, o que importa num público que já vende
-   por Pix. O Stripe só libera Pix por convite.
-4. **Parcelamento nativo (VES-26)** em até 12x, com a escolha entre juros do comprador e
-   juros do vendedor.
-5. **Sandbox simples** com usuários de teste e cartões que forçam aprovado/recusado,
-   suficiente para os testes de integração exigidos pela VES-24.
+A proposta de 09/10 era o Mercado Pago. Em 23/10 o time criou a conta no
+Stripe (área restrita/sandbox, país Brasil) e decidiu seguir com ele:
 
-A **Pagar.me** fica como alternativa: o split por recebedores é o mais flexível, e vale
-reavaliar se o Vestiq passar a precisar de regras de divisão complexas ou de
-liquidação centralizada.
+1. **Cartão fora do nosso servidor.** O Checkout hospedado coleta o cartão na
+   página do Stripe. O Vestiq não toca em dados de cartão, e o escopo PCI fica no
+   mínimo (SAQ A).
+2. **Sandbox e documentação.** Modo de teste completo, cartões de teste com
+   resultado forçado, Stripe CLI para encaminhar webhooks em desenvolvimento e o
+   melhor SDK Node da comparação.
+3. **Esforço baixo para a VES-24.** Uma Server Action cria a sessão, e um Route
+   Handler recebe o webhook. Não há componente de cartão no cliente.
+4. **Caminho para as próximas histórias.** Parcelamento no Brasil (VES-26) e
+   split via Connect (VES-27) existem na mesma API. O custo do Connect em dólar
+   continua sendo o principal ponto contra e será reavaliado na VES-27.
 
-## Como vai funcionar
+O que perdemos em relação ao Mercado Pago, registrado na tabela acima: **Pix só
+por convite** e um onboarding de recebedores (Connect) mais pesado do que o OAuth
+com uma conta Mercado Pago que a revendedora já tem. A **Pagar.me** continua como
+alternativa se o split por recebedores virar requisito forte.
 
-- **Cliente:** o Card Payment Brick tokeniza o cartão. Só o `token` chega à Server Action.
-- **Servidor:** cria o pagamento com o `access_token` do vendedor (guardado
-  criptografado e lido só no servidor) e o `marketplace_fee` calculado em centavos.
-- **Webhook:** um Route Handler `/api/payments/webhook` valida a assinatura
-  (`x-signature`) e chama uma função PostgreSQL que registra status, bruto, comissão e
-  líquido de forma atômica (ADR-0004).
-- **Variáveis de ambiente** (nenhuma chave real no repositório):
-  - `MERCADOPAGO_ACCESS_TOKEN` (conta da plataforma, servidor)
-  - `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY` (cliente)
-  - `MERCADOPAGO_CLIENT_ID` / `MERCADOPAGO_CLIENT_SECRET` (OAuth dos vendedores)
-  - `MERCADOPAGO_WEBHOOK_SECRET`
-  - Em desenvolvimento e no CI, usar só as credenciais **de teste** do painel
-    (prefixo `TEST-`).
+## Como funciona (SPEC-014)
 
-## Pendências (antes de aceitar esta ADR)
+- **Integração isolada** em `src/features/payments/provider/stripe.ts`: é o único
+  módulo que importa o SDK `stripe`. O resto do app usa tipos próprios.
+- **Servidor:** a action `payOrderWithCard` cria uma Checkout Session
+  (`mode: payment`, só cartão, BRL, valor do pedido em centavos, expira em 30 min)
+  e grava o pagamento `PENDING` por `register_supply_order_payment`.
+- **Webhook:** `POST /api/payments/webhook` (rota pública) verifica a assinatura
+  `Stripe-Signature` sobre o corpo bruto e chama
+  `apply_supply_order_payment_status` com a service role. A função é idempotente,
+  transacional (ADR-0004) e não pode ser chamada por usuários. Eventos:
+  `checkout.session.completed` (só com `payment_status = paid`),
+  `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`
+  e `checkout.session.expired`.
+- **Volta do checkout:** `/pedidos/[id]?checkout=<sessão>` lê a sessão na API do
+  Stripe e registra o resultado, para o pedido aparecer pago sem esperar o
+  webhook. É um complemento: **o webhook é obrigatório**, porque a revendedora
+  pode pagar e não voltar.
+- **Variáveis de ambiente** (nenhuma chave no repositório):
+  - `STRIPE_SECRET_KEY` (servidor). Preferir uma chave restrita `rk_` com escrita
+    em Checkout Sessions.
+  - `STRIPE_WEBHOOK_SECRET` (servidor), do endpoint no painel ou da `stripe listen`.
+  - Em desenvolvimento e no CI, só chaves da **área restrita** (sandbox).
 
+## Pendências
+
+- [x] Criar a conta no Stripe (área restrita, Brasil).
+- [x] Definir o que é pago: o **pedido de abastecimento** confirmado
+      (revendedora → fábrica). Negociações entre revendedoras ficam de fora por ora.
+- [ ] Cadastrar as chaves de teste no `.env.local` de cada dev e no Netlify.
+- [ ] Cadastrar o endpoint de webhook no painel (ver `docs/DEPLOY.md`).
 - [ ] Validar a escolha com o professor.
-- [ ] Criar a conta de desenvolvedor no Mercado Pago, a aplicação e os usuários de teste
-      (comprador e vendedor). Essa etapa é manual e feita pelo time.
-- [ ] Registrar as chaves de teste no `.env.local` de cada dev e nos segredos do CI.
-- [ ] Definir quais transações serão pagas pela plataforma (pedido de abastecimento
-      revendedora → fábrica e/ou transferência entre revendedoras). A pergunta está
-      aberta nas VES-24/26/27.
 - [ ] Confirmar no painel as taxas vigentes da conta.
 
 ## Consequências
 
-- Vendedores sem conta Mercado Pago precisam criar uma para receber pelo Vestiq.
-- A comissão depende do vendedor ter autorizado o OAuth. Sem a conexão, o checkout
-  daquele vendedor fica indisponível.
-- Ficamos acoplados à API do Mercado Pago. Para reduzir o custo de uma troca futura, a
-  integração fica isolada em `src/features/payments/provider/`.
+- Nesta etapa o valor do pedido cai na conta Stripe da **plataforma**. Repassar
+  para a fábrica exige o Connect (VES-27), com onboarding e KYC de cada recebedor.
+- Sem Pix até o Stripe liberar o meio para a conta. Como os pedidos são pagos por
+  cartão, o fluxo de status já trata meios assíncronos (`async_payment_*`) para
+  quando o Pix entrar.
+- Ficamos acoplados à API do Stripe. Para reduzir o custo de uma troca, a
+  integração fica isolada em `src/features/payments/provider/`, e o banco guarda
+  só `checkout_session_id` e `payment_intent_id`.
