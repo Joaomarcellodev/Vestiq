@@ -50,3 +50,24 @@
 **Quando** o pedido é pago
 **Então** a fábrica recebe "Pedido pago · <revenda> pagou o pedido de N peças", com link para o pedido
 **E** recebe só uma notificação, mesmo que o Stripe reenvie o evento
+
+## AC-PAY-004-01 — Fábrica reembolsa o pedido
+
+**Dado** um pedido pago de R$ 239,70
+**Quando** a fábrica (admin) informa o motivo, confirma e toca em "Reembolsar R$ 239,70"
+**Então** o Stripe devolve o valor ao cartão e o pedido mostra "Reembolsado", com a data e o motivo
+**E** a revendedora recebe "Pagamento reembolsado · R$ 239,70 do pedido para <fábrica> foram reembolsados no seu cartão"
+**E** o pedido não pode ser pago nem reembolsado de novo
+
+## AC-PAY-004-02 — Só a fábrica reembolsa
+
+**Dado** um pedido pago
+**Então** a revendedora e outras organizações não veem o reembolso e o servidor recusa com "Você não tem permissão para esta ação"
+**E** sem marcar a confirmação, o reembolso não é feito
+
+## AC-PAY-004-03 — Reembolso pelo painel do Stripe
+
+**Dado** um pedido pago de R$ 319,60
+**Quando** o Stripe informa R$ 100,00 reembolsados e, depois, o total
+**Então** o pedido mostra primeiro "R$ 100,00 reembolsados", ainda como "Pago", e depois "Reembolsado"
+**E** a revendedora recebe uma notificação a cada reembolso

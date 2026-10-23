@@ -12,10 +12,13 @@
 | RF-PAY-002 | AC-PAY-002-03 | TC-PAY-08                       | integration        | idem                                                 |
 | RF-PAY-002 | AC-PAY-002-04 | TC-PAY-10                       | integration        | idem                                                 |
 | RF-PAY-002 | AC-PAY-002-01 | TC-PAY-09, TC-PAY-13            | unit + integration | `src/features/payments/status.test.ts`, idem         |
+| RF-PAY-004 | AC-PAY-004-01 | TC-PAY-14                       | integration        | idem                                                 |
+| RF-PAY-004 | AC-PAY-004-02 | TC-PAY-15, TC-PAY-16            | integration        | idem                                                 |
+| RF-PAY-004 | AC-PAY-004-03 | TC-PAY-17, TC-PAY-18            | integration        | idem                                                 |
 | RF-PAY-003 | AC-PAY-003-01 | TC-PAY-06                       | integration        | idem                                                 |
 
-O Stripe é simulado nos testes de integração (`createCheckout`, `getCheckout` e
-`expireCheckout`). A verificação de assinatura do webhook é a real do SDK, com
+O Stripe é simulado nos testes de integração (`createCheckout`, `getCheckout`,
+`expireCheckout` e `refundPayment`). A verificação de assinatura do webhook é a real do SDK, com
 eventos assinados por `Stripe.webhooks.generateTestHeaderString`.
 
 ## Casos de teste
@@ -91,3 +94,30 @@ eventos assinados por `Stripe.webhooks.generateTestHeaderString`.
 
 - **Nível:** unit
 - **Resultado esperado:** só `complete + paid` é `PAID`; `completed` não pago aguarda o evento assíncrono; `async_payment_failed` → `FAILED`; `expired` → `EXPIRED`; R$ 1.678,20 → 167820 centavos
+
+### TC-PAY-14 — Fábrica reembolsa o pedido pago
+
+- **Nível:** integration
+- **Resultado esperado:** reembolso pedido ao Stripe uma vez; `REFUNDED` com `refunded_amount`, `refunded_by` e motivo aparado; notificação `SUPPLY_ORDER_REFUNDED` para a revenda; pagar de novo → "Este pedido foi reembolsado"; reembolsar de novo → "Este pedido não tem um pagamento para reembolsar"
+- **Regra crítica (SDD §38):** sim
+
+### TC-PAY-15 — Só admin do fornecedor, só pedido pago
+
+- **Nível:** integration
+- **Resultado esperado:** revendedora e outra revenda → sem permissão; pedido sem pagamento, sem confirmação e motivo > 500 → recusados sem chamar o Stripe; `apply_supply_order_payment_refund` por usuário → `42501`
+- **Regra crítica (SDD §38):** sim
+
+### TC-PAY-16 — Stripe recusa o reembolso
+
+- **Nível:** integration
+- **Resultado esperado:** "Não foi possível reembolsar o pagamento. Tente novamente."; pagamento continua `PAID`
+
+### TC-PAY-17 — Reembolso pelo painel (webhook `charge.refunded`)
+
+- **Nível:** integration
+- **Resultado esperado:** parcial → `PAID` com R$ 100,00; total menor depois → não diminui; total → `REFUNDED`; reenvio sem efeito; duas notificações (parcial e total); reembolso maior que o pago → 500
+
+### TC-PAY-18 — Reembolso de cobrança desconhecida
+
+- **Nível:** integration
+- **Resultado esperado:** 200 `ignored`
