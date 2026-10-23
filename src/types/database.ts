@@ -950,6 +950,10 @@ export type Database = {
           paid_at: string | null
           payment_intent_id: string | null
           provider: string
+          refund_reason: string | null
+          refunded_amount: number
+          refunded_at: string | null
+          refunded_by: string | null
           status: Database["public"]["Enums"]["payment_status"]
           updated_at: string
         }
@@ -964,6 +968,10 @@ export type Database = {
           paid_at?: string | null
           payment_intent_id?: string | null
           provider?: string
+          refund_reason?: string | null
+          refunded_amount?: number
+          refunded_at?: string | null
+          refunded_by?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           updated_at?: string
         }
@@ -978,6 +986,10 @@ export type Database = {
           paid_at?: string | null
           payment_intent_id?: string | null
           provider?: string
+          refund_reason?: string | null
+          refunded_amount?: number
+          refunded_at?: string | null
+          refunded_by?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           updated_at?: string
         }
@@ -994,6 +1006,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "supply_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_order_payments_refunded_by_fkey"
+            columns: ["refunded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1184,6 +1203,38 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      apply_supply_order_payment_refund: {
+        Args: {
+          p_amount_refunded: number
+          p_payment_intent_id: string
+          p_reason?: string
+          p_refunded_by?: string
+        }
+        Returns: {
+          amount: number
+          checkout_session_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          order_id: string
+          paid_at: string | null
+          payment_intent_id: string | null
+          provider: string
+          refund_reason: string | null
+          refunded_amount: number
+          refunded_at: string | null
+          refunded_by: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "supply_order_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       apply_supply_order_payment_status: {
         Args: {
           p_amount?: number
@@ -1202,6 +1253,10 @@ export type Database = {
           paid_at: string | null
           payment_intent_id: string | null
           provider: string
+          refund_reason: string | null
+          refunded_amount: number
+          refunded_at: string | null
+          refunded_by: string | null
           status: Database["public"]["Enums"]["payment_status"]
           updated_at: string
         }
@@ -1219,6 +1274,33 @@ export type Database = {
       auth_network_ids: { Args: never; Returns: string[] }
       auth_org_ids: { Args: never; Returns: string[] }
       auth_supplier_ids: { Args: never; Returns: string[] }
+      authorize_supply_order_refund: {
+        Args: { p_order_id: string; p_reason?: string }
+        Returns: {
+          amount: number
+          checkout_session_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          order_id: string
+          paid_at: string | null
+          payment_intent_id: string | null
+          provider: string
+          refund_reason: string | null
+          refunded_amount: number
+          refunded_at: string | null
+          refunded_by: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "supply_order_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       can_access_negotiation: { Args: { neg_id: string }; Returns: boolean }
       cancel_sale: {
         Args: { p_reason: string; p_sale_id: string }
@@ -1587,6 +1669,10 @@ export type Database = {
           paid_at: string | null
           payment_intent_id: string | null
           provider: string
+          refund_reason: string | null
+          refunded_amount: number
+          refunded_at: string | null
+          refunded_by: string | null
           status: Database["public"]["Enums"]["payment_status"]
           updated_at: string
         }
@@ -1723,6 +1809,7 @@ export type Database = {
         | "SUPPLY_ORDER_REJECTED"
         | "SUPPLY_ORDER_CANCELLED"
         | "SUPPLY_ORDER_PAID"
+        | "SUPPLY_ORDER_REFUNDED"
       offer_status:
         | "ACTIVE"
         | "PARTIALLY_NEGOTIATED"
@@ -1731,7 +1818,7 @@ export type Database = {
       organization_status: "ACTIVE" | "SUSPENDED"
       organization_type: "FACTORY" | "RESELLER" | "PLATFORM"
       payment_method: "PIX" | "CARTAO" | "DINHEIRO"
-      payment_status: "PENDING" | "PAID" | "FAILED" | "EXPIRED"
+      payment_status: "PENDING" | "PAID" | "FAILED" | "EXPIRED" | "REFUNDED"
       sale_status: "CONFIRMED" | "CANCELLED"
       supply_order_status: "PENDING" | "CONFIRMED" | "REJECTED" | "CANCELLED"
     }
@@ -1904,6 +1991,7 @@ export const Constants = {
         "SUPPLY_ORDER_REJECTED",
         "SUPPLY_ORDER_CANCELLED",
         "SUPPLY_ORDER_PAID",
+        "SUPPLY_ORDER_REFUNDED",
       ],
       offer_status: [
         "ACTIVE",
@@ -1914,7 +2002,7 @@ export const Constants = {
       organization_status: ["ACTIVE", "SUSPENDED"],
       organization_type: ["FACTORY", "RESELLER", "PLATFORM"],
       payment_method: ["PIX", "CARTAO", "DINHEIRO"],
-      payment_status: ["PENDING", "PAID", "FAILED", "EXPIRED"],
+      payment_status: ["PENDING", "PAID", "FAILED", "EXPIRED", "REFUNDED"],
       sale_status: ["CONFIRMED", "CANCELLED"],
       supply_order_status: ["PENDING", "CONFIRMED", "REJECTED", "CANCELLED"],
     },
