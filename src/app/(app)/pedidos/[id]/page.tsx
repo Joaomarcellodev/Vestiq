@@ -12,7 +12,7 @@ import { Badge } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { SUPPLY_ORDER_STATUS } from "@/lib/i18n/labels";
 import { OrderPayment } from "@/features/payments/components/order-payment";
-import { getSupplyOrderPayment } from "@/features/payments/queries";
+import { getFactoryPayoutAccount, getSupplyOrderPayment } from "@/features/payments/queries";
 import { syncCheckout } from "@/features/payments/sync";
 
 export const metadata: Metadata = { title: "Pedido" };
@@ -42,6 +42,11 @@ export default async function SupplyOrderPage({
     );
   }
   const payment = order.status === "CONFIRMED" ? await getSupplyOrderPayment(order.id) : null;
+  // VES-27: the supplier sees whether its payout account can receive this payment.
+  const payout =
+    order.status === "CONFIRMED" && order.party === "supplier" && !payment
+      ? await getFactoryPayoutAccount(order.supplierId)
+      : null;
 
   const actions = availableActions(order.status, order.party, { canRespond: order.canRespond });
   const status = SUPPLY_ORDER_STATUS[order.status];
@@ -184,6 +189,7 @@ export default async function SupplyOrderPage({
           total={order.totalAmount}
           payment={payment}
           canRefund={order.canRespond}
+          supplierReady={!payout || payout.transfersStatus === "active"}
         />
       )}
 
