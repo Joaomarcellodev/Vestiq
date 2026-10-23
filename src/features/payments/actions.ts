@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "@/lib/zod";
 import { publicEnv } from "@/lib/env";
@@ -8,13 +9,20 @@ import { rpcErrorMessage } from "@/lib/supabase/errors";
 import { getCurrentUser } from "@/features/auth/queries";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import { orderCode } from "@/features/supply-orders/state";
-import { createCheckout, expireCheckout, getCheckout, paymentsConfigured } from "./provider/stripe";
-import { applyPaymentStatus } from "./sync";
+import {
+  createCheckout,
+  expireCheckout,
+  getCheckout,
+  paymentsConfigured,
+  refundPayment,
+} from "./provider/stripe";
+import { applyPaymentStatus, applyRefund } from "./sync";
 
 export type ActionState = { error?: string };
 
 const PAYMENTS_UNAVAILABLE = "Os pagamentos estão indisponíveis no momento.";
 const CHECKOUT_FAILED = "Não foi possível abrir o pagamento. Tente novamente.";
+const REFUND_FAILED = "Não foi possível reembolsar o pagamento. Tente novamente.";
 
 /**
  * RF-PAY-001 — sends the reseller to the Stripe checkout to pay a confirmed
@@ -114,4 +122,60 @@ async function resumeCheckout(checkoutSessionId: string): Promise<string | "paid
     paymentIntentId: checkout.paymentIntentId,
   });
   return status === "PAID" ? "paid" : null;
+}
+
+const refundSchema = z.object({
+  orderId: z.string().uuid("Pedido não encontrado"),
+  reason: z.string().trim().max(500, "O motivo pode ter até 500 caracteres").optional(),
+  confirm: z.literal("on", { errorMap: () => ({ message: "Confirme o reembolso" }) }),
+});
+
+/**
+ * RF-PAY-004 — the supplier refunds what is left of a paid order to the
+ * reseller's card. The database authorizes it first (BR-PAY-08); the refund is
+ * recorded from Stripe's refunded total, and the webhook confirms it.
+ */
+export async function refundSupplyOrderPayment(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireActiveOrganization();
+  const parsed = refundSchema.safeParse({
+    orderId: formData.get("orderId"),
+    reason: formData.get("reason") ?? undefined,
+    confirm: formData.get("confirm"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  const { orderId, reason } = parsed.data;
+
+  const supabase = await createClient();
+  const { data: payment, error } = await supabase.rpc("authorize_supply_order_refund", {
+    p_order_id: orderId,
+    p_reason: reason || undefined,
+  });
+  if (error) return { error: rpcErrorMessage(error) };
+  if (!paymentsConfigured()) return { error: PAYMENTS_UNAVAILABLE };
+
+  let refunded: Awaited<ReturnType<typeof refundPayment>>;
+  try {
+    refunded = await refundPayment({
+      paymentIntentId: payment.payment_intent_id!,
+      orderId,
+      idempotencyKey: `vestiq-refund-${payment.id}`,
+    });
+  } catch (err) {
+    console.error("[payments] refundPayment failed", err);
+    return { error: REFUND_FAILED };
+  }
+
+  const user = await getCurrentUser();
+  try {
+    await applyRefund({ ...refunded, refundedBy: user?.id, reason });
+  } catch (err) {
+    // Stripe already refunded: the `charge.refunded` webhook records it.
+    console.error("[payments] applyRefund failed", err);
+  }
+
+  revalidatePath(`/pedidos/${orderId}`);
+  redirect(`/pedidos/${orderId}?toast=supply-order-refunded`);
 }
