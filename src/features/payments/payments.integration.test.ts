@@ -205,7 +205,7 @@ d("supply order payments (SPEC-014)", () => {
     });
   });
 
-  it("reuses the open checkout instead of opening a second one (BR-PAY-03)", async () => {
+  it("reuses the open checkout instead of opening a second one (TC-PAY-02)", async () => {
     const o = await order();
     const first = await startCheckout(o.id);
     const again = await startCheckout(o.id);
@@ -214,7 +214,7 @@ d("supply order payments (SPEC-014)", () => {
     expect(await paymentRows(o.id)).toHaveLength(1);
   });
 
-  it("only lets the order's reseller pay a confirmed order (TC-PAY-02)", async () => {
+  it("only lets the order's reseller pay a confirmed order (TC-PAY-03)", async () => {
     const pending = await order(2, false);
     expect(await pay(ctx.reseller, pending.id)).toEqual({
       error: "Só é possível pagar um pedido confirmado pelo fornecedor",
@@ -230,7 +230,7 @@ d("supply order payments (SPEC-014)", () => {
     expect(await paymentRows(o.id)).toEqual([]);
   });
 
-  it("says payments are unavailable when Stripe is not configured", async () => {
+  it("says payments are unavailable when Stripe is not configured (TC-PAY-04)", async () => {
     stripeApi.configured = false;
     const o = await order();
     expect(await pay(ctx.reseller, o.id)).toEqual({
@@ -238,7 +238,7 @@ d("supply order payments (SPEC-014)", () => {
     });
   });
 
-  it("guards the registration in the database too", async () => {
+  it("guards the registration and the status in the database too (TC-PAY-05)", async () => {
     const o = await order(2);
     const register = (client: User["client"], p: Record<string, unknown> = {}) =>
       client.rpc("register_supply_order_payment", {
@@ -266,7 +266,7 @@ d("supply order payments (SPEC-014)", () => {
     expect((await paymentRows(o.id))[0]!.status).toBe("PENDING");
   });
 
-  it("marks the order paid from the signed webhook and tells the supplier (TC-PAY-03)", async () => {
+  it("marks the order paid from the signed webhook and tells the supplier (TC-PAY-06)", async () => {
     const o = await order(4);
     const checkout = await startCheckout(o.id);
     const { payload, signature } = paidEvent(checkout);
@@ -306,7 +306,7 @@ d("supply order payments (SPEC-014)", () => {
     expect(await pay(ctx.reseller, o.id)).toEqual({ error: "Este pedido já foi pago" });
   });
 
-  it("rejects unsigned or tampered events (TC-PAY-04)", async () => {
+  it("rejects unsigned or tampered events (TC-PAY-07)", async () => {
     const o = await order();
     const checkout = await startCheckout(o.id);
     const { payload, signature } = paidEvent(checkout);
@@ -318,7 +318,7 @@ d("supply order payments (SPEC-014)", () => {
     expect((await paymentRows(o.id))[0]!.status).toBe("PENDING");
   });
 
-  it("refuses a paid amount that differs from the order (BR-PAY-04)", async () => {
+  it("refuses a paid amount that differs from the order (TC-PAY-08)", async () => {
     const o = await order();
     const checkout = await startCheckout(o.id);
     const { payload, signature } = paidEvent(checkout, 100);
@@ -328,7 +328,7 @@ d("supply order payments (SPEC-014)", () => {
     expect((await paymentRows(o.id))[0]!.status).toBe("PENDING");
   });
 
-  it("acknowledges events it doesn't act on", async () => {
+  it("acknowledges events it doesn't act on (TC-PAY-09)", async () => {
     const other = signedEvent("checkout.session.completed", {
       id: "cs_test_from_another_integration",
       status: "complete",
@@ -345,7 +345,7 @@ d("supply order payments (SPEC-014)", () => {
     });
   });
 
-  it("lets the reseller try again after a checkout expires", async () => {
+  it("lets the reseller try again after a checkout expires (TC-PAY-10)", async () => {
     const o = await order();
     const first = await startCheckout(o.id);
     const { payload, signature } = signedEvent("checkout.session.expired", {
@@ -363,7 +363,7 @@ d("supply order payments (SPEC-014)", () => {
     expect((await paymentRows(o.id)).map((p) => p.status)).toEqual(["EXPIRED", "PENDING"]);
   });
 
-  it("records the outcome when the reseller comes back from the checkout", async () => {
+  it("records the outcome when the reseller comes back from the checkout (TC-PAY-11)", async () => {
     const o = await order();
     const checkout = await startCheckout(o.id);
     const other = await order();
@@ -380,7 +380,7 @@ d("supply order payments (SPEC-014)", () => {
     expect(await getSupplyOrderPayment(o.id)).toMatchObject({ status: "PAID", amount: 239.7 });
   });
 
-  it("settles a checkout paid meanwhile instead of opening a new one", async () => {
+  it("settles a checkout paid meanwhile instead of opening a new one (TC-PAY-12)", async () => {
     const o = await order();
     const checkout = await startCheckout(o.id);
     stripeApi.sessions.set(checkout.id, { ...checkout, outcome: "PAID", url: null });
