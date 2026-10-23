@@ -36,6 +36,7 @@ const ICON: Record<NotificationType, string> = {
   SUPPLY_ORDER_REJECTED: "warning",
   SUPPLY_ORDER_CANCELLED: "warning",
   SUPPLY_ORDER_PAID: "payments",
+  SUPPLY_ORDER_REFUNDED: "currency_exchange",
 };
 
 /** Fallback only — while the Realtime channel is live, polling is skipped. */

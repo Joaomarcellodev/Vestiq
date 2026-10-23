@@ -61,8 +61,18 @@ export default async function SupplyOrderPage({
           },
         ]
       : []),
-    ...(payment?.status === "PAID" && payment.paidAt
+    ...(payment?.paidAt && (payment.status === "PAID" || payment.status === "REFUNDED")
       ? [{ label: "Pagamento aprovado", at: payment.paidAt, note: null, noteLabel: "" }]
+      : []),
+    ...(payment?.refundedAt
+      ? [
+          {
+            label: payment.status === "REFUNDED" ? "Pagamento reembolsado" : "Reembolso parcial",
+            at: payment.refundedAt,
+            note: payment.refundReason,
+            noteLabel: "Motivo",
+          },
+        ]
       : []),
     ...(order.cancelledAt
       ? [
@@ -173,6 +183,7 @@ export default async function SupplyOrderPage({
           party={order.party}
           total={order.totalAmount}
           payment={payment}
+          canRefund={order.canRespond}
         />
       )}
 

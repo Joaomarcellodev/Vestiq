@@ -54,6 +54,7 @@ export const PAYMENT_STATUS: LabelMap<Database["public"]["Enums"]["payment_statu
   PAID: { label: "Pago", tone: "success" },
   FAILED: { label: "Pagamento recusado", tone: "error" },
   EXPIRED: { label: "Pagamento expirado", tone: "neutral" },
+  REFUNDED: { label: "Reembolsado", tone: "neutral" },
 };
 
 export const SALE_STATUS: Record<Database["public"]["Enums"]["sale_status"], string> = {
