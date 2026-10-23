@@ -23,6 +23,10 @@ const stripeApi = vi.hoisted(() => ({
   /** Refunded total per payment intent, as Stripe's charge reports it. */
   refunded: new Map<string, number>(),
   amounts: new Map<string, number>(),
+  /** Connected accounts: transfers capability status by account id. */
+  accounts: new Map<string, string>(),
+  accountsCreated: [] as { organizationId: string; name: string }[],
+  links: [] as { accountId: string; refreshUrl: string; returnUrl: string }[],
 }));
 
 vi.mock("./provider/stripe", async (importOriginal) => {
@@ -35,6 +39,7 @@ vi.mock("./provider/stripe", async (importOriginal) => {
       amount: number;
       successUrl: string;
       cancelUrl: string;
+      transfer: { destination: string; platformFee: number };
     }) => {
       const id = `cs_test_${crypto.randomUUID().replace(/-/g, "")}`;
       const checkout = {
@@ -57,10 +62,26 @@ vi.mock("./provider/stripe", async (importOriginal) => {
     expireCheckout: async (id: string) => {
       stripeApi.expired.push(id);
     },
+    getRecipientStatus: async (accountId: string) => stripeApi.accounts.get(accountId) ?? "pending",
+    createRecipientAccount: async (input: { organizationId: string; name: string }) => {
+      const id = `acct_test_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+      stripeApi.accounts.set(id, "pending");
+      stripeApi.accountsCreated.push(input);
+      return { id, transfersStatus: "pending" };
+    },
+    createOnboardingLink: async (input: {
+      accountId: string;
+      refreshUrl: string;
+      returnUrl: string;
+    }) => {
+      stripeApi.links.push(input);
+      return `https://connect.stripe.com/setup/e/${input.accountId}`;
+    },
     refundPayment: async (input: {
       paymentIntentId: string;
       orderId: string;
       idempotencyKey: string;
+      destinationCharge: boolean;
     }) => {
       if (stripeApi.refundFails) throw new Error("Stripe is down");
       stripeApi.refunds.push(input);
@@ -76,6 +97,7 @@ const { payOrderWithCard, refundSupplyOrderPayment } = await import("./actions")
 const { getSupplyOrderPayment } = await import("./queries");
 const { syncCheckout } = await import("./sync");
 const { POST: webhook } = await import("@/app/api/payments/webhook/route");
+const { GET: onboarding } = await import("@/app/api/payments/onboarding/route");
 
 const up = await supabaseUp();
 const d = up ? describe : describe.skip;
@@ -100,7 +122,17 @@ d("supply order payments (SPEC-014)", () => {
 
     const product = await makeProduct(factory.id, { name: "Blusa Paga", min_order_quantity: 1 });
     const variant = await makeVariant(product.id, { size: "M", retail_price: 79.9 });
-    return { factoryAdmin, factory, reseller, shop, outsider, variant };
+    // the factory can receive (VES-27); its commission is the default 10%
+    const accountId = `acct_test_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+    const linked = await admin().rpc("link_factory_payment_account", {
+      p_organization_id: factory.id,
+      p_stripe_account_id: accountId,
+      p_transfers_status: "active",
+    });
+    if (linked.error) throw linked.error;
+    stripeApi.accounts.set(accountId, "active");
+
+    return { factoryAdmin, factory, reseller, shop, outsider, variant, accountId };
   }
 
   /** A supply order of `quantity` × R$ 79,90, confirmed by the factory unless told otherwise. */
@@ -232,6 +264,8 @@ d("supply order payments (SPEC-014)", () => {
     stripeApi.expired.length = 0;
     stripeApi.refunds.length = 0;
     stripeApi.refundFails = false;
+    stripeApi.accountsCreated.length = 0;
+    stripeApi.links.length = 0;
   });
   afterEach(() => {
     clearTestClient();
@@ -267,6 +301,9 @@ d("supply order payments (SPEC-014)", () => {
       refundedAmount: 0,
       refundedAt: null,
       refundReason: null,
+      platformFeePercent: 10,
+      platformFeeAmount: 23.97,
+      netAmount: 215.73,
     });
   });
 
@@ -310,6 +347,8 @@ d("supply order payments (SPEC-014)", () => {
         p_order_id: o.id,
         p_checkout_session_id: `cs_test_${crypto.randomUUID()}`,
         p_amount: o.total,
+        p_platform_fee_amount: 15.98, // 10% of 159,80
+        p_destination_account_id: ctx.accountId,
         ...p,
       });
 
@@ -317,6 +356,13 @@ d("supply order payments (SPEC-014)", () => {
     expect((await register(ctx.reseller.client, { p_amount: 1 })).error?.message).toBe(
       "O valor do pagamento não confere com o total do pedido",
     );
+    expect((await register(ctx.reseller.client, { p_platform_fee_amount: 0 })).error?.message).toBe(
+      "A comissão não confere com o percentual do fornecedor",
+    );
+    expect(
+      (await register(ctx.reseller.client, { p_destination_account_id: "acct_someone_else" })).error
+        ?.message,
+    ).toBe("O fornecedor ainda não pode receber pagamentos pelo Vestiq");
     expect((await register(ctx.reseller.client)).error).toBeNull();
     expect((await register(ctx.reseller.client)).error?.message).toBe(
       "Já existe um pagamento em andamento para este pedido",
@@ -592,5 +638,201 @@ d("supply order payments (SPEC-014)", () => {
       received: true,
       ignored: true,
     });
+  });
+
+  // --- VES-27: commission and the supplier's connected account (SPEC-015) ---
+
+  async function setFee(orgId: string, percent: number) {
+    const { error } = await admin().rpc("set_factory_platform_fee", {
+      p_organization_id: orgId,
+      p_percent: percent,
+    });
+    if (error) throw error;
+  }
+
+  it("charges for the supplier's account and keeps its commission (TC-COM-01)", async () => {
+    await setFee(ctx.factory.id, 12.5);
+    try {
+      const o = await order(3); // R$ 239,70
+      await startCheckout(o.id);
+
+      // 12,5% of 239,70 = 29,9625 → 29,96
+      expect(stripeApi.created.at(-1)).toMatchObject({
+        transfer: { destination: ctx.accountId, platformFee: 29.96 },
+      });
+      expect((await paymentRows(o.id))[0]).toMatchObject({
+        amount: 239.7,
+        platform_fee_percent: 12.5,
+        platform_fee_amount: 29.96,
+        net_amount: 209.74,
+        destination_account_id: ctx.accountId,
+      });
+    } finally {
+      await setFee(ctx.factory.id, 10);
+    }
+  });
+
+  it("refunds a destination charge from the supplier, with the commission (TC-COM-02)", async () => {
+    const o = await paidOrder();
+    await refund(ctx.factoryAdmin, o.id).catch(() => {});
+    expect(stripeApi.refunds.at(-1)).toMatchObject({ destinationCharge: true });
+  });
+
+  it("only charges when the supplier can receive, re-checking Stripe (TC-COM-03)", async () => {
+    const o = await order();
+    // Stripe now says the account needs attention
+    stripeApi.accounts.set(ctx.accountId, "restricted");
+    try {
+      expect(await pay(ctx.reseller, o.id)).toEqual({
+        error: "O fornecedor ainda não pode receber pagamentos pelo Vestiq",
+      });
+      expect(stripeApi.created).toEqual([]);
+      const { data } = await admin()
+        .from("factory_payment_accounts")
+        .select("transfers_status")
+        .eq("organization_id", ctx.factory.id)
+        .single();
+      expect(data!.transfers_status).toBe("restricted");
+    } finally {
+      stripeApi.accounts.set(ctx.accountId, "active");
+      await admin().rpc("set_factory_payment_account_status", {
+        p_stripe_account_id: ctx.accountId,
+        p_transfers_status: "active",
+      });
+    }
+
+    // a supplier that never set up its account
+    const other = await makeUser();
+    const otherFactory = await makeOrg(
+      other.userId,
+      "FACTORY",
+      "FACTORY_ADMIN",
+      "Fábrica Sem Conta",
+    );
+    const net = await makeNetwork(otherFactory.id);
+    await addMember(net.id, ctx.shop.id);
+    const product = await makeProduct(otherFactory.id, { min_order_quantity: 1 });
+    const variant = await makeVariant(product.id, { retail_price: 50 });
+    const placed = await ctx.reseller.client.rpc("place_supply_order", {
+      p_reseller_id: ctx.shop.id,
+      p_supplier_id: otherFactory.id,
+      p_items: [{ variant_id: variant.id, quantity: 2 }],
+    });
+    await other.client.rpc("respond_supply_order", {
+      p_order_id: placed.data!.id,
+      p_decision: "confirm",
+    });
+    expect(await pay(ctx.reseller, placed.data!.id)).toEqual({
+      error: "O fornecedor ainda não pode receber pagamentos pelo Vestiq",
+    });
+  });
+
+  it("keeps the payout account and the commission out of users' hands (TC-COM-04)", async () => {
+    // resellers don't read the supplier's account
+    const { data: seen } = await ctx.reseller.client.from("factory_payment_accounts").select("*");
+    expect(seen).toEqual([]);
+    const { data: own } = await ctx.factoryAdmin.client
+      .from("factory_payment_accounts")
+      .select("platform_fee_percent, transfers_status");
+    expect(own).toEqual([{ platform_fee_percent: 10, transfers_status: "active" }]);
+
+    // nobody but the service role links, activates or prices an account
+    for (const [fn, args] of [
+      ["set_factory_platform_fee", { p_organization_id: ctx.factory.id, p_percent: 0 }],
+      [
+        "set_factory_payment_account_status",
+        { p_stripe_account_id: ctx.accountId, p_transfers_status: "active" },
+      ],
+      [
+        "link_factory_payment_account",
+        {
+          p_organization_id: ctx.factory.id,
+          p_stripe_account_id: "acct_x",
+          p_transfers_status: "active",
+        },
+      ],
+    ] as const) {
+      const { error } = await ctx.factoryAdmin.client.rpc(fn, args as never);
+      expect(error?.code).toBe("42501");
+    }
+    // a direct write is refused by RLS
+    await ctx.factoryAdmin.client
+      .from("factory_payment_accounts")
+      .update({ platform_fee_percent: 0 })
+      .eq("organization_id", ctx.factory.id);
+    const { data: after } = await admin()
+      .from("factory_payment_accounts")
+      .select("platform_fee_percent")
+      .eq("organization_id", ctx.factory.id)
+      .single();
+    expect(after!.platform_fee_percent).toBe(10);
+
+    // a factory keeps the account it was linked to
+    const { error } = await admin().rpc("link_factory_payment_account", {
+      p_organization_id: ctx.factory.id,
+      p_stripe_account_id: "acct_test_other",
+      p_transfers_status: "active",
+    });
+    expect(error?.message).toBe("Esta fábrica já tem outra conta de recebimento");
+  });
+
+  async function startOnboarding(user: User) {
+    setTestClient(user.client);
+    return onboarding(new NextRequest("http://localhost:3000/api/payments/onboarding"));
+  }
+
+  it("sends a factory admin to the Stripe onboarding, creating the account once (TC-COM-05)", async () => {
+    const admin2 = await makeUser();
+    const newFactory = await makeOrg(admin2.userId, "FACTORY", "FACTORY_ADMIN", "Fábrica Nova");
+
+    const first = await startOnboarding(admin2);
+    expect(first.status).toBe(307);
+    const [created] = stripeApi.accountsCreated;
+    expect(created).toEqual(
+      expect.objectContaining({ organizationId: newFactory.id, name: "Fábrica Nova" }),
+    );
+    const { data: row } = await admin2.client
+      .from("factory_payment_accounts")
+      .select("stripe_account_id, transfers_status, platform_fee_percent")
+      .single();
+    expect(row).toMatchObject({ transfers_status: "pending", platform_fee_percent: 10 });
+    expect(first.headers.get("location")).toBe(
+      `https://connect.stripe.com/setup/e/${row!.stripe_account_id}`,
+    );
+    expect(stripeApi.links[0]).toEqual({
+      accountId: row!.stripe_account_id,
+      refreshUrl: "http://localhost:3000/api/payments/onboarding",
+      returnUrl: "http://localhost:3000/recebimentos?cadastro=retorno",
+    });
+
+    // again (or an expired link): same account, a fresh link
+    await startOnboarding(admin2);
+    expect(stripeApi.accountsCreated).toHaveLength(1);
+    expect(stripeApi.links).toHaveLength(2);
+
+    // back from Stripe, once the account can receive
+    stripeApi.accounts.set(row!.stripe_account_id!, "active");
+    const { syncPayoutAccount } = await import("./sync");
+    expect(await syncPayoutAccount(row!.stripe_account_id!)).toBe("active");
+    setTestClient(admin2.client);
+    const { getFactoryPayoutAccount } = await import("./queries");
+    expect(await getFactoryPayoutAccount(newFactory.id)).toEqual({
+      stripeAccountId: row!.stripe_account_id,
+      transfersStatus: "active",
+      platformFeePercent: 10,
+    });
+  });
+
+  it("doesn't let resellers or a disabled Stripe start the onboarding (TC-COM-06)", async () => {
+    const res = await startOnboarding(ctx.reseller);
+    expect(res.headers.get("location")).toBe(
+      "http://localhost:3000/recebimentos?toast=payouts-not-allowed",
+    );
+    stripeApi.configured = false;
+    const off = await startOnboarding(ctx.factoryAdmin);
+    expect(off.headers.get("location")).toBe(
+      "http://localhost:3000/recebimentos?toast=payouts-unavailable",
+    );
+    expect(stripeApi.accountsCreated).toEqual([]);
   });
 });
