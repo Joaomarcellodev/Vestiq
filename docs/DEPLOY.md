@@ -86,7 +86,7 @@ Só duas — ambas públicas (protegidas por RLS):
 >
 > - `STRIPE_SECRET_KEY` — no painel do Stripe, **Desenvolvedores → Chaves de
 >   API**. Prefira uma **chave restrita** (`rk_test_…`) com permissão de
->   **escrita em Checkout Sessions**. Enquanto o Vestiq estiver em teste, use só
+>   **escrita em Checkout Sessions e em Refunds** e **leitura em PaymentIntents**. Enquanto o Vestiq estiver em teste, use só
 >   chaves da área restrita (sandbox), nunca as de produção.
 > - `STRIPE_WEBHOOK_SECRET` — o `whsec_…` do endpoint de webhook (abaixo).
 >
@@ -97,7 +97,8 @@ Só duas — ambas públicas (protegidas por RLS):
 > **Endpoint de webhook** (painel do Stripe → **Desenvolvedores → Webhooks →
 > Adicionar destino**): URL `https://vestiq-app.netlify.app/api/payments/webhook`,
 > eventos `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
-> `checkout.session.async_payment_failed` e `checkout.session.expired`. Copie o
+> `checkout.session.async_payment_failed`, `checkout.session.expired` e
+> `charge.refunded` (reembolsos, inclusive os feitos no painel). Copie o
 > segredo de assinatura para `STRIPE_WEBHOOK_SECRET`.
 >
 > **Em desenvolvimento**, o webhook pode vir pela Stripe CLI:

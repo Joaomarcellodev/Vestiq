@@ -80,14 +80,17 @@ alternativa se o split por recebedores virar requisito forte.
   transacional (ADR-0004) e não pode ser chamada por usuários. Eventos:
   `checkout.session.completed` (só com `payment_status = paid`),
   `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`
-  e `checkout.session.expired`.
+  e `checkout.session.expired`; e `charge.refunded` para reembolsos.
+- **Reembolso:** a fábrica reembolsa o pedido pago pelo Vestiq (`refunds.create` com
+  chave de idempotência), e reembolsos feitos no painel chegam pelo webhook. O
+  valor reembolsado é sempre o `amount_refunded` da cobrança no Stripe.
 - **Volta do checkout:** `/pedidos/[id]?checkout=<sessão>` lê a sessão na API do
   Stripe e registra o resultado, para o pedido aparecer pago sem esperar o
   webhook. É um complemento: **o webhook é obrigatório**, porque a revendedora
   pode pagar e não voltar.
 - **Variáveis de ambiente** (nenhuma chave no repositório):
   - `STRIPE_SECRET_KEY` (servidor). Preferir uma chave restrita `rk_` com escrita
-    em Checkout Sessions.
+    em Checkout Sessions e Refunds e leitura em PaymentIntents.
   - `STRIPE_WEBHOOK_SECRET` (servidor), do endpoint no painel ou da `stripe listen`.
   - Em desenvolvimento e no CI, só chaves da **área restrita** (sandbox).
 

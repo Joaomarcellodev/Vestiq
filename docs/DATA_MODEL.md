@@ -367,6 +367,16 @@ tabela só tem policy de `select` (as duas partes do pedido).
 
 O trigger `supply_order_payments_notify` avisa a fábrica quando o pedido é pago.
 
+Reembolso (migrations `0035` e `0036`): colunas `refunded_amount` (0 a `amount`),
+`refunded_at`, `refunded_by` e `refund_reason`; status `REFUNDED` só no reembolso total.
+
+| Função | Garante |
+| --- | --- |
+| `authorize_supply_order_refund(p_order_id, p_reason)` | `FACTORY_ADMIN`/`PLATFORM_ADMIN` do fornecedor; pagamento `PAID` com `payment_intent_id`; não grava nada |
+| `apply_supply_order_payment_refund(p_payment_intent_id, p_amount_refunded, p_refunded_by, p_reason)` | **só `service_role`**; total reembolsado lido do Stripe; nunca diminui nem passa do pago |
+
+O trigger `supply_order_payments_notify_refund` avisa a revenda de cada reembolso.
+
 ## Índices principais
 
 ```sql

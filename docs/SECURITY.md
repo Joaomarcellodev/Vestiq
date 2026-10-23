@@ -79,7 +79,7 @@ Segurança) e o teste de isolamento em `specs/<feature>/TESTS.md`.
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | pública | browser/server client (protegida por RLS) |
 | `SUPABASE_SECRET_KEY` | **server-only** | `lib/supabase/admin.ts`, seeds, jobs |
 | `NEXT_PUBLIC_SITE_URL` | pública | `redirectTo` do OAuth |
-| `STRIPE_SECRET_KEY` | **server-only** | `features/payments/provider/stripe.ts` — preferir chave restrita `rk_` (escrita em Checkout Sessions) |
+| `STRIPE_SECRET_KEY` | **server-only** | `features/payments/provider/stripe.ts` — preferir chave restrita `rk_` (escrita em Checkout Sessions e Refunds, leitura em PaymentIntents) |
 | `STRIPE_WEBHOOK_SECRET` | **server-only** | verificação da assinatura em `/api/payments/webhook` |
 
 - `.env` e `.env*.local` no `.gitignore`. Só `.env.example` versionado.
