@@ -62,6 +62,11 @@ export const FLASH_MESSAGES: Record<string, { message: string; variant: ToastVar
   "supply-order-confirmed": { message: "Pedido confirmado.", variant: "success" },
   "supply-order-rejected": { message: "Pedido recusado.", variant: "info" },
   "supply-order-cancelled": { message: "Pedido cancelado.", variant: "info" },
+  "supply-order-paid": { message: "Pagamento aprovado.", variant: "success" },
+  "supply-order-payment-cancelled": {
+    message: "Pagamento não concluído. Você pode tentar de novo.",
+    variant: "info",
+  },
 
   // network
   "network-joined": { message: "Bem-vindo à rede!", variant: "success" },

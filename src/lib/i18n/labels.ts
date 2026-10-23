@@ -49,6 +49,13 @@ export const SUPPLY_ORDER_STATUS: LabelMap<Database["public"]["Enums"]["supply_o
   CANCELLED: { label: "Cancelado", tone: "neutral" },
 };
 
+export const PAYMENT_STATUS: LabelMap<Database["public"]["Enums"]["payment_status"]> = {
+  PENDING: { label: "Aguardando pagamento", tone: "warning" },
+  PAID: { label: "Pago", tone: "success" },
+  FAILED: { label: "Pagamento recusado", tone: "error" },
+  EXPIRED: { label: "Pagamento expirado", tone: "neutral" },
+};
+
 export const SALE_STATUS: Record<Database["public"]["Enums"]["sale_status"], string> = {
   CONFIRMED: "Confirmada",
   CANCELLED: "Cancelada",

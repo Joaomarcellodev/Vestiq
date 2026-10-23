@@ -11,6 +11,9 @@ import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
 import { Badge } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { SUPPLY_ORDER_STATUS } from "@/lib/i18n/labels";
+import { OrderPayment } from "@/features/payments/components/order-payment";
+import { getSupplyOrderPayment } from "@/features/payments/queries";
+import { syncCheckout } from "@/features/payments/sync";
 
 export const metadata: Metadata = { title: "Pedido" };
 
@@ -20,10 +23,25 @@ const dateTime = (iso: string) =>
 const textareaClass =
   "field-focus-ring w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 font-body-md text-body-md";
 
-export default async function SupplyOrderPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function SupplyOrderPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ checkout?: string }>;
+}) {
+  const [{ id }, { checkout }] = await Promise.all([params, searchParams]);
   const order = await getSupplyOrder(id);
   if (!order) notFound();
+
+  // Back from the Stripe checkout: record its outcome now rather than wait for
+  // the webhook. A failure here only delays the status — the webhook settles it.
+  if (order.status === "CONFIRMED" && checkout) {
+    await syncCheckout(order.id, checkout).catch((err) =>
+      console.error("[payments] syncCheckout failed", err),
+    );
+  }
+  const payment = order.status === "CONFIRMED" ? await getSupplyOrderPayment(order.id) : null;
 
   const actions = availableActions(order.status, order.party, { canRespond: order.canRespond });
   const status = SUPPLY_ORDER_STATUS[order.status];
@@ -42,6 +60,9 @@ export default async function SupplyOrderPage({ params }: { params: Promise<{ id
             noteLabel: "Mensagem do fornecedor",
           },
         ]
+      : []),
+    ...(payment?.status === "PAID" && payment.paidAt
+      ? [{ label: "Pagamento aprovado", at: payment.paidAt, note: null, noteLabel: "" }]
       : []),
     ...(order.cancelledAt
       ? [
@@ -145,6 +166,15 @@ export default async function SupplyOrderPage({ params }: { params: Promise<{ id
           </table>
         </div>
       </section>
+
+      {order.status === "CONFIRMED" && (
+        <OrderPayment
+          orderId={order.id}
+          party={order.party}
+          total={order.totalAmount}
+          payment={payment}
+        />
+      )}
 
       <section className="space-y-sm">
         <h2 className="font-headline-md text-headline-md text-on-surface">Histórico</h2>
