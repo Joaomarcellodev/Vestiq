@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getCheckout, type CheckoutUpdate } from "./provider/stripe";
+import { getCheckout, type CheckoutUpdate, type RefundUpdate } from "./provider/stripe";
 import type { PaymentStatus } from "./status";
 
 /**
@@ -16,6 +16,23 @@ export async function applyPaymentStatus(update: CheckoutUpdate): Promise<Paymen
     p_status: update.status,
     p_amount: update.amount ?? undefined,
     p_payment_intent_id: update.paymentIntentId ?? undefined,
+  });
+  if (error) throw error;
+  return data.status;
+}
+
+/**
+ * Records a charge's refunded total read from Stripe (RF-PAY-004). Same
+ * service-role reasoning as above; never lowers the amount already recorded.
+ */
+export async function applyRefund(
+  update: RefundUpdate & { refundedBy?: string; reason?: string },
+): Promise<PaymentStatus> {
+  const { data, error } = await createAdminClient().rpc("apply_supply_order_payment_refund", {
+    p_payment_intent_id: update.paymentIntentId,
+    p_amount_refunded: update.amountRefunded,
+    p_refunded_by: update.refundedBy,
+    p_reason: update.reason,
   });
   if (error) throw error;
   return data.status;

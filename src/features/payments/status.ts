@@ -33,6 +33,9 @@ export const CHECKOUT_EVENTS = [
 
 export type CheckoutEventType = (typeof CHECKOUT_EVENTS)[number];
 
+/** Sent for every refund on a charge, from the Vestiq or from the Stripe Dashboard. */
+export const REFUND_EVENT = "charge.refunded";
+
 export function isCheckoutEvent(type: string): type is CheckoutEventType {
   return (CHECKOUT_EVENTS as readonly string[]).includes(type);
 }

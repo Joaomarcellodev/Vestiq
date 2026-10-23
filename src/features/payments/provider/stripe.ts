@@ -6,6 +6,7 @@ import {
   eventOutcome,
   fromCents,
   isCheckoutEvent,
+  REFUND_EVENT,
   sessionOutcome,
   toCents,
   type PaymentStatus,
@@ -47,13 +48,23 @@ export interface Checkout {
   paymentIntentId: string | null;
 }
 
-/** What a webhook event changes on a payment. */
+/** What a checkout event changes on a payment. */
 export interface CheckoutUpdate {
   checkoutSessionId: string;
   status: PaymentStatus;
   amount: number | null;
   paymentIntentId: string | null;
 }
+
+/** A charge's refunded total, as Stripe reports it (RF-PAY-004). */
+export interface RefundUpdate {
+  paymentIntentId: string;
+  /** Total refunded so far on the charge, in BRL — not this refund alone. */
+  amountRefunded: number;
+}
+
+export type WebhookUpdate =
+  ({ kind: "checkout" } & CheckoutUpdate) | ({ kind: "refund" } & RefundUpdate);
 
 function toCheckout(session: Stripe.Checkout.Session): Checkout {
   return {
@@ -123,6 +134,36 @@ export async function expireCheckout(id: string): Promise<void> {
   await stripe().checkout.sessions.expire(id);
 }
 
+/**
+ * Refunds what is left of a payment, in full (RF-PAY-004). The idempotency key
+ * makes a double submit refund once. Returns the charge's refunded total.
+ */
+export async function refundPayment(input: {
+  paymentIntentId: string;
+  orderId: string;
+  idempotencyKey: string;
+}): Promise<RefundUpdate> {
+  const refund = await stripe().refunds.create(
+    {
+      payment_intent: input.paymentIntentId,
+      reason: "requested_by_customer",
+      metadata: { supply_order_id: input.orderId },
+    },
+    { idempotencyKey: input.idempotencyKey },
+  );
+  if (refund.status === "failed" || refund.status === "canceled") {
+    throw new Error(`Stripe refund ${refund.id} ${refund.status}`);
+  }
+  const intent = await stripe().paymentIntents.retrieve(input.paymentIntentId, {
+    expand: ["latest_charge"],
+  });
+  const charge = intent.latest_charge as Stripe.Charge | null;
+  return {
+    paymentIntentId: input.paymentIntentId,
+    amountRefunded: fromCents(charge?.amount_refunded ?? refund.amount),
+  };
+}
+
 export class InvalidWebhookError extends Error {}
 
 /**
@@ -133,12 +174,24 @@ export function parseWebhook(
   rawBody: string,
   signature: string | null,
   secret: string,
-): CheckoutUpdate | null {
+): WebhookUpdate | null {
   let event: Stripe.Event;
   try {
     event = Stripe.webhooks.constructEvent(rawBody, signature ?? "", secret);
   } catch (err) {
     throw new InvalidWebhookError(err instanceof Error ? err.message : "invalid signature");
+  }
+
+  if (event.type === REFUND_EVENT) {
+    const charge = event.data.object as Stripe.Charge;
+    const pi = charge.payment_intent;
+    const id = typeof pi === "string" ? pi : pi?.id;
+    if (!id) return null;
+    return {
+      kind: "refund",
+      paymentIntentId: id,
+      amountRefunded: fromCents(charge.amount_refunded),
+    };
   }
   if (!isCheckoutEvent(event.type)) return null;
 
@@ -146,6 +199,7 @@ export function parseWebhook(
   const status = eventOutcome(event.type, session);
   if (!status) return null;
   return {
+    kind: "checkout",
     checkoutSessionId: session.id,
     status,
     amount: session.amount_total === null ? null : fromCents(session.amount_total),

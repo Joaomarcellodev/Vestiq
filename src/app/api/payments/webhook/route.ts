@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getServerEnv } from "@/lib/env";
 import { InvalidWebhookError, parseWebhook } from "@/features/payments/provider/stripe";
-import { applyPaymentStatus } from "@/features/payments/sync";
+import { applyPaymentStatus, applyRefund } from "@/features/payments/sync";
 
 /**
  * Stripe webhook (RF-PAY-002). Public route — Stripe has no session — so the
@@ -30,7 +30,8 @@ export async function POST(request: NextRequest) {
   if (!update) return NextResponse.json({ received: true });
 
   try {
-    const status = await applyPaymentStatus(update);
+    const status =
+      update.kind === "refund" ? await applyRefund(update) : await applyPaymentStatus(update);
     return NextResponse.json({ received: true, status });
   } catch (err) {
     // A checkout this app never registered (another integration on the same
