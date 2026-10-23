@@ -18,6 +18,11 @@ const stripeApi = vi.hoisted(() => ({
   sessions: new Map<string, Checkout>(),
   created: [] as { orderId: string; amount: number; successUrl: string; cancelUrl: string }[],
   expired: [] as string[],
+  refunds: [] as { paymentIntentId: string; idempotencyKey: string }[],
+  refundFails: false,
+  /** Refunded total per payment intent, as Stripe's charge reports it. */
+  refunded: new Map<string, number>(),
+  amounts: new Map<string, number>(),
 }));
 
 vi.mock("./provider/stripe", async (importOriginal) => {
@@ -52,10 +57,22 @@ vi.mock("./provider/stripe", async (importOriginal) => {
     expireCheckout: async (id: string) => {
       stripeApi.expired.push(id);
     },
+    refundPayment: async (input: {
+      paymentIntentId: string;
+      orderId: string;
+      idempotencyKey: string;
+    }) => {
+      if (stripeApi.refundFails) throw new Error("Stripe is down");
+      stripeApi.refunds.push(input);
+      // a full refund of what is left, like refunds.create without `amount`
+      const total = stripeApi.amounts.get(input.paymentIntentId) ?? 0;
+      stripeApi.refunded.set(input.paymentIntentId, total);
+      return { paymentIntentId: input.paymentIntentId, amountRefunded: total };
+    },
   };
 });
 
-const { payOrderWithCard } = await import("./actions");
+const { payOrderWithCard, refundSupplyOrderPayment } = await import("./actions");
 const { getSupplyOrderPayment } = await import("./queries");
 const { syncCheckout } = await import("./sync");
 const { POST: webhook } = await import("@/app/api/payments/webhook/route");
@@ -162,6 +179,49 @@ d("supply order payments (SPEC-014)", () => {
     });
   }
 
+  /** A confirmed order paid through the signed webhook. */
+  async function paidOrder(quantity = 3) {
+    const o = await order(quantity);
+    const checkout = await startCheckout(o.id);
+    const paymentIntentId = `pi_test_${crypto.randomUUID().replace(/-/g, "")}`;
+    const event = signedEvent("checkout.session.completed", {
+      id: checkout.id,
+      status: "complete",
+      payment_status: "paid",
+      amount_total: Math.round(o.total * 100),
+      payment_intent: paymentIntentId,
+    });
+    expect((await post(event.payload, event.signature)).status).toBe(200);
+    stripeApi.amounts.set(paymentIntentId, o.total);
+    return { ...o, paymentIntentId };
+  }
+
+  function refundedEvent(paymentIntentId: string, amountRefunded: number) {
+    return signedEvent("charge.refunded", {
+      object: "charge",
+      id: `ch_${crypto.randomUUID()}`,
+      payment_intent: paymentIntentId,
+      amount_refunded: Math.round(amountRefunded * 100),
+      refunded: true,
+    });
+  }
+
+  async function refund(user: User, orderId: string, extra: Record<string, unknown> = {}) {
+    setTestClient(user.client);
+    return refundSupplyOrderPayment({}, formData({ orderId, confirm: "on", ...extra }));
+  }
+
+  async function notificationsOf(orgId: string, type: string, orderId: string) {
+    const { data } = await admin()
+      .from("notifications")
+      .select("title, body")
+      .eq("organization_id", orgId)
+      .eq("type", type as "SUPPLY_ORDER_REFUNDED")
+      .eq("link", `/pedidos/${orderId}`)
+      .order("created_at");
+    return data ?? [];
+  }
+
   beforeAll(async () => {
     ctx = await setup();
   });
@@ -170,6 +230,8 @@ d("supply order payments (SPEC-014)", () => {
     stripeApi.configured = true;
     stripeApi.created.length = 0;
     stripeApi.expired.length = 0;
+    stripeApi.refunds.length = 0;
+    stripeApi.refundFails = false;
   });
   afterEach(() => {
     clearTestClient();
@@ -202,6 +264,9 @@ d("supply order payments (SPEC-014)", () => {
       status: "PENDING",
       amount: 239.7,
       paidAt: null,
+      refundedAmount: 0,
+      refundedAt: null,
+      refundReason: null,
     });
   });
 
@@ -392,5 +457,140 @@ d("supply order payments (SPEC-014)", () => {
     );
     expect(stripeApi.created).toHaveLength(1);
     expect((await paymentRows(o.id)).map((p) => p.status)).toEqual(["PAID"]);
+  });
+
+  it("lets the supplier refund a paid order in full (TC-PAY-14)", async () => {
+    const o = await paidOrder(3);
+    setTestClient(ctx.factoryAdmin.client);
+    await expectRedirect(
+      () =>
+        refundSupplyOrderPayment(
+          {},
+          formData({ orderId: o.id, confirm: "on", reason: "  Sem tecido para produzir  " }),
+        ),
+      `/pedidos/${o.id}?toast=supply-order-refunded`,
+    );
+
+    expect(stripeApi.refunds).toEqual([
+      expect.objectContaining({ paymentIntentId: o.paymentIntentId, orderId: o.id }),
+    ]);
+    const [row] = await paymentRows(o.id);
+    expect(row).toMatchObject({
+      status: "REFUNDED",
+      refunded_amount: 239.7,
+      refunded_by: ctx.factoryAdmin.userId,
+      refund_reason: "Sem tecido para produzir",
+    });
+    expect(row!.refunded_at).not.toBeNull();
+    expect(await notificationsOf(ctx.shop.id, "SUPPLY_ORDER_REFUNDED", o.id)).toEqual([
+      {
+        title: "Pagamento reembolsado",
+        body: "R$ 239,70 do pedido para Fábrica Paga foram reembolsados no seu cartão",
+      },
+    ]);
+
+    setTestClient(ctx.reseller.client);
+    expect(await getSupplyOrderPayment(o.id)).toMatchObject({
+      status: "REFUNDED",
+      refundedAmount: 239.7,
+      refundReason: "Sem tecido para produzir",
+    });
+    // BR-PAY-07: a refunded order is not paid again
+    expect(await pay(ctx.reseller, o.id)).toEqual({ error: "Este pedido foi reembolsado" });
+    // and there's nothing left to refund
+    expect(await refund(ctx.factoryAdmin, o.id)).toEqual({
+      error: "Este pedido não tem um pagamento para reembolsar",
+    });
+    expect(stripeApi.refunds).toHaveLength(1);
+  });
+
+  it("only lets a supplier admin refund a paid order (TC-PAY-15)", async () => {
+    const o = await paidOrder();
+    const notPaid = await order();
+
+    expect(await refund(ctx.reseller, o.id)).toEqual({
+      error: "Você não tem permissão para esta ação",
+    });
+    expect(await refund(ctx.outsider, o.id)).toEqual({
+      error: "Você não tem permissão para esta ação",
+    });
+    expect(await refund(ctx.factoryAdmin, notPaid.id)).toEqual({
+      error: "Este pedido não tem um pagamento para reembolsar",
+    });
+    expect(await refund(ctx.factoryAdmin, o.id, { confirm: undefined })).toEqual({
+      error: "Confirme o reembolso",
+    });
+    expect(await refund(ctx.factoryAdmin, o.id, { reason: "x".repeat(501) })).toEqual({
+      error: "O motivo pode ter até 500 caracteres",
+    });
+    expect(stripeApi.refunds).toEqual([]);
+
+    // the refund itself is service-role only
+    const { error } = await ctx.factoryAdmin.client.rpc("apply_supply_order_payment_refund", {
+      p_payment_intent_id: o.paymentIntentId,
+      p_amount_refunded: o.total,
+    });
+    expect(error?.code).toBe("42501");
+    expect((await paymentRows(o.id))[0]).toMatchObject({ status: "PAID", refunded_amount: 0 });
+  });
+
+  it("keeps the order paid when Stripe refuses the refund (TC-PAY-16)", async () => {
+    const o = await paidOrder();
+    stripeApi.refundFails = true;
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    expect(await refund(ctx.factoryAdmin, o.id)).toEqual({
+      error: "Não foi possível reembolsar o pagamento. Tente novamente.",
+    });
+    expect((await paymentRows(o.id))[0]).toMatchObject({ status: "PAID", refunded_amount: 0 });
+  });
+
+  it("records refunds made on the Stripe Dashboard from the webhook (TC-PAY-17)", async () => {
+    const o = await paidOrder(4); // R$ 319,60
+
+    // partial refund: still paid, amount recorded
+    const partial = refundedEvent(o.paymentIntentId, 100);
+    expect(await (await post(partial.payload, partial.signature)).json()).toEqual({
+      received: true,
+      status: "PAID",
+    });
+    expect((await paymentRows(o.id))[0]).toMatchObject({ status: "PAID", refunded_amount: 100 });
+
+    // a late, smaller total never lowers what was recorded
+    const stale = refundedEvent(o.paymentIntentId, 50);
+    expect((await post(stale.payload, stale.signature)).status).toBe(200);
+    expect((await paymentRows(o.id))[0]!.refunded_amount).toBe(100);
+
+    // the rest: fully refunded
+    const full = refundedEvent(o.paymentIntentId, 319.6);
+    expect(await (await post(full.payload, full.signature)).json()).toEqual({
+      received: true,
+      status: "REFUNDED",
+    });
+    expect((await post(full.payload, full.signature)).status).toBe(200);
+
+    expect(await notificationsOf(ctx.shop.id, "SUPPLY_ORDER_REFUNDED", o.id)).toEqual([
+      {
+        title: "Reembolso parcial",
+        body: "R$ 100,00 do pedido para Fábrica Paga foram reembolsados no seu cartão",
+      },
+      {
+        title: "Pagamento reembolsado",
+        body: "R$ 319,60 do pedido para Fábrica Paga foram reembolsados no seu cartão",
+      },
+    ]);
+
+    // more than was paid is refused, and Stripe retries
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const over = refundedEvent(o.paymentIntentId, 400);
+    expect((await post(over.payload, over.signature)).status).toBe(500);
+  });
+
+  it("ignores refunds of charges the app never recorded (TC-PAY-18)", async () => {
+    const other = refundedEvent("pi_test_from_another_integration", 10);
+    expect(await (await post(other.payload, other.signature)).json()).toEqual({
+      received: true,
+      ignored: true,
+    });
   });
 });
