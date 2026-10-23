@@ -349,6 +349,24 @@ ou do fornecedor); toda escrita passa pelas funções abaixo.
 O trigger `supply_orders_notify` avisa a fábrica de um novo pedido e de um
 cancelamento, e avisa a revenda de uma confirmação ou recusa (link `/pedidos/<id>`).
 
+## Pagamento de pedidos (SPEC-014)
+
+Migrations `0033` (tipo de notificação `SUPPLY_ORDER_PAID`) e `0034`. A revenda
+paga com cartão, no Checkout do Stripe (ADR-0012), um pedido `CONFIRMED`. O
+Vestiq guarda só a sessão de checkout e o status; nenhum dado de cartão. A
+tabela só tem policy de `select` (as duas partes do pedido).
+
+| Tabela | Colunas principais |
+| --- | --- |
+| `supply_order_payments` | `order_id`, `provider` (`stripe`), `checkout_session_id` (único), `payment_intent_id`, `status payment_status` (`PENDING`/`PAID`/`FAILED`/`EXPIRED`), `amount numeric(18,2)`, `currency` (`BRL`), `created_by`, `paid_at`. Único parcial `(order_id) where status = 'PENDING'` |
+
+| Função | Garante |
+| --- | --- |
+| `register_supply_order_payment(p_order_id, p_checkout_session_id, p_amount)` | membro da revenda; pedido `CONFIRMED`, ainda não pago e sem outro checkout pendente; valor = `total_amount` |
+| `apply_supply_order_payment_status(p_checkout_session_id, p_status, p_amount, p_payment_intent_id)` | **só `service_role`** (webhook e retorno do checkout, depois de ler o Stripe); só sai de `PENDING`; `PAID` exige o valor registrado; repetir é inócuo |
+
+O trigger `supply_order_payments_notify` avisa a fábrica quando o pedido é pago.
+
 ## Índices principais
 
 ```sql
