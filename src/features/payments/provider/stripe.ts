@@ -73,6 +73,8 @@ function paymentIntentId(session: Stripe.Checkout.Session): string | null {
 
 // Stripe's minimum lifetime for a checkout session.
 const CHECKOUT_TTL_SECONDS = 30 * 60;
+// Tags our sessions in the Dashboard (the random suffix keeps the label unique).
+const INTEGRATION_ID = "vestiq_supply_order_qkzmtrwa";
 
 /** Opens a hosted, card-only, single-payment checkout for a supply order (RF-PAY-001). */
 export async function createCheckout(input: {
@@ -86,6 +88,8 @@ export async function createCheckout(input: {
   const metadata = { supply_order_id: input.orderId };
   const session = await stripe().checkout.sessions.create({
     mode: "payment",
+    integration_identifier: INTEGRATION_ID,
+    // VES-24 is card, paid in full. Pix on Stripe Brazil is invite-only.
     allowed_payment_method_types: ["card"],
     line_items: [
       {
