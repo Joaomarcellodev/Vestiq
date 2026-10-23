@@ -64,6 +64,20 @@ export const FLASH_MESSAGES: Record<string, { message: string; variant: ToastVar
   "supply-order-cancelled": { message: "Pedido cancelado.", variant: "info" },
   "supply-order-paid": { message: "Pagamento aprovado.", variant: "success" },
   "supply-order-refunded": { message: "Pagamento reembolsado.", variant: "success" },
+
+  // payouts (VES-27)
+  "payouts-not-allowed": {
+    message: "Só o administrador da fábrica cadastra a conta de recebimento.",
+    variant: "error",
+  },
+  "payouts-unavailable": {
+    message: "Os pagamentos estão indisponíveis no momento.",
+    variant: "error",
+  },
+  "payouts-onboarding-failed": {
+    message: "Não foi possível abrir o cadastro no Stripe. Tente novamente.",
+    variant: "error",
+  },
   "supply-order-payment-cancelled": {
     message: "Pagamento não concluído. Você pode tentar de novo.",
     variant: "info",

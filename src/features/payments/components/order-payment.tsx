@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
 import { Badge } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
@@ -28,6 +29,7 @@ export function OrderPayment({
   total,
   payment,
   canRefund,
+  supplierReady = true,
 }: {
   orderId: string;
   party: SupplyOrderParty;
@@ -35,6 +37,8 @@ export function OrderPayment({
   payment: SupplyOrderPayment | null;
   /** Supplier admins refund; other supplier members only read. */
   canRefund: boolean;
+  /** Supplier side: whether its payout account can receive (VES-27). */
+  supplierReady?: boolean;
 }) {
   const settled = payment?.status === "PAID" || payment?.status === "REFUNDED";
   const status = PAYMENT_STATUS[settled ? payment.status : "PENDING"];
@@ -49,9 +53,21 @@ export function OrderPayment({
       {settled ? (
         <PaidDetails payment={payment} party={party} />
       ) : party === "supplier" ? (
-        <p className={textClass}>
-          Aguardando o pagamento da revendedora. Você será notificado quando ele for aprovado.
-        </p>
+        supplierReady ? (
+          <p className={textClass}>
+            Aguardando o pagamento da revendedora. Você será notificado quando ele for aprovado.
+          </p>
+        ) : (
+          <p className={textClass}>
+            A revendedora só consegue pagar depois que a fábrica cadastrar a conta de recebimento.{" "}
+            <Link
+              href="/recebimentos"
+              className="font-semibold text-primary-container hover:underline"
+            >
+              Ir para Recebimentos
+            </Link>
+          </p>
+        )
       ) : (
         <ActionForm action={payOrderWithCard} className="space-y-md">
           <input type="hidden" name="orderId" value={orderId} />
@@ -86,6 +102,23 @@ function PaidDetails({ payment, party }: { payment: SupplyOrderPayment; party: S
         {formatBRL(payment.amount)} pagos com cartão de crédito
         {payment.paidAt && ` em ${dateTime(payment.paidAt)}`}.
       </p>
+      {party === "supplier" && payment.platformFeePercent !== null && (
+        <dl className="grid grid-cols-3 gap-2 rounded-lg bg-surface-container-low p-3 font-body-md text-body-md">
+          {[
+            { label: "Valor pago", value: formatBRL(payment.amount) },
+            {
+              label: `Comissão do Vestiq (${payment.platformFeePercent.toLocaleString("pt-BR")}%)`,
+              value: formatBRL(payment.platformFeeAmount),
+            },
+            { label: "Você recebe", value: formatBRL(payment.netAmount) },
+          ].map((f) => (
+            <div key={f.label}>
+              <dt className="text-label-sm text-on-surface-variant">{f.label}</dt>
+              <dd className="font-semibold text-on-surface">{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
       {payment.refundedAmount > 0 && (
         <p className={textClass}>
           {refunded
