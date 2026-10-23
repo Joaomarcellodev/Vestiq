@@ -13,6 +13,9 @@ const publicSchema = z.object({
 
 const serverSchema = z.object({
   SUPABASE_SECRET_KEY: z.string().min(1).optional(),
+  // Stripe (ADR-0012). Optional so the app boots without payments configured.
+  STRIPE_SECRET_KEY: z.string().min(1).optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
 });
 
 const parsedPublicEnv = publicSchema.safeParse({
@@ -53,5 +56,7 @@ export const publicEnv = parsedPublicEnv.data;
 export function getServerEnv(): z.infer<typeof serverSchema> {
   return serverSchema.parse({
     SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || undefined,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || undefined,
   });
 }
