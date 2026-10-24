@@ -7,7 +7,13 @@ import { rpcErrorMessage } from "@/lib/supabase/errors";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import { keptImages, readImageFiles, removeImages, uploadImages } from "@/features/catalog/images";
 import { PRODUCT_IMAGE_MAX_COUNT } from "@/features/catalog/validation";
-import { cancelOfferSchema, offerPhotosSchema, publishOfferSchema } from "./validation";
+import { fieldErrorsOf } from "@/lib/zod";
+import {
+  cancelOfferSchema,
+  offerPhotosSchema,
+  publishOfferSchema,
+  updateOfferSchema,
+} from "./validation";
 
 export type ActionState = { error?: string };
 
@@ -133,4 +139,45 @@ export async function updateOfferPhotos(
   revalidatePath("/rede");
   revalidatePath(`/rede/ofertas/${offerId}`);
   redirect(`/rede/ofertas/${offerId}?toast=offer-photos-updated`);
+}
+
+export type UpdateOfferState = {
+  error?: string;
+  fieldErrors?: Partial<Record<"quantity" | "transferPrice" | "note", string>>;
+};
+
+/**
+ * VES-89 — the owner changes the transfer price, quantity and note of an open
+ * offer with no negotiation in progress. `update_offer` (migration 0033)
+ * enforces the rules; the trigger of migration 0029 keeps it in the free stock.
+ */
+export async function updateOffer(
+  _prev: UpdateOfferState,
+  formData: FormData,
+): Promise<UpdateOfferState> {
+  await requireActiveOrganization();
+  const parsed = updateOfferSchema.safeParse({
+    offerId: formData.get("offerId"),
+    quantity: formData.get("quantity"),
+    transferPrice: formData.get("transferPrice"),
+    note: formData.get("note"),
+  });
+  if (!parsed.success) {
+    const fieldErrors = fieldErrorsOf(parsed.error);
+    return { error: Object.values(fieldErrors)[0] ?? "Dados inválidos", fieldErrors };
+  }
+  const { offerId, quantity, transferPrice, note } = parsed.data;
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("update_offer", {
+    p_offer_id: offerId,
+    p_quantity: quantity,
+    p_transfer_price: transferPrice,
+    p_note: note || undefined,
+  });
+  if (error) return { error: rpcErrorMessage(error) };
+
+  revalidatePath("/rede");
+  revalidatePath(`/rede/ofertas/${offerId}`);
+  redirect(`/rede/ofertas/${offerId}?toast=offer-updated`);
 }
