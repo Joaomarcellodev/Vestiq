@@ -8,11 +8,19 @@ import { ProposeForm } from "@/features/negotiations/components/propose-form";
 import { OfferPhotosForm } from "@/features/offers/components/offer-photos-form";
 import { PageHeader } from "@/components/molecules/page-header";
 import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
-import { Badge, Icon } from "@/components/atoms";
+import Link from "next/link";
+import { Badge, Button, Icon } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { OFFER_STATUS } from "@/lib/i18n/labels";
 
 export const metadata: Metadata = { title: "Detalhes da oferta" };
+
+// Rendered on the server (UTC on Netlify) — pin the reseller's timezone.
+const EDITED_AT = new Intl.DateTimeFormat("pt-BR", {
+  dateStyle: "short",
+  timeStyle: "short",
+  timeZone: "America/Sao_Paulo",
+});
 
 export default async function OfferDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -65,6 +73,19 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
         </p>
         {offer.note && (
           <p className="mt-3 font-body-md text-body-md text-on-surface">{offer.note}</p>
+        )}
+        {offer.editedAt && (
+          <p className="mt-3 font-label-md text-label-md text-on-surface-variant">
+            Editada em {EDITED_AT.format(new Date(offer.editedAt))}
+          </p>
+        )}
+        {isMine && ["ACTIVE", "PARTIALLY_NEGOTIATED"].includes(offer.status) && (
+          <Link href={`/rede/ofertas/${offer.id}/editar`} className="mt-md inline-block">
+            <Button variant="secondary" size="sm">
+              <Icon name="edit" size={16} />
+              Editar oferta
+            </Button>
+          </Link>
         )}
       </div>
       {isMine && ["ACTIVE", "PARTIALLY_NEGOTIATED"].includes(offer.status) && (
