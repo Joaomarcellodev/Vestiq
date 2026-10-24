@@ -280,15 +280,15 @@ d("catalog actions + queries (SPEC-004)", () => {
       .update({ archived_at: new Date().toISOString() })
       .eq("id", p2.id);
 
-    const active = await listProducts();
+    const active = (await listProducts()).items;
     expect(active.map((p) => p.name)).toContain("Camisa Azul");
     expect(active.find((p) => p.id === p1.id)?.imageUrl).toBe("https://x/c.png");
     expect(active.find((p) => p.id === p1.id)?.minPrice).toBe(80);
 
-    const searched = await listProducts("azul");
+    const searched = (await listProducts("azul")).items;
     expect(searched.every((p) => /azul/i.test(p.name))).toBe(true);
 
-    const archived = await listProducts(undefined, "archived");
+    const archived = (await listProducts(undefined, "archived")).items;
     expect(archived.map((p) => p.id)).toContain(p2.id);
     expect(archived.map((p) => p.id)).not.toContain(p1.id);
   });
@@ -352,9 +352,13 @@ d("catalog actions + queries (SPEC-004)", () => {
     });
     await makeProduct(orgId, { name: "Tênis Azul", category_id: shoes.id });
 
-    expect((await listProducts(undefined, "active", bags.id)).map((p) => p.id)).toEqual([bag.id]);
-    expect((await listProducts("azul", "active", bags.id)).map((p) => p.id)).toEqual([bag.id]);
-    expect((await listProducts(undefined, "archived", bags.id)).map((p) => p.id)).toEqual([
+    expect((await listProducts(undefined, "active", bags.id)).items.map((p) => p.id)).toEqual([
+      bag.id,
+    ]);
+    expect((await listProducts("azul", "active", bags.id)).items.map((p) => p.id)).toEqual([
+      bag.id,
+    ]);
+    expect((await listProducts(undefined, "archived", bags.id)).items.map((p) => p.id)).toEqual([
       oldBag.id,
     ]);
   });

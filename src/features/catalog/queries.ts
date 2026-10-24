@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { pageOf, pageRange, type Page } from "@/lib/pagination";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 
 export interface ProductListItem {
@@ -22,16 +23,20 @@ export async function listProducts(
   search?: string,
   scope: "active" | "archived" = "active",
   categoryId?: string,
-): Promise<ProductListItem[]> {
+  page = 1,
+): Promise<Page<ProductListItem>> {
   await requireActiveOrganization();
   const supabase = await createClient();
 
+  // VES-90: one page at a time; `id` breaks ties so pages never overlap.
   let query = supabase
     .from("products")
     .select(
       "id, name, brand, internal_sku, image_urls, archived_at, min_order_quantity, size_grid, product_variants(retail_price, stock_on_hand, archived_at)",
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range(...pageRange(page));
 
   query =
     scope === "archived" ? query.not("archived_at", "is", null) : query.is("archived_at", null);
@@ -44,7 +49,7 @@ export async function listProducts(
   const { data, error } = await query;
   if (error) throw error;
 
-  return (data ?? []).map((p) => {
+  const items = (data ?? []).map((p) => {
     // An active product counts only its active variants (one can be archived on
     // its own — VES-68); an archived product shows the ones it was archived with.
     const variants = (p.product_variants ?? []).filter(
@@ -65,6 +70,7 @@ export async function listProducts(
       sizeGrid: p.size_grid ?? [],
     };
   });
+  return pageOf(items, page);
 }
 
 export async function getProduct(id: string) {
