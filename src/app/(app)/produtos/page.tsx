@@ -6,6 +6,8 @@ import { unarchiveProduct } from "@/features/catalog/actions";
 import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
 import { FilterTabs } from "@/components/molecules/filter-tabs";
+import { Pager } from "@/components/molecules/pager";
+import { parsePage } from "@/lib/pagination";
 import { Badge, Button, Icon } from "@/components/atoms";
 import { RevealList, RevealItem } from "@/components/motion";
 import { formatBRL } from "@/lib/utils/currency";
@@ -15,14 +17,18 @@ export const metadata: Metadata = { title: "Produtos" };
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; scope?: string; categoria?: string }>;
+  searchParams: Promise<{ q?: string; scope?: string; categoria?: string; pagina?: string }>;
 }) {
-  const { q, scope, categoria } = await searchParams;
+  const { q, scope, categoria, pagina } = await searchParams;
   const currentScope = scope === "archived" ? "archived" : "active";
   const categories = await listCategories();
   // Ignore a stale or foreign id instead of showing an empty list.
   const category = categories.find((c) => c.id === categoria);
-  const products = await listProducts(q, currentScope, category?.id);
+  const {
+    items: products,
+    page,
+    hasNext,
+  } = await listProducts(q, currentScope, category?.id, parsePage(pagina));
 
   return (
     <div className="space-y-lg">
@@ -91,19 +97,21 @@ export default async function ProductsPage({
         <EmptyState
           icon="inventory_2"
           title={
-            currentScope === "archived"
-              ? "Nenhum produto arquivado"
-              : q || category
-                ? "Nenhum produto encontrado"
-                : "Nenhum produto cadastrado"
+            page > 1
+              ? "Não há mais produtos nesta página"
+              : currentScope === "archived"
+                ? "Nenhum produto arquivado"
+                : q || category
+                  ? "Nenhum produto encontrado"
+                  : "Nenhum produto cadastrado"
           }
           description={
-            currentScope === "active" && !q && !category
+            currentScope === "active" && !q && !category && page === 1
               ? "Cadastre seu primeiro produto para começar a vender."
               : undefined
           }
           action={
-            currentScope === "active" && !q && !category ? (
+            currentScope === "active" && !q && !category && page === 1 ? (
               <Link href="/produtos/novo">
                 <Button size="sm">Cadastrar produto</Button>
               </Link>
@@ -171,6 +179,13 @@ export default async function ProductsPage({
           ))}
         </RevealList>
       )}
+
+      <Pager
+        basePath="/produtos"
+        params={{ q, scope, categoria: category?.id }}
+        page={page}
+        hasNext={hasNext}
+      />
     </div>
   );
 }
