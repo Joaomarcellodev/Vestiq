@@ -131,13 +131,13 @@ d("offers actions + queries (SPEC-008)", () => {
       /offer-published/,
     );
 
-    const mine = await listNetworkOffers();
+    const mine = (await listNetworkOffers()).items;
     const mineOffer = mine.find((o) => o.isMine && o.price === 250);
     expect(mineOffer?.productName).toBe("Vestido");
 
     // Peer sees the offer with its product, through the public projection (0022).
     setTestClient(ctx.peer.client);
-    const peerView = await listNetworkOffers();
+    const peerView = (await listNetworkOffers()).items;
     const peerOffer = peerView.find((o) => !o.isMine && o.price === 250);
     expect(peerOffer).toMatchObject({
       sellerName: "Vendedora O",
@@ -146,11 +146,13 @@ d("offers actions + queries (SPEC-008)", () => {
       brand: "Zara",
       descriptor: "M",
     });
-    expect((await listNetworkOffers("zara")).some((o) => o.id === peerOffer!.id)).toBe(true);
-    expect((await listNetworkOffers("gucci")).some((o) => o.id === peerOffer!.id)).toBe(false);
+    expect((await listNetworkOffers("zara")).items.some((o) => o.id === peerOffer!.id)).toBe(true);
+    expect((await listNetworkOffers("gucci")).items.some((o) => o.id === peerOffer!.id)).toBe(
+      false,
+    );
 
     setTestClient(ctx.outsider.client);
-    expect((await listNetworkOffers()).some((o) => o.price === 250)).toBe(false);
+    expect((await listNetworkOffers()).items.some((o) => o.price === 250)).toBe(false);
   });
 
   it("list_visible_offers: peers get the product's public fields only; outsiders get nothing", async () => {

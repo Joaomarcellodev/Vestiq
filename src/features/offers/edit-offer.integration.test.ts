@@ -93,7 +93,7 @@ d("edit an offer (VES-89)", () => {
     expect(data!.edited_at).not.toBeNull();
 
     setTestClient(ctx.peer.client);
-    const [seen] = (await listNetworkOffers()).filter((o) => o.id === ctx.offerId);
+    const [seen] = (await listNetworkOffers()).items.filter((o) => o.id === ctx.offerId);
     expect(seen).toMatchObject({ remaining: 6, price: 80, note: "Baixei o preço" });
     expect(seen!.editedAt).not.toBeNull();
   });
