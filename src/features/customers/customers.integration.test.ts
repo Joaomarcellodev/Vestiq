@@ -145,13 +145,17 @@ d("customers actions + queries (SPEC-006)", () => {
       .update({ archived_at: new Date().toISOString() })
       .eq("id", archived.id);
 
-    const active = await listCustomers();
+    const active = (await listCustomers()).items;
     expect(active.map((c) => c.name)).toContain("Bruna Costa");
     expect(active.map((c) => c.id)).not.toContain(archived.id);
 
-    expect((await listCustomers("bruna")).every((c) => /bruna/i.test(c.name + c.email))).toBe(true);
-    expect((await listCustomers("bruna@mail")).length).toBeGreaterThan(0);
-    expect((await listCustomers(undefined, "archived")).map((c) => c.id)).toContain(archived.id);
+    expect((await listCustomers("bruna")).items.every((c) => /bruna/i.test(c.name + c.email))).toBe(
+      true,
+    );
+    expect((await listCustomers("bruna@mail")).items.length).toBeGreaterThan(0);
+    expect((await listCustomers(undefined, "archived")).items.map((c) => c.id)).toContain(
+      archived.id,
+    );
   });
 
   it("getCustomerWithHistory: returns customer + sales stats", async () => {
@@ -166,7 +170,7 @@ d("customers actions + queries (SPEC-006)", () => {
     const otherOrg = await makeOrg(other.userId, "RESELLER");
     await makeCustomer(otherOrg.id, { name: "Segredo" });
 
-    const mine = await listCustomers();
+    const mine = (await listCustomers()).items;
     expect(mine.map((c) => c.name)).not.toContain("Segredo");
   });
 });
