@@ -69,6 +69,7 @@ export default async function DashboardPage() {
             label="Negociações pendentes"
             value={data.pendingNegotiations}
             accent={data.pendingNegotiations > 0 ? "ação necessária" : undefined}
+            hint={data.awaitingReply > 0 ? `${data.awaitingReply} aguardando resposta` : undefined}
           />
         </RevealCell>
       </RevealGroup>
