@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { admin, makeOrg, makeUser, supabaseUp } from "@/test/supabase";
+import { PAGE_SIZE } from "@/lib/pagination";
 import {
   clearTestClient,
   expectRedirect,
@@ -135,6 +136,26 @@ d("customers actions + queries (SPEC-006)", () => {
       () => unarchiveCustomer(formData({ id: c.id })),
       /toast=customer-unarchive-failed$/,
     );
+  });
+
+  it("listCustomers: pages by name, and the search narrows before paging (VES-90)", async () => {
+    const names = Array.from(
+      { length: PAGE_SIZE + 1 },
+      (_, i) => `Cliente ${String(i).padStart(2, "0")}`,
+    );
+    for (const name of [...names].reverse()) await makeCustomer(orgId, { name });
+    await makeCustomer(orgId, { name: "Zuleica Página" });
+
+    const first = await listCustomers(undefined, "active", 1);
+    expect(first.items.map((c) => c.name)).toEqual(names.slice(0, PAGE_SIZE));
+    expect(first.hasNext).toBe(true);
+    const second = await listCustomers(undefined, "active", 2);
+    expect(second.items.map((c) => c.name)).toEqual([names[PAGE_SIZE], "Zuleica Página"]);
+    expect(second.hasNext).toBe(false);
+
+    const searched = await listCustomers("zuleica", "active", 1);
+    expect(searched.items.map((c) => c.name)).toEqual(["Zuleica Página"]);
+    expect(searched.hasNext).toBe(false);
   });
 
   it("listCustomers: search (name/email) + scope", async () => {
