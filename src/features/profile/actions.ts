@@ -1,11 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { createClient as createSupabaseClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { publicEnv } from "@/lib/env";
+import { fieldErrorsOf } from "@/lib/zod";
 import { requireUser } from "@/features/auth/queries";
 import { sniffImageType } from "@/lib/utils/image-type";
-import { AVATAR_MAX_BYTES, AVATAR_TYPES, profileSchema } from "./validation";
+import { AVATAR_MAX_BYTES, AVATAR_TYPES, changePasswordSchema, profileSchema } from "./validation";
 
 export type ProfileState = { error?: string; ok?: string };
 
@@ -87,6 +89,53 @@ export async function updateProfile(
   revalidatePath("/perfil");
   revalidatePath("/", "layout");
   return { ok: `Perfil atualizado.${emailNote}` };
+}
+
+export type ChangePasswordState = {
+  error?: string;
+  ok?: boolean;
+  fieldErrors?: Partial<Record<"current" | "password" | "confirm", string>>;
+};
+
+/**
+ * VES-92 — troca a senha a partir do perfil. A senha atual é conferida num
+ * cliente à parte, sem cookies, para não mexer na sessão do navegador; a troca
+ * em si usa a sessão atual, que continua valendo.
+ */
+export async function changePassword(
+  _prev: ChangePasswordState,
+  formData: FormData,
+): Promise<ChangePasswordState> {
+  const user = await requireUser();
+  const parsed = changePasswordSchema.safeParse({
+    current: formData.get("current"),
+    password: formData.get("password"),
+    confirm: formData.get("confirm"),
+  });
+  if (!parsed.success) return { fieldErrors: fieldErrorsOf(parsed.error) };
+  const { current, password } = parsed.data;
+
+  const verifier = createSupabaseClient(
+    publicEnv.NEXT_PUBLIC_SUPABASE_URL,
+    publicEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+  const { error: signInErr } = await verifier.auth.signInWithPassword({
+    email: user.email ?? "",
+    password: current,
+  });
+  if (signInErr) return { fieldErrors: { current: "Senha atual incorreta." } };
+  // A conferência abriu uma sessão só para isso — encerra só ela.
+  await verifier.auth.signOut({ scope: "local" });
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    return /different from the old/i.test(error.message)
+      ? { fieldErrors: { password: "A nova senha precisa ser diferente da atual." } }
+      : { error: "Não foi possível alterar a senha. Tente novamente." };
+  }
+  return { ok: true };
 }
 
 /** Apaga os arquivos do usuário no bucket `avatars`, exceto `keep`. */
