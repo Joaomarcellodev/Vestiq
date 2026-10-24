@@ -27,12 +27,10 @@ function toProduct(row: ProductRow | undefined): NegotiationProduct | null {
 }
 
 /**
- * The buyer can't read the seller's products (RLS), so the product comes from
- * the `list_negotiation_products` projection (migration 0031, VES-97).
- */
-/**
  * VES-90 — the negotiations the org received (as the seller) or sent (as the
- * buyer), newest first, one page at a time; the products only of that page.
+ * buyer), newest first, one page at a time. The buyer can't read the seller's
+ * products (RLS), so the product comes from the `list_negotiation_products`
+ * projection (migration 0031, VES-97), for that page only.
  */
 export async function listNegotiations(direction: "received" | "sent" = "received", page = 1) {
   const org = await requireActiveOrganization();
