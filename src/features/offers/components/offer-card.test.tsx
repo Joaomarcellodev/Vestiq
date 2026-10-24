@@ -15,6 +15,7 @@ const offer = {
   brand: "Chanel",
   imageUrl: PHOTO,
   descriptor: "Preto / Único",
+  editedAt: null,
 };
 
 describe("OfferCard", () => {
@@ -37,5 +38,10 @@ describe("OfferCard", () => {
     expect(container.querySelector("img")).toBeNull();
     expect(screen.getByText("Sua oferta")).toBeInTheDocument();
     expect(screen.getByText("Atelier Sarah · 1 disponível")).toBeInTheDocument();
+  });
+
+  it("marks an offer the owner edited (VES-89)", () => {
+    render(<OfferCard offer={{ ...offer, editedAt: "2026-10-24T19:00:00Z" }} />);
+    expect(screen.getByText("Atelier Sarah · 2 disponíveis · editada")).toBeInTheDocument();
   });
 });
