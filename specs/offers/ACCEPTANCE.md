@@ -112,3 +112,12 @@ observação e status.
 
 **Dado** uma oferta sem fotos próprias
 **Então** ela mostra as fotos do produto, como antes.
+
+## AC-OFFER-009-01 — Editar oferta (VES-89)
+
+**Dado** uma oferta ativa da revendedora, sem negociação em andamento
+**Quando** ela muda preço, quantidade ou observação em "Editar oferta"
+**Então** a oferta é salva com os novos valores e o aviso "Oferta atualizada." aparece
+**E** o detalhe mostra "Editada em …" e o feed da rede mostra os novos valores com "editada"
+**E** uma quantidade acima do estoque livre é recusada com "Estoque livre insuficiente"
+**E** com uma proposta pendente ou aceita, a edição fica bloqueada até a negociação terminar.
