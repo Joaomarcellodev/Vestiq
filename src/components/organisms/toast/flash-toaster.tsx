@@ -31,9 +31,16 @@ export function FlashToaster() {
     const next = new URLSearchParams(searchParams);
     next.delete("toast");
     const qs = next.toString();
-    // Keep Next's own history state: dropping it makes the next router.refresh()
-    // fall back to a full page load.
-    window.history.replaceState(window.history.state, "", qs ? `${pathname}?${qs}` : pathname);
+    const url = qs ? `${pathname}?${qs}` : pathname;
+    // VES-87: Next patches replaceState to move its router to the new URL, but
+    // skips that for a state carrying its own `__NA` mark — the router then
+    // kept `?toast` and wrote it back on the next Server Action. So the mark is
+    // left out (Next copies it and its tree back in), and the call waits a tick:
+    // the patch is installed by an effect of the router, which runs after this one.
+    setTimeout(() => {
+      const { __NA: _mark, ...state } = (window.history.state ?? {}) as Record<string, unknown>;
+      window.history.replaceState(state, "", url);
+    });
   }, [searchParams, pathname, toast]);
 
   return null;
