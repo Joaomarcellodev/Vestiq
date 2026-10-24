@@ -5,8 +5,9 @@ import Image from "next/image";
 import { Button, Icon, TextField } from "@/components/atoms";
 import { useToast } from "@/components/organisms/toast/toast-provider";
 import { AVATAR_COMPRESSION, compressImage } from "@/lib/utils/image";
+import { isValidImage } from "@/lib/utils/image-type";
 import { updateProfile, type ProfileState } from "../actions";
-import { AVATAR_MAX_BYTES } from "../validation";
+import { AVATAR_MAX_BYTES, AVATAR_TYPES } from "../validation";
 import type { MyProfile } from "../queries";
 
 export function ProfileForm({ profile }: { profile: MyProfile }) {
@@ -42,6 +43,13 @@ export function ProfileForm({ profile }: { profile: MyProfile }) {
   const pick = async (file: File | undefined) => {
     if (!file) return;
     setPickError(null);
+
+    // VES-101: recusa com aviso o que não é imagem de verdade, mantendo a foto atual.
+    if (!AVATAR_TYPES.includes(file.type) || !(await isValidImage(file))) {
+      if (fileRef.current) fileRef.current.value = "";
+      setPickError("Esse arquivo não é uma imagem JPG, PNG ou WebP válida.");
+      return;
+    }
     setRemoved(false);
 
     // Preview imediato com o arquivo original; a compressão vem em seguida.
