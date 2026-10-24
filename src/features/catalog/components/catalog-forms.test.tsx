@@ -214,6 +214,35 @@ describe("ImageUploadField", () => {
     expect(onFilesChange).toHaveBeenCalledWith([expect.any(File)]);
   });
 
+  it("refuses a file renamed to .png that isn't an image, and says so (VES-101)", async () => {
+    const onFilesChange = vi.fn();
+    render(<ImageUploadField files={[]} onFilesChange={onFilesChange} />);
+    const input = document.querySelector("input[type=file]") as HTMLInputElement;
+    const fake = new File(["só texto"], "foto.png", { type: "image/png" });
+    await userEvent.upload(input, [png("1.png"), fake]);
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "1 arquivo não é uma imagem JPG, PNG ou WebP válida e foi recusado.",
+    );
+    expect(onFilesChange).toHaveBeenCalledTimes(1);
+    expect(onFilesChange.mock.calls[0]![0]).toHaveLength(1);
+  });
+
+  it("says how many photos the 5-image limit left out (VES-101)", async () => {
+    const onFilesChange = vi.fn();
+    render(<ImageUploadField files={[]} onFilesChange={onFilesChange} />);
+    const input = document.querySelector("input[type=file]") as HTMLInputElement;
+    await userEvent.upload(
+      input,
+      Array.from({ length: 6 }, (_, i) => png(`${i}.png`)),
+    );
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Cabem só 5 imagens por produto — 1 ficou de fora.",
+    );
+    expect(onFilesChange.mock.calls[0]![0]).toHaveLength(5);
+  });
+
   it("stops accepting new files once the max count is reached", () => {
     const many = Array.from({ length: 5 }, (_, i) => png(`${i}.png`));
     render(<ImageUploadField files={many} onFilesChange={vi.fn()} />);
