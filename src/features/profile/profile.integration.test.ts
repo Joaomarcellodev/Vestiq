@@ -107,6 +107,13 @@ d("profile actions + queries (SPEC-001)", () => {
     );
   });
 
+  it("updateProfile: rejects a text file named and typed as PNG (VES-101)", async () => {
+    const fake = new File(["só texto"], "me.png", { type: "image/png" });
+    expect((await updateProfile({}, pForm({ avatar: fake }))).error).toMatch(/JPG, PNG ou WebP/i);
+    const { data } = await admin().storage.from("avatars").list(user.userId);
+    expect(data ?? []).toHaveLength(0);
+  });
+
   it("updateProfile: changing the email returns a confirmation note", async () => {
     const state = await updateProfile({}, pForm({ email: uniqueEmail("new") }));
     expect(state.ok).toMatch(/confirme o novo email/i);
