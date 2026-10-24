@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { pageOf, pageRange } from "@/lib/pagination";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import { variantLabel } from "@/features/suppliers/format";
 import type { Database } from "@/types/database";
@@ -29,23 +30,33 @@ function toProduct(row: ProductRow | undefined): NegotiationProduct | null {
  * The buyer can't read the seller's products (RLS), so the product comes from
  * the `list_negotiation_products` projection (migration 0031, VES-97).
  */
-export async function listNegotiations() {
+/**
+ * VES-90 — the negotiations the org received (as the seller) or sent (as the
+ * buyer), newest first, one page at a time; the products only of that page.
+ */
+export async function listNegotiations(direction: "received" | "sent" = "received", page = 1) {
   const org = await requireActiveOrganization();
   const supabase = await createClient();
-  const [{ data, error }, { data: products, error: productsError }] = await Promise.all([
-    supabase
-      .from("negotiations")
-      .select(
-        "id, quantity, amount, status, seller_org_id, buyer_org_id, created_at, seller:organizations!negotiations_seller_org_id_fkey(name), buyer:organizations!negotiations_buyer_org_id_fkey(name)",
-      )
-      .order("created_at", { ascending: false }),
-    supabase.rpc("list_negotiation_products"),
-  ]);
+  const { data, error } = await supabase
+    .from("negotiations")
+    .select(
+      "id, quantity, amount, status, seller_org_id, buyer_org_id, created_at, seller:organizations!negotiations_seller_org_id_fkey(name), buyer:organizations!negotiations_buyer_org_id_fkey(name)",
+    )
+    .eq(direction === "received" ? "seller_org_id" : "buyer_org_id", org.id)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range(...pageRange(page));
   if (error) throw error;
+  const rows = pageOf(data ?? [], page);
+
+  const ids = rows.items.map((n) => n.id);
+  const { data: products, error: productsError } = ids.length
+    ? await supabase.rpc("list_negotiation_products").in("negotiation_id", ids)
+    : { data: [], error: null };
   if (productsError) throw productsError;
   const productOf = new Map((products ?? []).map((p) => [p.negotiation_id, p]));
 
-  return (data ?? []).map((n) => ({
+  const items = rows.items.map((n) => ({
     id: n.id,
     quantity: n.quantity,
     amount: Number(n.amount),
@@ -55,6 +66,7 @@ export async function listNegotiations() {
     counterparty: n.seller_org_id === org.id ? n.buyer?.name : n.seller?.name,
     product: toProduct(productOf.get(n.id)),
   }));
+  return { ...rows, items };
 }
 
 export async function getNegotiation(id: string) {
