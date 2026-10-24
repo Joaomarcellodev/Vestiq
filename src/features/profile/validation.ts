@@ -17,3 +17,22 @@ export type ProfileInput = z.infer<typeof profileSchema>;
 
 export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
 export const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+/**
+ * VES-92 — change the password from the profile: the current one, plus the
+ * same rules as the reset (RF-AUTH-005: at least 8 characters, confirmed).
+ */
+export const changePasswordSchema = z
+  .object({
+    current: z.string().min(1, "Informe a senha atual."),
+    password: z.string().min(8, "A senha deve ter ao menos 8 caracteres."),
+    confirm: z.string().min(1, "Confirme a nova senha."),
+  })
+  .refine((d) => d.password === d.confirm, {
+    message: "As senhas não coincidem.",
+    path: ["confirm"],
+  })
+  .refine((d) => d.password !== d.current, {
+    message: "A nova senha precisa ser diferente da atual.",
+    path: ["password"],
+  });
