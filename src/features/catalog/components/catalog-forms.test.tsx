@@ -16,7 +16,7 @@ const { ImageUploadField } = await import("./image-upload-field");
 
 const CATS = [{ id: "c1", name: "Bolsas" }];
 const png = (name = "a.png") =>
-  new File([Uint8Array.from([137, 80, 78, 71])], name, { type: "image/png" });
+  new File([Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10])], name, { type: "image/png" });
 
 describe("ProductForm", () => {
   it("adds and removes variant rows and shows the estimated margin", async () => {
