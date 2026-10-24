@@ -64,6 +64,8 @@ describe("FlashToaster", () => {
   it("turns a ?toast=<code> param into a toast and strips it from the URL", async () => {
     setPathname("/produtos/abc");
     setSearchParams("toast=product-created&foo=1");
+    const tree = { tree: ["", {}], renderedSearch: "?toast=product-created&foo=1" };
+    window.history.replaceState({ __NA: true, __PRIVATE_NEXTJS_INTERNALS_TREE: tree }, "");
     const replaceState = vi.spyOn(window.history, "replaceState");
     render(
       <ToastProvider>
@@ -71,7 +73,15 @@ describe("FlashToaster", () => {
       </ToastProvider>,
     );
     expect(await screen.findByRole("status")).toHaveTextContent("Produto cadastrado.");
-    expect(replaceState).toHaveBeenCalledWith(window.history.state, "", "/produtos/abc?foo=1");
+    // VES-87: without Next's `__NA` mark, so Next's patched replaceState also
+    // moves its router to the new URL; the rest of its state is kept.
+    await waitFor(() =>
+      expect(replaceState).toHaveBeenCalledWith(
+        { __PRIVATE_NEXTJS_INTERNALS_TREE: tree },
+        "",
+        "/produtos/abc?foo=1",
+      ),
+    );
     // no router navigation — it would refetch the page (see FlashToaster)
     expect(routerSpy.replace).not.toHaveBeenCalled();
     replaceState.mockRestore();
