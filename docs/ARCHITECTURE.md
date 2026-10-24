@@ -104,6 +104,13 @@ Server Action  ──valida (Zod)──▶  features/<f>/actions.ts  ──▶  
 - Erro de RPC vira mensagem com `rpcErrorMessage` (`@/lib/supabase/errors`, VES-79):
   o texto do `raise exception` (P0001 ou `check_violation`) aparece inteiro; guardas
   em inglês ("not authorized") e erros inesperados do banco ganham texto fixo em pt-BR.
+- Listas que crescem com o uso (`/produtos`, `/clientes`, `/negociacoes`, `/rede`)
+  são paginadas por número (`?pagina=N`, VES-90): a query pede `PAGE_SIZE + 1`
+  linhas com `.range(...pageRange(page))` e `pageOf` corta a sobra, que só diz se há
+  próxima página; a ordem termina em `id` para as páginas não se sobreporem. Busca
+  e filtros rodam **no banco, antes do corte** — filtrar depois esconderia
+  resultados de outras páginas (por isso a busca do feed foi para
+  `list_visible_offers(p_query)`, migration 0034). O `Pager` preserva busca e abas.
 
 ## Autenticação e proteção de rotas
 
