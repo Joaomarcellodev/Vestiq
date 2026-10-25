@@ -69,18 +69,19 @@ dashboard da fábrica exponha dados comerciais privados das revendedoras.
 
 ## Regras de Negócio
 
-| ID         | Regra                                                                                                                                            |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| BR-DASH-01 | Todos os números da revendedora derivam apenas dos dados da própria organização (RLS)                                                            |
-| BR-DASH-02 | Faturamento e ticket médio consideram só vendas `CONFIRMED` no período (default: mês corrente)                                                   |
-| BR-DASH-03 | Ticket médio = faturamento / nº de vendas confirmadas no período (0 se não houver)                                                               |
-| BR-DASH-04 | "Mais vendidos" = ranking por soma de `quantity` em `sale_items` de vendas confirmadas                                                           |
-| BR-DASH-05 | Estoque baixo usa o mesmo limiar da feature `inventory`                                                                                          |
-| BR-DASH-06 | Dashboard da fábrica usa **apenas agregados de contagem** por rede: `count(distinct reseller)`, `count(offers)`, `count(negotiations by status)` |
-| BR-DASH-07 | É proibido no dashboard da fábrica: valores de venda, faturamento, margem, nomes de clientes, itens vendidos por revendedora (SDD §18)           |
-| BR-DASH-08 | "Revendedora ativa" (fábrica) = com ao menos uma ação relevante (venda, movimento, oferta, negociação) nos últimos 30 dias                       |
-| BR-DASH-09 | "Taxa de utilização" = revendedoras ativas / revendedoras com vínculo ativo                                                                      |
-| BR-DASH-10 | Cada card tem estado vazio próprio (sem vendas, sem ofertas, etc.)                                                                               |
+| ID         | Regra                                                                                                                                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| BR-DASH-01 | Todos os números da revendedora derivam apenas dos dados da própria organização (RLS)                                                                                                                  |
+| BR-DASH-02 | Faturamento e ticket médio consideram só vendas `CONFIRMED` no período (default: mês corrente)                                                                                                         |
+| BR-DASH-03 | Ticket médio = faturamento / nº de vendas confirmadas no período (0 se não houver)                                                                                                                     |
+| BR-DASH-04 | "Mais vendidos" = ranking por soma de `quantity` em `sale_items` de vendas confirmadas                                                                                                                 |
+| BR-DASH-05 | Estoque baixo usa o mesmo limiar da feature `inventory`                                                                                                                                                |
+| BR-DASH-06 | Dashboard da fábrica usa **apenas agregados de contagem** por rede: `count(distinct reseller)`, `count(offers)`, `count(negotiations by status)`                                                       |
+| BR-DASH-07 | É proibido no dashboard da fábrica: valores de venda, faturamento, margem, nomes de clientes, itens vendidos por revendedora (SDD §18)                                                                 |
+| BR-DASH-08 | "Revendedora ativa" (fábrica) = com ao menos uma ação relevante (venda, movimento, oferta, negociação) nos últimos 30 dias                                                                             |
+| BR-DASH-09 | "Taxa de utilização" = revendedoras ativas / revendedoras com vínculo ativo                                                                                                                            |
+| BR-DASH-10 | Cada card tem estado vazio próprio (sem vendas, sem ofertas, etc.)                                                                                                                                     |
+| BR-DASH-11 | "Negociações pendentes · ação necessária" conta só as `PENDING` em que a organização é a vendedora (quem responde, BR-NEG-04); as que ela enviou aparecem à parte como "aguardando resposta" (VES-100) |
 
 ## Fluxos
 

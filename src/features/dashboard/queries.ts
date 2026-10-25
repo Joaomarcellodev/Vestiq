@@ -14,7 +14,10 @@ export interface ResellerDashboard {
   variantCount: number;
   lowStock: { id: string; label: string; stock: number }[];
   activeOffers: number;
+  /** PENDING proposals this org must answer, as the seller (VES-100). */
   pendingNegotiations: number;
+  /** PENDING proposals this org sent, waiting on the seller. */
+  awaitingReply: number;
   /** Revenue per day for the last 14 days. */
   salesTrend: { date: string; label: string; total: number }[];
   /** Top 5 products by units sold (confirmed sales). */
@@ -75,7 +78,7 @@ export async function getResellerDashboard(): Promise<ResellerDashboard> {
       .select("id, stock_on_hand, size, color, products(name)")
       .is("archived_at", null),
     supabase.from("offers").select("id").in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"]),
-    supabase.from("negotiations").select("id, status"),
+    supabase.from("negotiations").select("id, seller_org_id").eq("status", "PENDING"),
     getTopProducts(30),
     supabase
       .from("sale_items")
@@ -120,7 +123,10 @@ export async function getResellerDashboard(): Promise<ResellerDashboard> {
       stock: v.stock_on_hand,
     }));
 
-  const negotiations = negRes.data ?? [];
+  // VES-100: a PENDING proposal waits on the seller (BR-NEG-04) — only those are
+  // for this org to act on; the ones it sent wait on the other party.
+  const pending = negRes.data ?? [];
+  const pendingNegotiations = pending.filter((n) => n.seller_org_id === org.id).length;
 
   return {
     orgName: org.name,
@@ -131,7 +137,8 @@ export async function getResellerDashboard(): Promise<ResellerDashboard> {
     variantCount: variants.length,
     lowStock,
     activeOffers: (offersRes.data ?? []).length,
-    pendingNegotiations: negotiations.filter((n) => n.status === "PENDING").length,
+    pendingNegotiations,
+    awaitingReply: pending.length - pendingNegotiations,
     salesTrend,
     topProducts,
   };
