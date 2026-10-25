@@ -71,10 +71,30 @@ describe("FlashToaster", () => {
       </ToastProvider>,
     );
     expect(await screen.findByRole("status")).toHaveTextContent("Produto cadastrado.");
+    // Next's own history state is kept — without it the next refresh reloads the page
     expect(replaceState).toHaveBeenCalledWith(window.history.state, "", "/produtos/abc?foo=1");
     // no router navigation — it would refetch the page (see FlashToaster)
     expect(routerSpy.replace).not.toHaveBeenCalled();
     replaceState.mockRestore();
+  });
+
+  it("doesn't show the flash again when the page was reloaded (VES-87)", () => {
+    setPathname("/produtos/abc");
+    setSearchParams("toast=product-created");
+    const entries = vi
+      .spyOn(performance, "getEntriesByType")
+      .mockReturnValue([{ type: "reload" } as PerformanceNavigationTiming]);
+    const replaceState = vi.spyOn(window.history, "replaceState");
+    render(
+      <ToastProvider>
+        <FlashToaster />
+      </ToastProvider>,
+    );
+    expect(screen.queryByRole("status")).toBeNull();
+    // still stripped from the URL
+    expect(replaceState).toHaveBeenCalledWith(window.history.state, "", "/produtos/abc");
+    replaceState.mockRestore();
+    entries.mockRestore();
   });
 
   it("does nothing without the param", () => {
