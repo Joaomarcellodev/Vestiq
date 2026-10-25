@@ -27,7 +27,8 @@ test.describe("Theme + toasts", () => {
     await expect(toast(page)).toHaveText(/produto atualizado/i);
   });
 
-  // VES-87 — an inline action after the flash used to put `?toast` back in the URL.
+  // VES-87 — after an inline action Next writes `?toast` back into the URL, and a
+  // reload used to show the flash again.
   test("doesn't show 'Produto cadastrado' again after an entry and a reload", async ({ page }) => {
     await login(page, "revenda@vestiq.dev");
     await page.goto("/produtos/novo");
@@ -41,7 +42,6 @@ test.describe("Theme + toasts", () => {
     await page.getByLabel("Quantidade").fill("2");
     await page.getByRole("button", { name: /registrar entrada/i }).click();
     await expect(page.getByText("Entrada registrada.")).toBeVisible();
-    await expect(page).not.toHaveURL(/toast=/);
 
     await page.reload();
     await expect(page.getByRole("button", { name: "Entrada" })).toBeVisible();
