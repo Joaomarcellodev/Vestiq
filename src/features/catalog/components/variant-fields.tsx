@@ -17,13 +17,15 @@ export interface VariantRow {
   stock?: number;
 }
 
+// VES-86: blank values — "Único" and "0" are only placeholders, so typing never
+// appends to them. A blank size is saved as null and shown as "Único".
 export const emptyVariant: VariantRow = {
-  size: "Único",
+  size: "",
   color: "",
   sku: "",
   costPrice: "",
   retailPrice: "",
-  initialStock: "0",
+  initialStock: "",
 };
 
 /** The messages of variant `i` from the action's `fieldErrors` ("variants.0.retailPrice"). */
@@ -63,6 +65,7 @@ export function VariantFields({
       <div className="grid grid-cols-1 gap-sm sm:grid-cols-2">
         <TextField
           label="Tamanho"
+          placeholder="Único"
           value={row.size}
           onChange={(e) => onChange({ size: e.target.value })}
           error={errors.size}
@@ -95,6 +98,7 @@ export function VariantFields({
             type="number"
             min={0}
             step={1}
+            placeholder="0"
             value={row.initialStock}
             onChange={(e) => onChange({ initialStock: e.target.value })}
             error={errors.initialStock}

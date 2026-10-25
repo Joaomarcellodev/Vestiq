@@ -47,7 +47,7 @@ export function ProductForm({
   const generateFromGrid = () =>
     setVariants((rows) => {
       const base = rows[0] ?? emptyVariant;
-      return sizeGrid.map((size) => ({ ...base, size, sku: "", initialStock: "0" }));
+      return sizeGrid.map((size) => ({ ...base, size, sku: "", initialStock: "" }));
     });
 
   return (
@@ -119,7 +119,7 @@ export function ProductForm({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => setVariants((r) => [...r, { ...emptyVariant, size: "" }])}
+              onClick={() => setVariants((r) => [...r, { ...emptyVariant }])}
             >
               <Icon name="add" size={16} />
               Adicionar

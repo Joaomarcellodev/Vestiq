@@ -65,6 +65,32 @@ describe("ProductForm", () => {
     expect(screen.getByLabelText("Tamanho")).toHaveValue("M");
   });
 
+  it("starts size and initial stock blank, so typing doesn't append to a default (VES-86)", async () => {
+    render(<ProductForm categories={CATS} />);
+    const size = screen.getByLabelText("Tamanho");
+    const stock = screen.getByLabelText("Estoque inicial");
+    expect(size).toHaveValue("");
+    expect(size).toHaveAttribute("placeholder", "Único");
+    expect(stock).toHaveValue(null);
+    expect(stock).toHaveAttribute("placeholder", "0");
+
+    await userEvent.type(size, "M");
+    await userEvent.type(stock, "5");
+    expect(size).toHaveValue("M");
+    expect(stock).toHaveValue(5);
+  });
+
+  it("sends a blank size and a zero initial stock when they're left empty (VES-86)", async () => {
+    createProduct.mockClear();
+    render(<ProductForm categories={CATS} />);
+    await userEvent.type(screen.getByLabelText(/nome do produto/i), "Jaqueta");
+    await userEvent.click(screen.getByRole("button", { name: /salvar produto/i }));
+
+    const fd = createProduct.mock.calls.at(-1)![1] as FormData;
+    const [variant] = JSON.parse(fd.get("variants") as string);
+    expect(variant).toMatchObject({ size: "", initialStock: 0 });
+  });
+
   it("shows the action's field errors next to their fields (VES-78)", async () => {
     createProduct.mockResolvedValueOnce({
       error: "O estoque inicial não pode ser negativo",
