@@ -99,12 +99,22 @@ Vá em **Supabase → Authentication → URL Configuration**:
 Sem isso o login por **email/senha funciona**, mas a recuperação de senha e o
 link do email de convite falham (redirect não autorizado).
 
-**Templates de email do convite** (**Authentication → Email Templates**): copie
-assunto e corpo de `supabase/templates/invite.html` ("Invite user", assunto
-`Convite para uma rede no Vestiq`) e de `supabase/templates/magic_link.html`
-("Magic Link", assunto `Seu convite no Vestiq`). Os dois links passam por
-`/auth/confirm` com `token_hash` — o template padrão do Supabase não funciona
-com essa rota. O SMTP padrão do Supabase tem limite baixo de envios por hora;
+**Templates de email** (**Authentication → Email Templates**): o projeto
+hospedado não lê o `supabase/config.toml`, então copie assunto e corpo de cada
+template de `supabase/templates/`:
+
+| Template no painel  | Arquivo              | Assunto                                        |
+| ------------------- | -------------------- | ---------------------------------------------- |
+| Invite user         | `invite.html`        | `Convite para uma rede no Vestiq`              |
+| Magic Link          | `magic_link.html`    | `Seu convite no Vestiq`                        |
+| Reset Password      | `recovery.html`      | `Redefinir sua senha no Vestiq`                |
+| Confirm signup      | `confirmation.html`  | `Confirme seu email no Vestiq`                 |
+| Change Email Address | `email_change.html` | `Confirme o novo email da sua conta no Vestiq` |
+
+Os links do convite e do magic link passam por `/auth/confirm` com
+`token_hash` — com o template padrão do Supabase o convidado cai logado no
+dashboard sem passar por `/convite/<token>`. Os outros três usam o
+`ConfirmationURL` do próprio Supabase (VES-102). O SMTP padrão do Supabase tem limite baixo de envios por hora;
 para uso real, configure um SMTP próprio em **Authentication → SMTP Settings**.
 
 Login social: **não usado** (ADR-0002, revisão de 2026-10-08). Deixe Google e
