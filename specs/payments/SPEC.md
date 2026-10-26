@@ -38,8 +38,10 @@ a fábrica precisa saber, com segurança, que o pedido foi pago.
 
 ## Fora do Escopo
 
-- Parcelamento (VES-26) e comissão/repasse para a fábrica via Connect (VES-27).
-  Nesta etapa o valor cai na conta Stripe da plataforma.
+- Parcelamento (VES-26): o Stripe não oferece parcelamento para contas Brasil
+  (VES-26 voltou para o backlog).
+- Comissão e repasse para a fábrica: [SPEC-015](../commission/SPEC.md) (VES-27).
+  Desde ela, o pagamento só abre se a fábrica puder receber (BR-COM-04).
 - Pix, boleto e outros meios. No Stripe Brasil, o Pix é liberado só por convite.
 - Reembolso parcial pelo Vestiq (só pelo painel do Stripe) e pedido de reembolso
   pela revendedora.

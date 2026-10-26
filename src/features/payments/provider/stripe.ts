@@ -95,8 +95,11 @@ export async function createCheckout(input: {
   customerEmail?: string;
   successUrl: string;
   cancelUrl: string;
+  /** Destination charge (VES-27): the supplier's connected account and the platform's cut. */
+  transfer: { destination: string; platformFee: number };
 }): Promise<Checkout & { url: string }> {
   const metadata = { supply_order_id: input.orderId };
+  const fee = toCents(input.transfer.platformFee);
   const session = await stripe().checkout.sessions.create({
     mode: "payment",
     integration_identifier: INTEGRATION_ID,
@@ -114,7 +117,11 @@ export async function createCheckout(input: {
     ],
     client_reference_id: input.orderId,
     metadata,
-    payment_intent_data: { metadata },
+    payment_intent_data: {
+      metadata,
+      transfer_data: { destination: input.transfer.destination },
+      ...(fee > 0 && { application_fee_amount: fee }),
+    },
     customer_email: input.customerEmail,
     locale: "pt-BR",
     expires_at: Math.floor(Date.now() / 1000) + CHECKOUT_TTL_SECONDS,
@@ -142,12 +149,15 @@ export async function refundPayment(input: {
   paymentIntentId: string;
   orderId: string;
   idempotencyKey: string;
+  /** Destination charge: take the money back from the supplier and return the commission. */
+  destinationCharge: boolean;
 }): Promise<RefundUpdate> {
   const refund = await stripe().refunds.create(
     {
       payment_intent: input.paymentIntentId,
       reason: "requested_by_customer",
       metadata: { supply_order_id: input.orderId },
+      ...(input.destinationCharge && { reverse_transfer: true, refund_application_fee: true }),
     },
     { idempotencyKey: input.idempotencyKey },
   );
@@ -162,6 +172,84 @@ export async function refundPayment(input: {
     paymentIntentId: input.paymentIntentId,
     amountRefunded: fromCents(charge?.amount_refunded ?? refund.amount),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Connected accounts (VES-27) — Accounts v2, marketplace recipients
+// ---------------------------------------------------------------------------
+
+export type TransfersStatus = "active" | "pending" | "restricted" | "rejected" | "unsupported";
+
+const TRANSFERS_STATUSES: readonly string[] = [
+  "active",
+  "pending",
+  "restricted",
+  "rejected",
+  "unsupported",
+];
+
+function transfersStatus(account: Stripe.V2.Core.Account): TransfersStatus {
+  const status =
+    account.configuration?.recipient?.capabilities?.stripe_balance?.stripe_transfers?.status;
+  return status && TRANSFERS_STATUSES.includes(status) ? (status as TransfersStatus) : "pending";
+}
+
+/**
+ * Creates the supplier's connected account: a Brazilian recipient that can
+ * receive transfers from the platform, with the Express Dashboard. The platform
+ * collects Stripe's fees and covers losses (marketplace with destination charges).
+ */
+export async function createRecipientAccount(input: {
+  organizationId: string;
+  name: string;
+  email?: string;
+}): Promise<{ id: string; transfersStatus: TransfersStatus }> {
+  const account = await stripe().v2.core.accounts.create(
+    {
+      display_name: input.name,
+      contact_email: input.email,
+      dashboard: "express",
+      identity: { country: "br" },
+      defaults: {
+        responsibilities: { fees_collector: "application", losses_collector: "application" },
+      },
+      configuration: {
+        recipient: { capabilities: { stripe_balance: { stripe_transfers: { requested: true } } } },
+      },
+      metadata: { organization_id: input.organizationId },
+      include: ["configuration.recipient"],
+    },
+    // one account per factory, even on a double submit
+    { idempotencyKey: `vestiq-recipient-${input.organizationId}` },
+  );
+  return { id: account.id, transfersStatus: transfersStatus(account) };
+}
+
+/** Whether the connected account can receive transfers now (checked before every payment). */
+export async function getRecipientStatus(accountId: string): Promise<TransfersStatus> {
+  const account = await stripe().v2.core.accounts.retrieve(accountId, {
+    include: ["configuration.recipient"],
+  });
+  return transfersStatus(account);
+}
+
+/** Stripe-hosted onboarding for the connected account; the link is single-use and short-lived. */
+export async function createOnboardingLink(input: {
+  accountId: string;
+  refreshUrl: string;
+  returnUrl: string;
+}): Promise<string> {
+  const link = await stripe().v2.core.accountLinks.create({
+    account: input.accountId,
+    use_case: {
+      type: "account_onboarding",
+      account_onboarding: {
+        refresh_url: input.refreshUrl,
+        return_url: input.returnUrl,
+      },
+    },
+  });
+  return link.url;
 }
 
 export class InvalidWebhookError extends Error {}

@@ -13,16 +13,18 @@ import {
   createCheckout,
   expireCheckout,
   getCheckout,
+  getRecipientStatus,
   paymentsConfigured,
   refundPayment,
 } from "./provider/stripe";
-import { applyPaymentStatus, applyRefund } from "./sync";
+import { applyAccountStatus, applyPaymentStatus, applyRefund } from "./sync";
 
 export type ActionState = { error?: string };
 
 const PAYMENTS_UNAVAILABLE = "Os pagamentos estão indisponíveis no momento.";
 const CHECKOUT_FAILED = "Não foi possível abrir o pagamento. Tente novamente.";
 const REFUND_FAILED = "Não foi possível reembolsar o pagamento. Tente novamente.";
+const SUPPLIER_NOT_READY = "O fornecedor ainda não pode receber pagamentos pelo Vestiq";
 
 /**
  * RF-PAY-001 — sends the reseller to the Stripe checkout to pay a confirmed
@@ -74,6 +76,9 @@ export async function payOrderWithCard(
     if (resumed) redirect(resumed);
   }
 
+  const destination = await readyDestination(orderId);
+  if ("error" in destination) return destination;
+
   const user = await getCurrentUser();
   let checkout: Awaited<ReturnType<typeof createCheckout>>;
   try {
@@ -84,6 +89,7 @@ export async function payOrderWithCard(
       customerEmail: user?.email,
       successUrl: `${orderPage}?checkout={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${orderPage}?toast=supply-order-payment-cancelled`,
+      transfer: { destination: destination.accountId, platformFee: destination.platformFee },
     });
   } catch (err) {
     console.error("[payments] createCheckout failed", err);
@@ -94,6 +100,8 @@ export async function payOrderWithCard(
     p_order_id: orderId,
     p_checkout_session_id: checkout.id,
     p_amount: Number(order.total_amount),
+    p_platform_fee_amount: destination.platformFee,
+    p_destination_account_id: destination.accountId,
   });
   if (rpcError) {
     // Nobody can pay a checkout the database doesn't know about.
@@ -102,6 +110,35 @@ export async function payOrderWithCard(
   }
 
   redirect(checkout.url);
+}
+
+/**
+ * VES-27 — the supplier's connected account and the platform's cut for this
+ * order. The account's ability to receive is re-read from Stripe before every
+ * payment (it can lose it at any time), and the database copy kept in step.
+ */
+async function readyDestination(
+  orderId: string,
+): Promise<{ accountId: string; platformFee: number } | { error: string }> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .rpc("quote_supply_order_payment", { p_order_id: orderId })
+    .single();
+  if (error) return { error: rpcErrorMessage(error) };
+  if (!data.destination_account_id) return { error: SUPPLIER_NOT_READY };
+
+  let status: Awaited<ReturnType<typeof getRecipientStatus>>;
+  try {
+    status = await getRecipientStatus(data.destination_account_id);
+  } catch (err) {
+    console.error("[payments] getRecipientStatus failed", err);
+    return { error: CHECKOUT_FAILED };
+  }
+  if (status !== data.destination_status) {
+    await applyAccountStatus(data.destination_account_id, status);
+  }
+  if (status !== "active") return { error: SUPPLIER_NOT_READY };
+  return { accountId: data.destination_account_id, platformFee: Number(data.platform_fee_amount) };
 }
 
 /**
@@ -162,6 +199,7 @@ export async function refundSupplyOrderPayment(
       paymentIntentId: payment.payment_intent_id!,
       orderId,
       idempotencyKey: `vestiq-refund-${payment.id}`,
+      destinationCharge: payment.destination_account_id !== null,
     });
   } catch (err) {
     console.error("[payments] refundPayment failed", err);

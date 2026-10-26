@@ -377,6 +377,25 @@ Reembolso (migrations `0035` e `0036`): colunas `refunded_amount` (0 a `amount`)
 
 O trigger `supply_order_payments_notify_refund` avisa a revenda de cada reembolso.
 
+## Comissão e recebimento da fábrica (SPEC-015)
+
+Migration `0037`. A fábrica recebe numa conta conectada do Stripe Connect, e o
+Vestiq retém um percentual por fábrica.
+
+| Tabela | Colunas principais |
+| --- | --- |
+| `factory_payment_accounts` | `organization_id` (PK), `stripe_account_id` (único), `transfers_status` (`active`/`pending`/`restricted`/`rejected`/`unsupported`), `platform_fee_percent` (0–50, padrão 10). `select` só para membros da fábrica |
+| `supply_order_payments` (+) | `platform_fee_percent`, `platform_fee_amount`, `net_amount` (gerada = `amount − platform_fee_amount`), `destination_account_id` |
+
+| Função | Garante |
+| --- | --- |
+| `quote_supply_order_payment(p_order_id)` | membro da revenda; total, percentual, comissão arredondada e conta de destino com status |
+| `register_supply_order_payment(…, p_platform_fee_amount, p_destination_account_id)` | as guardas da SPEC-014 + conta da fábrica `active` e comissão igual ao percentual |
+| `link_factory_payment_account` / `set_factory_payment_account_status` / `set_factory_platform_fee` | **só `service_role`**; a fábrica não troca de conta |
+
+Para mudar a comissão de uma fábrica (SQL Editor, service role):
+`select public.set_factory_platform_fee('<organization_id>', 7.5);`
+
 ## Índices principais
 
 ```sql

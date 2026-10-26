@@ -1,7 +1,13 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getCheckout, type CheckoutUpdate, type RefundUpdate } from "./provider/stripe";
+import {
+  getCheckout,
+  getRecipientStatus,
+  type CheckoutUpdate,
+  type RefundUpdate,
+  type TransfersStatus,
+} from "./provider/stripe";
 import type { PaymentStatus } from "./status";
 
 /**
@@ -36,6 +42,42 @@ export async function applyRefund(
   });
   if (error) throw error;
   return data.status;
+}
+
+/**
+ * Records whether a supplier's connected account can receive, as just read
+ * from Stripe (VES-27). Service role: the factory can't mark itself ready.
+ */
+export async function applyAccountStatus(
+  stripeAccountId: string,
+  status: TransfersStatus,
+): Promise<void> {
+  const { error } = await createAdminClient().rpc("set_factory_payment_account_status", {
+    p_stripe_account_id: stripeAccountId,
+    p_transfers_status: status,
+  });
+  if (error) throw error;
+}
+
+/** Links a factory to the connected account just created for it on Stripe (VES-27). */
+export async function linkPayoutAccount(
+  organizationId: string,
+  stripeAccountId: string,
+  status: TransfersStatus,
+): Promise<void> {
+  const { error } = await createAdminClient().rpc("link_factory_payment_account", {
+    p_organization_id: organizationId,
+    p_stripe_account_id: stripeAccountId,
+    p_transfers_status: status,
+  });
+  if (error) throw error;
+}
+
+/** Back from the Stripe onboarding, reads whether the factory's account can receive now. */
+export async function syncPayoutAccount(stripeAccountId: string): Promise<TransfersStatus> {
+  const status = await getRecipientStatus(stripeAccountId);
+  await applyAccountStatus(stripeAccountId, status);
+  return status;
 }
 
 /**
