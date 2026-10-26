@@ -64,3 +64,17 @@
 
 **Quando** a revendedora envia um pedido
 **Então** a fábrica recebe "Novo pedido de abastecimento" com link para o pedido
+
+## AC-ORD-007-01 — Fábrica acompanha o pedido até o envio
+
+**Dado** um pedido confirmado
+**Quando** a fábrica marca "em produção" e depois "enviado" com o código de rastreio
+**Então** o pedido passa a "Em produção" e "Enviado", cada etapa aparece no histórico com a data
+**E** a revendedora é notificada de cada etapa (o envio com o rastreio).
+
+## AC-ORD-008-01 — Revendedora recebe o pedido
+
+**Dado** um pedido enviado
+**Quando** a revendedora confirma o recebimento
+**Então** o pedido passa a "Entregue" e a fábrica é notificada
+**E** cada item entra no estoque da revendedora como entrada vinculada ao pedido.

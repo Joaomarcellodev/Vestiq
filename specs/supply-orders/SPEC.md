@@ -38,7 +38,6 @@ esses pedidos em um só lugar.
 
 ## Fora do Escopo
 
-- Despacho, recebimento e entrada no estoque da revendedora (spec futura).
 - Baixa do estoque da fábrica.
 - Pagamento, frete, nota fiscal (SDD §6).
 - Edição de um pedido já enviado — cancela-se e faz-se outro.
@@ -46,8 +45,9 @@ esses pedidos em um só lugar.
 
 ## Atores
 
-`RESELLER` faz e cancela pedidos. `FACTORY_ADMIN` (ou `PLATFORM_ADMIN`) do
-fornecedor confirma ou recusa.
+`RESELLER` faz e cancela pedidos e confirma o recebimento. `FACTORY_ADMIN` (ou
+`PLATFORM_ADMIN`) do fornecedor confirma ou recusa e, depois, marca o pedido em
+produção e enviado (VES-32).
 
 ## Requisitos Relacionados
 
@@ -59,6 +59,8 @@ fornecedor confirma ou recusa.
 | RF-ORD-004 | Fábrica confirma ou recusa um pedido pendente                                 |
 | RF-ORD-005 | Revendedora cancela um pedido pendente                                        |
 | RF-ORD-006 | A outra parte é notificada de cada novo pedido e de cada mudança de status    |
+| RF-ORD-007 | Fábrica marca o pedido confirmado em produção e enviado (rastreio opcional)   |
+| RF-ORD-008 | Revendedora confirma o recebimento e as peças entram no estoque dela          |
 
 ## User Stories
 
@@ -70,17 +72,20 @@ fornecedor confirma ou recusa.
 
 ## Regras de Negócio
 
-| ID        | Regra                                                                                                                                                                         |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| BR-ORD-01 | Um pedido tem um único fornecedor, que precisa ser fornecedor da revenda (BR-SUP-01) no momento do pedido                                                                     |
-| BR-ORD-02 | Itens = variações ativas de produtos ativos do fornecedor, com preço > 0; quantidade inteira de 1 a 100.000; até 200 variações por pedido; a mesma variação repetida é somada |
-| BR-ORD-03 | Para cada produto do pedido, a soma das peças de todas as variações deve ser ≥ `min_order_quantity`                                                                           |
-| BR-ORD-04 | Preço unitário, nome do produto, cor, tamanho e SKU são congelados no item; alterações posteriores no catálogo não mudam o pedido                                             |
-| BR-ORD-05 | Variação sem estoque pode ser pedida (sob encomenda); a fábrica decide ao responder                                                                                           |
-| BR-ORD-06 | Estados: `PENDING → CONFIRMED`, `PENDING → REJECTED` (fábrica), `PENDING → CANCELLED` (revendedora). Estados finais não mudam                                                 |
-| BR-ORD-07 | Observação da revendedora e justificativa da fábrica: até 1.000 caracteres                                                                                                    |
-| BR-ORD-08 | Pedidos são criados e alterados só pelas funções transacionais; não há `insert`/`update` direto                                                                               |
-| BR-ORD-09 | Total = Σ (preço unitário × quantidade), em BRL                                                                                                                               |
+| ID        | Regra                                                                                                                                                                                                                                                                                        |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-ORD-01 | Um pedido tem um único fornecedor, que precisa ser fornecedor da revenda (BR-SUP-01) no momento do pedido                                                                                                                                                                                    |
+| BR-ORD-02 | Itens = variações ativas de produtos ativos do fornecedor, com preço > 0; quantidade inteira de 1 a 100.000; até 200 variações por pedido; a mesma variação repetida é somada                                                                                                                |
+| BR-ORD-03 | Para cada produto do pedido, a soma das peças de todas as variações deve ser ≥ `min_order_quantity`                                                                                                                                                                                          |
+| BR-ORD-04 | Preço unitário, nome do produto, cor, tamanho e SKU são congelados no item; alterações posteriores no catálogo não mudam o pedido                                                                                                                                                            |
+| BR-ORD-05 | Variação sem estoque pode ser pedida (sob encomenda); a fábrica decide ao responder                                                                                                                                                                                                          |
+| BR-ORD-06 | Estados: `PENDING → CONFIRMED`, `PENDING → REJECTED` (fábrica), `PENDING → CANCELLED` (revendedora); depois `CONFIRMED → IN_PRODUCTION → SHIPPED` (fábrica; `CONFIRMED → SHIPPED` direto do estoque) e `SHIPPED → DELIVERED` (revendedora). `DELIVERED`, `REJECTED` e `CANCELLED` são finais |
+| BR-ORD-10 | Ao enviar, a fábrica pode informar um código de rastreio (até 100 caracteres), mostrado no histórico e na notificação                                                                                                                                                                        |
+| BR-ORD-11 | Ao receber, cada item entra no estoque da revendedora como `ENTRADA` com `reference_type = 'supply_order'`, numa variação dela encontrada (ou criada) por nome+marca do produto e cor+tamanho; uma variação nova nasce com custo e preço de venda = preço unitário do pedido                 |
+| BR-ORD-12 | Cada etapa registra sua data (`production_started_at`, `shipped_at`, `delivered_at`), aparece no histórico do pedido e notifica a outra parte (`SUPPLY_ORDER_IN_PRODUCTION`, `SUPPLY_ORDER_SHIPPED` → revenda; `SUPPLY_ORDER_DELIVERED` → fábrica)                                           |
+| BR-ORD-07 | Observação da revendedora e justificativa da fábrica: até 1.000 caracteres                                                                                                                                                                                                                   |
+| BR-ORD-08 | Pedidos são criados e alterados só pelas funções transacionais; não há `insert`/`update` direto                                                                                                                                                                                              |
+| BR-ORD-09 | Total = Σ (preço unitário × quantidade), em BRL                                                                                                                                                                                                                                              |
 
 ## Fluxo Principal
 
@@ -126,6 +131,7 @@ Migrations `0018_supply_order_notification_types` (novos valores do enum
 - RPCs `list_supplier_order_catalog`, `place_supply_order`, `respond_supply_order`,
   `cancel_supply_order`;
 - trigger `notify_supply_order` (RF-ORD-006).
+- RPCs `advance_supply_order` e `receive_supply_order` (RF-ORD-007/008, migrations 0042–0043).
 
 ## Segurança
 
