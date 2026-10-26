@@ -220,6 +220,7 @@ describe("Stripe provider (ADR-0012)", () => {
           responsibilities: { fees_collector: "application", losses_collector: "application" },
         },
         configuration: {
+          merchant: { capabilities: { card_payments: { requested: true } } },
           recipient: {
             capabilities: { stripe_balance: { stripe_transfers: { requested: true } } },
           },
