@@ -7,7 +7,7 @@ import { listNetworkOffers } from "./queries";
 const up = await supabaseUp();
 const d = up ? describe : describe.skip;
 
-// VES-90 — the feed is searched in SQL (migration 0034) and paged.
+// VES-90 — the feed is searched in SQL (migration 0039) and paged.
 d("network feed search and pages (VES-90)", () => {
   let ctx: Awaited<ReturnType<typeof setup>>;
 

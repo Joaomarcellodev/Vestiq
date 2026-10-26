@@ -110,7 +110,7 @@ Server Action  ──valida (Zod)──▶  features/<f>/actions.ts  ──▶  
   próxima página; a ordem termina em `id` para as páginas não se sobreporem. Busca
   e filtros rodam **no banco, antes do corte** — filtrar depois esconderia
   resultados de outras páginas (por isso a busca do feed foi para
-  `list_visible_offers(p_query)`, migration 0034). O `Pager` preserva busca e abas.
+  `list_visible_offers(p_query)`, migration 0039). O `Pager` preserva busca e abas.
 
 ## Autenticação e proteção de rotas
 

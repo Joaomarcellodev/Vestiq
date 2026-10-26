@@ -49,7 +49,7 @@ export type OfferDetail = {
  * Active offers of the reseller's networks, optionally narrowed by a search query,
  * newest first, one page at a time (VES-90). Reads the public projection
  * (migration 0022) so peers get the product too; it also runs the search
- * (migration 0034), so a page holds only matches.
+ * (migration 0039), so a page holds only matches.
  */
 export async function listNetworkOffers(query?: string, page = 1): Promise<Page<NetworkOffer>> {
   const org = await requireActiveOrganization();
