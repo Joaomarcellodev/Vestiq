@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { BackButton } from "@/components/molecules/back-button";
 import { getSale } from "@/features/sales/queries";
 import { cancelSale } from "@/features/sales/actions";
+import { SaleTotals } from "@/features/sales/components/sale-totals";
 import { PageHeader } from "@/components/molecules/page-header";
 import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
 import { Badge } from "@/components/atoms";
@@ -46,10 +47,12 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
             </span>
           </div>
         ))}
-        <div className="flex items-center justify-between p-4 font-title-lg text-title-lg">
-          <span>Total · {PAYMENT_METHOD[sale.payment_method]}</span>
-          <span className="text-primary-container">{formatBRL(Number(sale.total))}</span>
-        </div>
+        <SaleTotals
+          subtotal={Number(sale.subtotal)}
+          discount={Number(sale.discount)}
+          total={Number(sale.total)}
+          paymentLabel={PAYMENT_METHOD[sale.payment_method]}
+        />
       </section>
 
       {sale.status === "CONFIRMED" && (
