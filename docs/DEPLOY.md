@@ -158,8 +158,14 @@ template de `supabase/templates/`:
 Os links do convite e do magic link passam por `/auth/confirm` com
 `token_hash` — com o template padrão do Supabase o convidado cai logado no
 dashboard sem passar por `/convite/<token>`. Os outros três usam o
-`ConfirmationURL` do próprio Supabase (VES-102). O SMTP padrão do Supabase tem limite baixo de envios por hora;
-para uso real, configure um SMTP próprio em **Authentication → SMTP Settings**.
+`ConfirmationURL` do próprio Supabase (VES-102).
+
+**Pré-requisito:** o painel só deixa editar assunto e corpo dos templates com
+**SMTP próprio** configurado (**Authentication → Emails → SMTP Settings**; o
+mais simples é o Gmail com senha de app: `smtp.gmail.com`, porta `465`). Sem
+ele, produção envia os templates padrão do Supabase, em inglês, e o SMTP padrão
+tem limite baixo de envios por hora. Enquanto isso, `/recuperar-senha` avisa que
+o email pode chegar em inglês.
 
 Login social: **não usado** (ADR-0002, revisão de 2026-10-08). Deixe Google e
 Apple desabilitados em **Authentication → Providers**.
