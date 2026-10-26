@@ -1482,6 +1482,7 @@ export type Database = {
         Args: { p_variant_id: string }
         Returns: undefined
       }
+      format_brl: { Args: { p_value: number }; Returns: string }
       get_network_invite: {
         Args: { p_token: string }
         Returns: {
