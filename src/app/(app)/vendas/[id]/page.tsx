@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { BackButton } from "@/components/molecules/back-button";
 import { getSale } from "@/features/sales/queries";
 import { cancelSale } from "@/features/sales/actions";
+import { SaleCancellation } from "@/features/sales/components/sale-cancellation";
 import { SaleTotals } from "@/features/sales/components/sale-totals";
 import { PageHeader } from "@/components/molecules/page-header";
 import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
@@ -54,6 +55,14 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
           paymentLabel={PAYMENT_METHOD[sale.payment_method]}
         />
       </section>
+
+      {sale.status === "CANCELLED" && (
+        <SaleCancellation
+          reason={sale.cancel_reason}
+          cancelledAt={sale.cancelled_at}
+          cancelledBy={sale.cancelledByName}
+        />
+      )}
 
       {sale.status === "CONFIRMED" && (
         <ActionForm
