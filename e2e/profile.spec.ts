@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { createUser, toast } from "./helpers";
 
 // 1x1 PNG
 const TINY_PNG = Buffer.from(
@@ -89,5 +90,41 @@ test.describe("Profile", () => {
     await page.goto("/perfil");
     await page.getByRole("button", { name: "Sair da conta" }).click();
     await expect(page).toHaveURL(/\/login/);
+  });
+
+  // VES-92 — a fresh user, so the shared demo passwords never change.
+  test("changes the password from the profile and keeps the session", async ({ page, request }) => {
+    const email = await createUser(request, "senha-antiga-1");
+    const signIn = async (password: string) => {
+      await page.goto("/login");
+      await page.getByLabel("Email profissional").fill(email);
+      await page.getByLabel("Senha", { exact: true }).fill(password);
+      await page.getByRole("button", { name: /entrar na plataforma/i }).click();
+    };
+    await signIn("senha-antiga-1");
+    await expect(page).not.toHaveURL(/\/login/);
+
+    await page.goto("/perfil");
+    await page.getByLabel("Senha atual").fill("errada-123");
+    await page.getByLabel("Nova senha", { exact: true }).fill("senha-nova-12");
+    await page.getByLabel("Confirmar nova senha").fill("senha-nova-12");
+    await page.getByRole("button", { name: "Alterar senha" }).click();
+    await expect(page.getByText("Senha atual incorreta.")).toBeVisible();
+
+    await page.getByLabel("Senha atual").fill("senha-antiga-1");
+    await page.getByLabel("Nova senha", { exact: true }).fill("senha-nova-12");
+    await page.getByLabel("Confirmar nova senha").fill("senha-nova-12");
+    await page.getByRole("button", { name: "Alterar senha" }).click();
+    await expect(toast(page)).toHaveText("Senha alterada.");
+
+    await page.reload();
+    await expect(page).toHaveURL(/\/perfil/);
+    await page.getByRole("button", { name: "Sair da conta" }).click();
+    await expect(page).toHaveURL(/\/login/);
+
+    await signIn("senha-antiga-1");
+    await expect(page.locator("p[role=alert], [role=alert]").first()).toBeVisible();
+    await signIn("senha-nova-12");
+    await expect(page).not.toHaveURL(/\/login/);
   });
 });
