@@ -349,6 +349,53 @@ ou do fornecedor); toda escrita passa pelas funções abaixo.
 O trigger `supply_orders_notify` avisa a fábrica de um novo pedido e de um
 cancelamento, e avisa a revenda de uma confirmação ou recusa (link `/pedidos/<id>`).
 
+## Pagamento de pedidos (SPEC-014)
+
+Migrations `0033` (tipo de notificação `SUPPLY_ORDER_PAID`) e `0034`. A revenda
+paga com cartão, no Checkout do Stripe (ADR-0012), um pedido `CONFIRMED`. O
+Vestiq guarda só a sessão de checkout e o status; nenhum dado de cartão. A
+tabela só tem policy de `select` (as duas partes do pedido).
+
+| Tabela | Colunas principais |
+| --- | --- |
+| `supply_order_payments` | `order_id`, `provider` (`stripe`), `checkout_session_id` (único), `payment_intent_id`, `status payment_status` (`PENDING`/`PAID`/`FAILED`/`EXPIRED`), `amount numeric(18,2)`, `currency` (`BRL`), `created_by`, `paid_at`. Único parcial `(order_id) where status = 'PENDING'` |
+
+| Função | Garante |
+| --- | --- |
+| `register_supply_order_payment(p_order_id, p_checkout_session_id, p_amount)` | membro da revenda; pedido `CONFIRMED`, ainda não pago e sem outro checkout pendente; valor = `total_amount` |
+| `apply_supply_order_payment_status(p_checkout_session_id, p_status, p_amount, p_payment_intent_id)` | **só `service_role`** (webhook e retorno do checkout, depois de ler o Stripe); só sai de `PENDING`; `PAID` exige o valor registrado; repetir é inócuo |
+
+O trigger `supply_order_payments_notify` avisa a fábrica quando o pedido é pago.
+
+Reembolso (migrations `0035` e `0036`): colunas `refunded_amount` (0 a `amount`),
+`refunded_at`, `refunded_by` e `refund_reason`; status `REFUNDED` só no reembolso total.
+
+| Função | Garante |
+| --- | --- |
+| `authorize_supply_order_refund(p_order_id, p_reason)` | `FACTORY_ADMIN`/`PLATFORM_ADMIN` do fornecedor; pagamento `PAID` com `payment_intent_id`; não grava nada |
+| `apply_supply_order_payment_refund(p_payment_intent_id, p_amount_refunded, p_refunded_by, p_reason)` | **só `service_role`**; total reembolsado lido do Stripe; nunca diminui nem passa do pago |
+
+O trigger `supply_order_payments_notify_refund` avisa a revenda de cada reembolso.
+
+## Comissão e recebimento da fábrica (SPEC-015)
+
+Migration `0037`. A fábrica recebe numa conta conectada do Stripe Connect, e o
+Vestiq retém um percentual por fábrica.
+
+| Tabela | Colunas principais |
+| --- | --- |
+| `factory_payment_accounts` | `organization_id` (PK), `stripe_account_id` (único), `transfers_status` (`active`/`pending`/`restricted`/`rejected`/`unsupported`), `platform_fee_percent` (0–50, padrão 10). `select` só para membros da fábrica |
+| `supply_order_payments` (+) | `platform_fee_percent`, `platform_fee_amount`, `net_amount` (gerada = `amount − platform_fee_amount`), `destination_account_id` |
+
+| Função | Garante |
+| --- | --- |
+| `quote_supply_order_payment(p_order_id)` | membro da revenda; total, percentual, comissão arredondada e conta de destino com status |
+| `register_supply_order_payment(…, p_platform_fee_amount, p_destination_account_id)` | as guardas da SPEC-014 + conta da fábrica `active` e comissão igual ao percentual |
+| `link_factory_payment_account` / `set_factory_payment_account_status` / `set_factory_platform_fee` | **só `service_role`**; a fábrica não troca de conta |
+
+Para mudar a comissão de uma fábrica (SQL Editor, service role):
+`select public.set_factory_platform_fee('<organization_id>', 7.5);`
+
 ## Índices principais
 
 ```sql

@@ -1,9 +1,9 @@
-# ADR-0012 — Provedor de pagamentos: Mercado Pago
+# ADR-0012 — Provedor de pagamentos: Stripe
 
-- **Status:** Proposto (aguarda validação do professor e criação da conta sandbox)
-- **Data:** 2026-10-09
-- **Requisitos:** VES-70; prepara VES-24 (cartão à vista), VES-26 (parcelamento) e
-  VES-27 (comissão da plataforma)
+- **Status:** Aceito pelo time (falta a validação com o professor)
+- **Data:** 2026-10-09 (proposta: Mercado Pago) · revisada em 2026-10-23 (decisão: Stripe)
+- **Requisitos:** VES-70; VES-24 (cartão à vista, [SPEC-014](../../specs/payments/SPEC.md));
+  prepara VES-26 (parcelamento) e VES-27 (comissão da plataforma)
 
 ## Contexto
 
@@ -34,7 +34,7 @@ precisam ser confirmados no painel de cada conta.**
 | Cartão de crédito à vista             | ~4,98% (recebe na hora) · ~3,98% (30 dias)                                                    | ~4,19% (tabela pública antiga; hoje só no painel)                    | ~3,99% + R$ 0,39                                                           |
 | Pix                                   | 0% para a maioria das contas (0,49% para CNPJ novo acima de R$ 15 mil/mês)                    | ~0,99%                                                               | ~1,19%, **só por convite** (exige histórico na conta)                      |
 | Prazo de recebimento                  | Escolhido pelo vendedor (na hora, 14 ou 30 dias): quanto mais longo, menor a taxa             | Configurável por recebedor (antecipação opcional)                    | D+2 a D+30, conforme o país e o risco                                      |
-| Parcelamento (VES-26)                 | Até 12x; juros repassados ao comprador ou absorvidos pelo vendedor                            | Até 12x, com tabela de juros por recebedor                           | Parcelamento BR suportado, com menos opções de configuração                |
+| Parcelamento (VES-26)                 | Até 12x; juros repassados ao comprador ou absorvidos pelo vendedor                            | Até 12x, com tabela de juros por recebedor                           | **Sem parcelamento para contas Brasil** (só México, Japão e Mastercard Installments; revisto em 23/10) |
 | Split / comissão (VES-27)             | **Checkout API com `marketplace_fee`**: o vendedor conecta a própria conta MP por OAuth      | **Split nativo por recebedores** (regras em % ou valor por pedido)  | **Connect**: US$ 2 por conta ativa/mês + 0,25% + 25¢ por repasse (preço global) |
 | Onboarding do recebedor               | Login com uma conta MP que a revendedora provavelmente já tem                                 | Cadastro de recebedor com dados bancários e KYC feito pela plataforma | Onboarding Connect (KYC da Stripe), pensado para empresas                  |
 | Tokenização no navegador              | Card Payment Brick / `MercadoPago.js`                                                         | `tokenizecard.js` / checkout próprio                                 | Stripe Elements                                                            |
@@ -44,57 +44,82 @@ precisam ser confirmados no painel de cada conta.**
 
 ## Decisão
 
-Adotar o **Mercado Pago** (Checkout API com Card Payment Brick e split via
-`marketplace_fee`).
+Adotar o **Stripe**, com o **Checkout hospedado** (Checkout Sessions API) para o
+pagamento com cartão à vista (VES-24).
 
-1. **Comissão sem custódia (VES-27).** Cada vendedor conecta a própria conta Mercado
-   Pago por OAuth. O pagamento é criado com o token de acesso do vendedor, e o
-   `marketplace_fee` fica com o Vestiq. O Vestiq nunca guarda o dinheiro do vendedor.
-2. **Onboarding mais leve para quem recebe.** A maioria das revendedoras já tem conta
-   Mercado Pago. Com Pagar.me, o Vestiq precisaria coletar dados bancários e conduzir o
-   KYC de cada recebedor.
-3. **Pix a custo zero** para a maioria das contas, o que importa num público que já vende
-   por Pix. O Stripe só libera Pix por convite.
-4. **Parcelamento nativo (VES-26)** em até 12x, com a escolha entre juros do comprador e
-   juros do vendedor.
-5. **Sandbox simples** com usuários de teste e cartões que forçam aprovado/recusado,
-   suficiente para os testes de integração exigidos pela VES-24.
+A proposta de 09/10 era o Mercado Pago. Em 23/10 o time criou a conta no
+Stripe (área restrita/sandbox, país Brasil) e decidiu seguir com ele:
 
-A **Pagar.me** fica como alternativa: o split por recebedores é o mais flexível, e vale
-reavaliar se o Vestiq passar a precisar de regras de divisão complexas ou de
-liquidação centralizada.
+1. **Cartão fora do nosso servidor.** O Checkout hospedado coleta o cartão na
+   página do Stripe. O Vestiq não toca em dados de cartão, e o escopo PCI fica no
+   mínimo (SAQ A).
+2. **Sandbox e documentação.** Modo de teste completo, cartões de teste com
+   resultado forçado, Stripe CLI para encaminhar webhooks em desenvolvimento e o
+   melhor SDK Node da comparação.
+3. **Esforço baixo para a VES-24.** Uma Server Action cria a sessão, e um Route
+   Handler recebe o webhook. Não há componente de cartão no cliente.
+4. **Caminho para as próximas histórias.** O split via Connect (VES-27) existe na
+   mesma API. O parcelamento (VES-26) **não**: revisto em 23/10, o parcelamento
+   nativo do Stripe é documentado só para contas do México, do Japão e para
+   Mastercard Installments. A VES-26 voltou para o backlog.
 
-## Como vai funcionar
+O que perdemos em relação ao Mercado Pago, registrado na tabela acima: **Pix só
+por convite** e um onboarding de recebedores (Connect) mais pesado do que o OAuth
+com uma conta Mercado Pago que a revendedora já tem. A **Pagar.me** continua como
+alternativa se o split por recebedores virar requisito forte.
 
-- **Cliente:** o Card Payment Brick tokeniza o cartão. Só o `token` chega à Server Action.
-- **Servidor:** cria o pagamento com o `access_token` do vendedor (guardado
-  criptografado e lido só no servidor) e o `marketplace_fee` calculado em centavos.
-- **Webhook:** um Route Handler `/api/payments/webhook` valida a assinatura
-  (`x-signature`) e chama uma função PostgreSQL que registra status, bruto, comissão e
-  líquido de forma atômica (ADR-0004).
-- **Variáveis de ambiente** (nenhuma chave real no repositório):
-  - `MERCADOPAGO_ACCESS_TOKEN` (conta da plataforma, servidor)
-  - `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY` (cliente)
-  - `MERCADOPAGO_CLIENT_ID` / `MERCADOPAGO_CLIENT_SECRET` (OAuth dos vendedores)
-  - `MERCADOPAGO_WEBHOOK_SECRET`
-  - Em desenvolvimento e no CI, usar só as credenciais **de teste** do painel
-    (prefixo `TEST-`).
+## Como funciona (SPEC-014)
 
-## Pendências (antes de aceitar esta ADR)
+- **Integração isolada** em `src/features/payments/provider/stripe.ts`: é o único
+  módulo que importa o SDK `stripe`. O resto do app usa tipos próprios.
+- **Servidor:** a action `payOrderWithCard` cria uma Checkout Session
+  (`mode: payment`, só cartão, BRL, valor do pedido em centavos, expira em 30 min)
+  e grava o pagamento `PENDING` por `register_supply_order_payment`.
+- **Webhook:** `POST /api/payments/webhook` (rota pública) verifica a assinatura
+  `Stripe-Signature` sobre o corpo bruto e chama
+  `apply_supply_order_payment_status` com a service role. A função é idempotente,
+  transacional (ADR-0004) e não pode ser chamada por usuários. Eventos:
+  `checkout.session.completed` (só com `payment_status = paid`),
+  `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`
+  e `checkout.session.expired`; e `charge.refunded` para reembolsos.
+- **Reembolso:** a fábrica reembolsa o pedido pago pelo Vestiq (`refunds.create` com
+  chave de idempotência), e reembolsos feitos no painel chegam pelo webhook. O
+  valor reembolsado é sempre o `amount_refunded` da cobrança no Stripe.
+- **Volta do checkout:** `/pedidos/[id]?checkout=<sessão>` lê a sessão na API do
+  Stripe e registra o resultado, para o pedido aparecer pago sem esperar o
+  webhook. É um complemento: **o webhook é obrigatório**, porque a revendedora
+  pode pagar e não voltar.
+- **Variáveis de ambiente** (nenhuma chave no repositório):
+  - `STRIPE_SECRET_KEY` (servidor). Preferir uma chave restrita `rk_` com escrita
+    em Checkout Sessions e Refunds e leitura em PaymentIntents.
+  - `STRIPE_WEBHOOK_SECRET` (servidor), do endpoint no painel ou da `stripe listen`.
+  - Em desenvolvimento e no CI, só chaves da **área restrita** (sandbox).
 
+## Pendências
+
+- [x] Criar a conta no Stripe (área restrita, Brasil).
+- [x] Definir o que é pago: o **pedido de abastecimento** confirmado
+      (revendedora → fábrica). Negociações entre revendedoras ficam de fora por ora.
+- [ ] Cadastrar as chaves de teste no `.env.local` de cada dev e no Netlify.
+- [ ] Cadastrar o endpoint de webhook no painel (ver `docs/DEPLOY.md`).
 - [ ] Validar a escolha com o professor.
-- [ ] Criar a conta de desenvolvedor no Mercado Pago, a aplicação e os usuários de teste
-      (comprador e vendedor). Essa etapa é manual e feita pelo time.
-- [ ] Registrar as chaves de teste no `.env.local` de cada dev e nos segredos do CI.
-- [ ] Definir quais transações serão pagas pela plataforma (pedido de abastecimento
-      revendedora → fábrica e/ou transferência entre revendedoras). A pergunta está
-      aberta nas VES-24/26/27.
 - [ ] Confirmar no painel as taxas vigentes da conta.
 
 ## Consequências
 
-- Vendedores sem conta Mercado Pago precisam criar uma para receber pelo Vestiq.
-- A comissão depende do vendedor ter autorizado o OAuth. Sem a conexão, o checkout
-  daquele vendedor fica indisponível.
-- Ficamos acoplados à API do Mercado Pago. Para reduzir o custo de uma troca futura, a
-  integração fica isolada em `src/features/payments/provider/`.
+- **Comissão (VES-27, [SPEC-015](../../specs/commission/SPEC.md)):** marketplace com
+  **cobranças com destino**. Cada fábrica tem uma conta conectada **v2 de recebedor**
+  (`configuration.recipient` com `stripe_balance.stripe_transfers`, Dashboard
+  Express, Brasil), cadastrada pelo Account Link hospedado. A plataforma paga as
+  tarifas do Stripe e cobre perdas (`fees_collector` e `losses_collector:
+  application`). O checkout leva `transfer_data.destination` e
+  `application_fee_amount` (percentual por fábrica, padrão 10%). O reembolso usa
+  `reverse_transfer` e `refund_application_fee`.
+- O Connect precisa ser **ativado no painel** (configuração de plataforma), e a
+  plataforma assume as perdas de contas conectadas (saldo negativo, contestações).
+- Sem Pix até o Stripe liberar o meio para a conta. Como os pedidos são pagos por
+  cartão, o fluxo de status já trata meios assíncronos (`async_payment_*`) para
+  quando o Pix entrar.
+- Ficamos acoplados à API do Stripe. Para reduzir o custo de uma troca, a
+  integração fica isolada em `src/features/payments/provider/`, e o banco guarda
+  só `checkout_session_id` e `payment_intent_id`.

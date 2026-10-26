@@ -80,6 +80,50 @@ Só duas — ambas públicas (protegidas por RLS):
 > `NEXT_PUBLIC_`. Sem ela, convidar uma revendedora mostra "O envio de emails
 > não está configurado" e o convite não é criado.
 
+> **Pagamentos (SPEC-014, ADR-0012).** Para o botão "Pagar com cartão"
+> funcionar, cadastre também, como variáveis **secretas** com escopo
+> **Functions**:
+>
+> - `STRIPE_SECRET_KEY` — no painel do Stripe, **Desenvolvedores → Chaves de
+>   API**. Prefira uma **chave restrita** (`rk_test_…`) com permissão de
+>   **escrita em Checkout Sessions e em Refunds** e **leitura em PaymentIntents**. Enquanto o Vestiq estiver em teste, use só
+>   chaves da área restrita (sandbox), nunca as de produção.
+> - `STRIPE_WEBHOOK_SECRET` — o `whsec_…` do endpoint de webhook (abaixo).
+>
+> O webhook também precisa da `SUPABASE_SECRET_KEY`: o status do pagamento é
+> gravado com a service role. Sem `STRIPE_SECRET_KEY`, o pedido mostra "Os
+> pagamentos estão indisponíveis no momento"; o resto do app funciona.
+>
+> **Endpoint de webhook** (painel do Stripe → **Desenvolvedores → Webhooks →
+> Adicionar destino**): URL `https://vestiq-app.netlify.app/api/payments/webhook`,
+> eventos `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+> `checkout.session.async_payment_failed`, `checkout.session.expired` e
+> `charge.refunded` (reembolsos, inclusive os feitos no painel). Copie o
+> segredo de assinatura para `STRIPE_WEBHOOK_SECRET`.
+>
+> **Em desenvolvimento**, o webhook pode vir pela Stripe CLI:
+> `stripe listen --forward-to localhost:3000/api/payments/webhook` imprime um
+> `whsec_…` para o `.env.local`. Sem a CLI, a volta do checkout já registra o
+> pagamento, mas expiração e falhas só chegam pelo webhook, que é obrigatório
+> em produção. Cartão de teste aprovado: `4242 4242 4242 4242`, qualquer
+> validade futura e qualquer CVC.
+
+> **Comissão e recebimento das fábricas (SPEC-015, VES-27).** Os pagamentos são
+> cobranças com destino do **Stripe Connect**. Antes de qualquer pagamento:
+>
+> 1. No painel do Stripe (área restrita primeiro), **Configurações → Connect →
+>    Configuração da plataforma**: escolha o modelo **marketplace**, com a
+>    plataforma responsável pelas tarifas e pelas perdas das contas conectadas, e
+>    revise as responsabilidades. Sem isso, a API responde
+>    `Accounts v2 is not enabled`.
+> 2. Cada fábrica abre **Recebimentos** no Vestiq e faz o cadastro no Stripe. Na
+>    área restrita, o cadastro aceita [dados de teste](https://docs.stripe.com/connect/testing).
+> 3. Se usar chave restrita (`rk_`), inclua escrita em **Accounts (v2)** e
+>    **Account Links**.
+>
+> Sem a conta da fábrica ativa, a revendedora vê "O fornecedor ainda não pode
+> receber pagamentos pelo Vestiq".
+
 Depois de adicionar as variáveis: **Deploys → Trigger deploy → Deploy site**.
 
 ## 4. Configurar o Supabase para o domínio do Netlify
