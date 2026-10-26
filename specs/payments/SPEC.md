@@ -76,7 +76,7 @@ informa o resultado pelo webhook.
 
 | ID        | Regra                                                                                                                                                                          |
 | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| BR-PAY-01 | Só se paga um pedido `CONFIRMED`, e só um membro da revenda do pedido pode pagar                                                                                               |
+| BR-PAY-01 | Só se paga um pedido aceito pelo fornecedor (`CONFIRMED`, `IN_PRODUCTION`, `SHIPPED` ou `DELIVERED` — VES-32), e só um membro da revenda do pedido pode pagar                  |
 | BR-PAY-02 | Um pedido é pago uma vez: com um pagamento `PAID`, não se abre outro checkout                                                                                                  |
 | BR-PAY-03 | No máximo um checkout `PENDING` por pedido; clicar de novo reabre o mesmo checkout enquanto ele estiver aberto (expira em 30 minutos)                                          |
 | BR-PAY-04 | O checkout cobra exatamente `total_amount` do pedido, em BRL; o webhook recusa um valor pago diferente do registrado                                                           |

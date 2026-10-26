@@ -45,6 +45,9 @@ export const NEGOTIATION_EVENT: Record<
 export const SUPPLY_ORDER_STATUS: LabelMap<Database["public"]["Enums"]["supply_order_status"]> = {
   PENDING: { label: "Pendente", tone: "warning" },
   CONFIRMED: { label: "Confirmado", tone: "success" },
+  IN_PRODUCTION: { label: "Em produção", tone: "info" },
+  SHIPPED: { label: "Enviado", tone: "primary" },
+  DELIVERED: { label: "Entregue", tone: "success" },
   REJECTED: { label: "Recusado", tone: "error" },
   CANCELLED: { label: "Cancelado", tone: "neutral" },
 };

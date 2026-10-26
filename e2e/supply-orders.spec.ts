@@ -2,7 +2,9 @@ import { test, expect } from "@playwright/test";
 import { login } from "./helpers";
 
 // SPEC-012 TC-ORD-12 — relies on the demo factory catalog from scripts/seed.mjs.
-test("a reseller orders from a supplier and the factory confirms", async ({ browser }) => {
+test("a reseller orders, the factory confirms and ships, and the reseller receives it", async ({
+  browser,
+}) => {
   const resellerCtx = await browser.newContext();
   const factoryCtx = await browser.newContext();
   const reseller = await resellerCtx.newPage();
@@ -47,6 +49,28 @@ test("a reseller orders from a supplier and the factory confirms", async ({ brow
   await expect(reseller.getByText("Confirmado", { exact: true })).toBeVisible();
   await expect(reseller.getByText("Sai na segunda.")).toBeVisible();
   await expect(reseller.getByRole("button", { name: "Cancelar pedido" })).toHaveCount(0);
+  await expect(reseller.getByRole("button", { name: "Confirmar recebimento" })).toHaveCount(0);
+
+  // VES-32 — the factory starts production and ships with a tracking code.
+  await factory.goto(orderPath);
+  await factory.getByRole("button", { name: "Marcar em produção" }).click();
+  await expect(factory.getByText("Pedido em produção.")).toBeVisible();
+  await expect(factory.getByText("Em produção", { exact: true })).toBeVisible();
+  const tracking = `BR${Date.now()}BR`;
+  await factory.getByLabel("Código de rastreio (opcional)").fill(tracking);
+  await factory.getByRole("button", { name: "Marcar como enviado" }).click();
+  await expect(factory.getByText("Pedido marcado como enviado.")).toBeVisible();
+  await expect(factory.getByText("Enviado", { exact: true })).toBeVisible();
+
+  // The reseller sees the tracking code and receives the order into her stock.
+  await reseller.goto(orderPath);
+  await expect(reseller.getByText(tracking)).toBeVisible();
+  await reseller.getByRole("button", { name: "Confirmar recebimento" }).click();
+  await expect(
+    reseller.getByText("As peças entraram no seu estoque.", { exact: false }).first(),
+  ).toBeVisible();
+  await expect(reseller.getByText("Entregue", { exact: true })).toBeVisible();
+  await expect(reseller.getByText("Recebido pela revendedora")).toBeVisible();
 
   await resellerCtx.close();
   await factoryCtx.close();

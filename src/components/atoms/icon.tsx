@@ -26,6 +26,7 @@ type IconName =
   | "hub"
   | "inbox"
   | "inventory_2"
+  | "local_shipping"
   | "lock"
   | "mail"
   | "menu"
@@ -126,6 +127,13 @@ const PATHS: Record<IconName, React.ReactNode> = {
   inventory_2: (
     <>
       <path d="M4 8h16v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8ZM3 4h18v4H3zM10 12h4" />
+    </>
+  ),
+  local_shipping: (
+    <>
+      <path d="M3 6h11v10H3zM14 9h4l3 3v4h-7" />
+      <circle cx="7" cy="18" r="2" />
+      <circle cx="17" cy="18" r="2" />
     </>
   ),
   lock: (
