@@ -8,7 +8,13 @@ import {
   makeNetwork,
   setTestClient,
 } from "@/test/actions";
-import { cancelSupplyOrder, placeSupplyOrder, respondSupplyOrder } from "./actions";
+import {
+  advanceSupplyOrder,
+  cancelSupplyOrder,
+  placeSupplyOrder,
+  receiveSupplyOrder,
+  respondSupplyOrder,
+} from "./actions";
 import { getOrderCatalog, getSupplyOrder, listSupplyOrders } from "./queries";
 
 const up = await supabaseUp();
@@ -412,5 +418,172 @@ d("supply orders (SPEC-012)", () => {
       "SUPPLY_ORDER_PLACED",
       "SUPPLY_ORDER_CANCELLED",
     ]);
+  });
+
+  // ---------------------------------------------------------------------------
+  // VES-32 — fulfillment: production, shipping, delivery into the reseller's stock
+  // ---------------------------------------------------------------------------
+  async function confirmedOrder(list: [string, number][]) {
+    const id = await placeOk(list);
+    setTestClient(ctx.factoryAdmin.client);
+    await expectRedirect(
+      () => respondSupplyOrder({}, formData({ orderId: id, decision: "confirm" })),
+      /toast=supply-order-confirmed/,
+    );
+    return id;
+  }
+  const advance = (user: User, orderId: string, stage: string, trackingCode = "") => {
+    setTestClient(user.client);
+    return advanceSupplyOrder({}, formData({ orderId, stage, trackingCode }));
+  };
+  const receive = (user: User, orderId: string) => {
+    setTestClient(user.client);
+    return receiveSupplyOrder({}, formData({ orderId }));
+  };
+
+  it("follows an order through production and shipping up to the reseller's stock (VES-32)", async () => {
+    const id = await confirmedOrder([
+      [ctx.dressP.id, 8],
+      [ctx.dressM.id, 4],
+    ]);
+
+    await expectRedirect(
+      () => advance(ctx.factoryAdmin, id, "IN_PRODUCTION"),
+      /toast=supply-order-in-production/,
+    );
+    await expectRedirect(
+      () => advance(ctx.factoryAdmin, id, "SHIPPED", " BR123456789BR "),
+      /toast=supply-order-shipped/,
+    );
+    setTestClient(ctx.reseller.client);
+    expect(await getSupplyOrder(id)).toMatchObject({
+      status: "SHIPPED",
+      trackingCode: "BR123456789BR",
+    });
+
+    await expectRedirect(() => receive(ctx.reseller, id), /toast=supply-order-received/);
+    setTestClient(ctx.reseller.client);
+    const order = await getSupplyOrder(id);
+    expect(order).toMatchObject({ status: "DELIVERED" });
+    expect(order!.productionStartedAt).not.toBeNull();
+    expect(order!.shippedAt).not.toBeNull();
+    expect(order!.deliveredAt).not.toBeNull();
+
+    // the pieces entered the shop's own catalog, one ENTRADA per item tied to the order
+    const { data: variants } = await admin()
+      .from("product_variants")
+      .select("id, size, color, stock_on_hand, cost_price, products!inner(name, organization_id)")
+      .eq("organization_id", ctx.shop.id)
+      .eq("products.name", "Vestido Pedido")
+      .order("size");
+    expect(variants?.map((v) => [v.size, v.color, v.stock_on_hand, Number(v.cost_price)])).toEqual([
+      ["M", "Preto", 4, 79.9],
+      ["P", "Preto", 8, 79.9],
+    ]);
+    const { data: moves } = await admin()
+      .from("inventory_movements")
+      .select("type, quantity, reference_type, organization_id")
+      .eq("reference_id", id);
+    expect(moves).toHaveLength(2);
+    for (const m of moves ?? []) {
+      expect(m).toMatchObject({
+        type: "ENTRADA",
+        reference_type: "supply_order",
+        organization_id: ctx.shop.id,
+      });
+    }
+
+    // a second order for the same pieces adds to the same variants
+    const again = await confirmedOrder([[ctx.dressP.id, 12]]);
+    await expectRedirect(() => advance(ctx.factoryAdmin, again, "SHIPPED"), /toast=/);
+    await expectRedirect(() => receive(ctx.reseller, again), /toast=/);
+    const { data: p } = await admin()
+      .from("product_variants")
+      .select("stock_on_hand, products!inner(name)")
+      .eq("organization_id", ctx.shop.id)
+      .eq("products.name", "Vestido Pedido")
+      .eq("size", "P");
+    expect(p?.map((v) => v.stock_on_hand)).toEqual([20]);
+  });
+
+  it("guards who moves the order and in what order (VES-32)", async () => {
+    const id = await confirmedOrder([[ctx.pants38.id, 6]]);
+
+    // only the factory advances, only the reseller receives
+    expect(await advance(ctx.reseller, id, "SHIPPED")).toEqual({
+      error: "Você não tem permissão para esta ação",
+    });
+    expect(await advance(ctx.otherAdmin, id, "SHIPPED")).toEqual({
+      error: "Você não tem permissão para esta ação",
+    });
+    expect(await receive(ctx.outsider, id)).toEqual({
+      error: "Você não tem permissão para esta ação",
+    });
+    // nothing to receive before it ships
+    expect(await receive(ctx.reseller, id)).toEqual({
+      error: "Só um pedido enviado pode ser marcado como recebido",
+    });
+    expect(await advance(ctx.factoryAdmin, id, "DELIVERED")).toEqual({
+      error: expect.any(String),
+    });
+
+    await expectRedirect(() => advance(ctx.factoryAdmin, id, "SHIPPED"), /toast=/);
+    expect(await advance(ctx.factoryAdmin, id, "IN_PRODUCTION")).toEqual({
+      error: "Só um pedido confirmado entra em produção",
+    });
+    expect(await receive(ctx.factoryAdmin, id)).toEqual({
+      error: "Você não tem permissão para esta ação",
+    });
+    await expectRedirect(() => receive(ctx.reseller, id), /toast=/);
+    expect(await receive(ctx.reseller, id)).toEqual({
+      error: "Só um pedido enviado pode ser marcado como recebido",
+    });
+
+    // a pending order can't skip confirmation
+    const pending = await placeOk([[ctx.pants38.id, 6]]);
+    expect(await advance(ctx.factoryAdmin, pending, "SHIPPED")).toEqual({
+      error: "Só um pedido confirmado ou em produção pode ser enviado",
+    });
+  });
+
+  it("notifies each fulfillment stage to the other side (VES-32)", async () => {
+    const id = await confirmedOrder([[ctx.pants38.id, 6]]);
+    await expectRedirect(() => advance(ctx.factoryAdmin, id, "IN_PRODUCTION"), /toast=/);
+    await expectRedirect(() => advance(ctx.factoryAdmin, id, "SHIPPED", "BR1"), /toast=/);
+    await expectRedirect(() => receive(ctx.reseller, id), /toast=/);
+
+    const notes = async (orgId: string) => {
+      const { data } = await admin()
+        .from("notifications")
+        .select("type, body")
+        .eq("organization_id", orgId)
+        .eq("link", `/pedidos/${id}`)
+        .order("created_at");
+      return data ?? [];
+    };
+    expect(await notes(ctx.shop.id)).toEqual([
+      expect.objectContaining({ type: "SUPPLY_ORDER_CONFIRMED" }),
+      {
+        type: "SUPPLY_ORDER_IN_PRODUCTION",
+        body: "Confecção Pedido começou a produzir seu pedido de 6 peças",
+      },
+      {
+        type: "SUPPLY_ORDER_SHIPPED",
+        body: "Confecção Pedido enviou seu pedido de 6 peças · rastreio BR1",
+      },
+    ]);
+    expect((await notes(ctx.factory.id)).map((n) => n.type)).toEqual([
+      "SUPPLY_ORDER_PLACED",
+      "SUPPLY_ORDER_DELIVERED",
+    ]);
+  });
+
+  it("filters the order list by the new stages (VES-32)", async () => {
+    const id = await confirmedOrder([[ctx.pants38.id, 6]]);
+    await expectRedirect(() => advance(ctx.factoryAdmin, id, "IN_PRODUCTION"), /toast=/);
+    setTestClient(ctx.factoryAdmin.client);
+    const inProduction = await listSupplyOrders("IN_PRODUCTION");
+    expect(inProduction.map((o) => o.id)).toContain(id);
+    expect(inProduction.every((o) => o.status === "IN_PRODUCTION")).toBe(true);
   });
 });
