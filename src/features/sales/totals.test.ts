@@ -17,6 +17,12 @@ describe("sale totals", () => {
     expect(computeTotals([{ quantity: 1, unitPrice: 100 }], -50).discount).toBe(0);
   });
 
+  it("never returns a negative total when the discount exceeds the subtotal (VES-81)", () => {
+    const t = computeTotals([{ quantity: 1, unitPrice: 16800 }], 999999);
+    expect(t.subtotal).toBe(16800);
+    expect(t.total).toBe(0);
+  });
+
   it("validates discount vs subtotal", () => {
     expect(validateDiscount(100, 20)).toBeNull();
     expect(validateDiscount(100, 120)).toBe("Desconto maior que o subtotal");
