@@ -69,7 +69,7 @@ transacional; bloquear venda acima do disponível; cancelar → estorno + histó
 | ID         | Regra                                                                                                                                                                                         |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | BR-SALE-01 | Venda tem 1..N itens; cada item referencia `product_variant` + `quantity > 0` + `unit_price` (preço no momento)                                                                               |
-| BR-SALE-02 | `subtotal = Σ line_total`; `total = subtotal - discount`; `discount ∈ [0, subtotal]`                                                                                                          |
+| BR-SALE-02 | `subtotal = Σ line_total`; `total = subtotal - discount`; `discount ∈ [0, subtotal]`; enquanto o desconto digitado passa do subtotal, a tela mostra total R$ 0,00 (nunca negativo — VES-81)   |
 | BR-SALE-03 | `payment_method ∈ {PIX, CARTAO, DINHEIRO}`                                                                                                                                                    |
 | BR-SALE-04 | `confirm_sale` é transacional: cria `sales` + `sale_items` + N movimentos `VENDA` (negativos) + atualiza `stock_on_hand`; se **qualquer** item exceder o saldo, aborta tudo (RF-SALE-006/007) |
 | BR-SALE-05 | Item de variação arquivada não pode ser vendido                                                                                                                                               |
