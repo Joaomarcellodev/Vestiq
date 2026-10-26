@@ -181,6 +181,7 @@ Append-only. Sem `update`/`delete` via RLS (RF-INV-006).
 | `sold_by` | uuid → profiles | |
 | `cancelled_at` | timestamptz | RF-SALE-008 — permanece no histórico |
 | `cancel_reason` | text | null |
+| `cancelled_by` | uuid → profiles | quem cancelou (VES-83, migration 0038); nome lido pela RPC `sale_cancelled_by_name`, só para membros da organização |
 
 ### `sale_items` — RF-SALE-002/003
 | coluna | tipo | notas |

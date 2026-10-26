@@ -52,8 +52,9 @@
 
 **Dado** uma venda `CONFIRMED`
 **Quando** a revendedora a cancela com motivo
-**Então** `status = CANCELLED`, `cancelled_at` e `cancel_reason` preenchidos
-**E** a venda continua listada no histórico (do cliente e de vendas).
+**Então** `status = CANCELLED`, `cancelled_at`, `cancel_reason` e `cancelled_by` preenchidos
+**E** a venda continua listada no histórico (do cliente e de vendas)
+**E** o detalhe mostra o motivo, a data/hora e o nome de quem cancelou (VES-83).
 
 ## AC-SALE-009-01 — Estorno ao cancelar
 
