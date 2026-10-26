@@ -122,7 +122,9 @@ d("notifications — triggers, queries, actions, RLS (SPEC-008/009)", () => {
     const negId = dest.split("/")[2]!.split("?")[0]!;
 
     const sellerNotifs = await orgNotifications(ctx.sellerOrg.id);
-    expect(sellerNotifs.some((n) => n.type === "NEGOTIATION_OPENED")).toBe(true);
+    const opened = sellerNotifs.find((n) => n.type === "NEGOTIATION_OPENED");
+    // VES-85: the amount reads as Brazilian currency, not "550.00"
+    expect(opened?.body).toMatch(/ · R\$ 550,00$/);
 
     // seller accepts → buyer is notified (the action redirects, hence the catch)
     setTestClient(ctx.seller.client);

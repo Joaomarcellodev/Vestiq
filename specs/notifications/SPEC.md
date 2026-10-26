@@ -60,13 +60,14 @@ Qualquer membro ativo de uma organização (revendedora ou fábrica).
 
 ## Regras de Negócio
 
-| ID          | Regra                                                                                                    | Origem      |
-| ----------- | -------------------------------------------------------------------------------------------------------- | ----------- |
-| BR-NOTIF-01 | Só membros da organização destinatária recebem a notificação (RLS aplicada pelo Realtime)                | SECURITY    |
-| BR-NOTIF-02 | O alerta do sistema só aparece com permissão concedida **e** aba oculta; com a aba visível, basta o sino | UX          |
-| BR-NOTIF-03 | A permissão só é pedida por um clique da usuária (“Receber alertas neste dispositivo”)                   | Navegadores |
-| BR-NOTIF-04 | Ao (re)conectar o canal, o sino rebusca a lista, cobrindo o que chegou com a conexão fora do ar          | ADR-0011    |
-| BR-NOTIF-05 | O polling de 60 s continua como reserva, mas só enquanto o canal não está conectado                      | ADR-0011    |
+| ID          | Regra                                                                                                                                        | Origem      |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| BR-NOTIF-01 | Só membros da organização destinatária recebem a notificação (RLS aplicada pelo Realtime)                                                    | SECURITY    |
+| BR-NOTIF-02 | O alerta do sistema só aparece com permissão concedida **e** aba oculta; com a aba visível, basta o sino                                     | UX          |
+| BR-NOTIF-03 | A permissão só é pedida por um clique da usuária (“Receber alertas neste dispositivo”)                                                       | Navegadores |
+| BR-NOTIF-04 | Ao (re)conectar o canal, o sino rebusca a lista, cobrindo o que chegou com a conexão fora do ar                                              | ADR-0011    |
+| BR-NOTIF-05 | O polling de 60 s continua como reserva, mas só enquanto o canal não está conectado                                                          | ADR-0011    |
+| BR-NOTIF-06 | Valores no texto das notificações saem em BRL ("R$ 1.600,00"), por `format_brl`, independente do locale do servidor (VES-85, migration 0041) | UX          |
 
 ## Fluxo Principal
 
