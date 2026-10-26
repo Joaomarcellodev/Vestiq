@@ -78,20 +78,31 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
 
+      # Only the browser download (no apt) — safe to kill and retry.
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         timeout-minutes: 10
         run: |
           for attempt in 1 2 3; do
-            timeout 180 npx playwright install --with-deps chromium && exit 0
-            echo "playwright install failed (attempt $attempt), retrying"
+            timeout 180 npx playwright install chromium && exit 0
+            echo "browser download failed (attempt $attempt), retrying"
           done
           exit 1
 
+      # System packages through apt. Never kill apt mid-run (it keeps the dpkg
+      # lock); let it retry stalled mirrors itself and wait for the lock instead.
       - name: Install Playwright system dependencies
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        timeout-minutes: 5
-        run: npx playwright install-deps chromium
+        timeout-minutes: 10
+        run: |
+          printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
+            | sudo tee /etc/apt/apt.conf.d/80-ci-retries > /dev/null
+          for attempt in 1 2 3; do
+            while sudo fuser /var/lib/dpkg/lock-frontend > /dev/null 2>&1; do sleep 5; done
+            npx playwright install-deps chromium && exit 0
+            echo "apt install failed (attempt $attempt), retrying in 15s"
+            sleep 15
+          done
+          exit 1
 
       - name: Reset + seed the database for E2E
         run: |
