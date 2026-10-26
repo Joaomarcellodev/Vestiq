@@ -837,6 +837,7 @@ export type Database = {
         Row: {
           cancel_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
           created_at: string
           customer_id: string | null
           discount: number
@@ -852,6 +853,7 @@ export type Database = {
         Insert: {
           cancel_reason?: string | null
           cancelled_at?: string | null
+          cancelled_by?: string | null
           created_at?: string
           customer_id?: string | null
           discount?: number
@@ -867,6 +869,7 @@ export type Database = {
         Update: {
           cancel_reason?: string | null
           cancelled_at?: string | null
+          cancelled_by?: string | null
           created_at?: string
           customer_id?: string | null
           discount?: number
@@ -880,6 +883,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "sales_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sales_customer_id_fkey"
             columns: ["customer_id"]
@@ -1366,6 +1376,7 @@ export type Database = {
         Returns: {
           cancel_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
           created_at: string
           customer_id: string | null
           discount: number
@@ -1444,6 +1455,7 @@ export type Database = {
         Returns: {
           cancel_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
           created_at: string
           customer_id: string | null
           discount: number
@@ -1809,6 +1821,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      sale_cancelled_by_name: { Args: { p_sale_id: string }; Returns: string }
       search_matches: {
         Args: { haystack: string; p_query: string }
         Returns: boolean
