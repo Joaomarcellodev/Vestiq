@@ -27,7 +27,9 @@ com bruto, comissão e líquido registrados.
 - Página **Recebimentos** para a fábrica: status da conta, botão de cadastro no
   Stripe e a comissão vigente.
 - Conta conectada v2 de **recebedor** (`configuration.recipient`,
-  `stripe_balance.stripe_transfers`), Dashboard Express, Brasil; a plataforma paga
+  `stripe_balance.stripe_transfers`), Dashboard Express, Brasil; o Stripe só libera
+  `stripe_transfers` a uma conta brasileira que também peça `card_payments`
+  (`configuration.merchant`); a plataforma paga
   as tarifas do Stripe e cobre perdas (`fees_collector`/`losses_collector: application`).
 - Checkout com `transfer_data.destination` e `application_fee_amount`.
 - Bruto, percentual, comissão e líquido gravados em cada pagamento.

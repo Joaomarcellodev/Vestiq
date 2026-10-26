@@ -198,6 +198,8 @@ function transfersStatus(account: Stripe.V2.Core.Account): TransfersStatus {
  * Creates the supplier's connected account: a Brazilian recipient that can
  * receive transfers from the platform, with the Express Dashboard. The platform
  * collects Stripe's fees and covers losses (marketplace with destination charges).
+ * Stripe only grants `stripe_transfers` to a Brazilian account that also
+ * requests `card_payments`, hence the merchant configuration.
  */
 export async function createRecipientAccount(input: {
   organizationId: string;
@@ -214,6 +216,7 @@ export async function createRecipientAccount(input: {
         responsibilities: { fees_collector: "application", losses_collector: "application" },
       },
       configuration: {
+        merchant: { capabilities: { card_payments: { requested: true } } },
         recipient: { capabilities: { stripe_balance: { stripe_transfers: { requested: true } } } },
       },
       metadata: { organization_id: input.organizationId },
