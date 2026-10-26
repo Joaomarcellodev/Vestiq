@@ -1578,7 +1578,7 @@ export type Database = {
         }[]
       }
       list_visible_offers: {
-        Args: { p_offer_id?: string }
+        Args: { p_offer_id?: string; p_query?: string }
         Returns: {
           brand: string
           color: string

@@ -143,7 +143,7 @@ d("updateProduct edits the variants (VES-68)", () => {
     expect(m!.archived_at).toBeNull();
 
     // The product list stops counting it: one variant, no stock left on display.
-    const listed = (await listProducts()).find((x) => x.id === ctx.product.id)!;
+    const listed = (await listProducts()).items.find((x) => x.id === ctx.product.id)!;
     expect(listed).toMatchObject({ variantCount: 1, totalStock: 0 });
   });
 

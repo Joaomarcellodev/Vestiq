@@ -5,6 +5,8 @@ import { unarchiveCustomer } from "@/features/customers/actions";
 import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
 import { FilterTabs } from "@/components/molecules/filter-tabs";
+import { Pager } from "@/components/molecules/pager";
+import { parsePage } from "@/lib/pagination";
 import { Badge, Button, Icon } from "@/components/atoms";
 import { formatPhone } from "@/lib/utils/phone";
 
@@ -13,11 +15,15 @@ export const metadata: Metadata = { title: "Clientes" };
 export default async function CustomersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; scope?: string }>;
+  searchParams: Promise<{ q?: string; scope?: string; pagina?: string }>;
 }) {
-  const { q, scope } = await searchParams;
+  const { q, scope, pagina } = await searchParams;
   const currentScope = scope === "archived" ? "archived" : "active";
-  const customers = await listCustomers(q, currentScope);
+  const {
+    items: customers,
+    page,
+    hasNext,
+  } = await listCustomers(q, currentScope, parsePage(pagina));
 
   return (
     <div className="space-y-lg">
@@ -62,9 +68,17 @@ export default async function CustomersPage({
       {customers.length === 0 ? (
         <EmptyState
           icon="group"
-          title={currentScope === "archived" ? "Nenhum cliente arquivado" : "Nenhum cliente"}
+          title={
+            page > 1
+              ? "Não há mais clientes nesta página"
+              : currentScope === "archived"
+                ? "Nenhum cliente arquivado"
+                : "Nenhum cliente"
+          }
           description={
-            currentScope === "active" && !q ? "Cadastre seu primeiro cliente." : undefined
+            currentScope === "active" && !q && page === 1
+              ? "Cadastre seu primeiro cliente."
+              : undefined
           }
         />
       ) : (
@@ -107,6 +121,8 @@ export default async function CustomersPage({
           venda.
         </p>
       )}
+
+      <Pager basePath="/clientes" params={{ q, scope }} page={page} hasNext={hasNext} />
     </div>
   );
 }

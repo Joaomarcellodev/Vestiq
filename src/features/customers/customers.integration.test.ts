@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { admin, makeOrg, makeUser, supabaseUp } from "@/test/supabase";
+import { PAGE_SIZE } from "@/lib/pagination";
 import {
   clearTestClient,
   expectRedirect,
@@ -137,6 +138,26 @@ d("customers actions + queries (SPEC-006)", () => {
     );
   });
 
+  it("listCustomers: pages by name, and the search narrows before paging (VES-90)", async () => {
+    const names = Array.from(
+      { length: PAGE_SIZE + 1 },
+      (_, i) => `Cliente ${String(i).padStart(2, "0")}`,
+    );
+    for (const name of [...names].reverse()) await makeCustomer(orgId, { name });
+    await makeCustomer(orgId, { name: "Zuleica Página" });
+
+    const first = await listCustomers(undefined, "active", 1);
+    expect(first.items.map((c) => c.name)).toEqual(names.slice(0, PAGE_SIZE));
+    expect(first.hasNext).toBe(true);
+    const second = await listCustomers(undefined, "active", 2);
+    expect(second.items.map((c) => c.name)).toEqual([names[PAGE_SIZE], "Zuleica Página"]);
+    expect(second.hasNext).toBe(false);
+
+    const searched = await listCustomers("zuleica", "active", 1);
+    expect(searched.items.map((c) => c.name)).toEqual(["Zuleica Página"]);
+    expect(searched.hasNext).toBe(false);
+  });
+
   it("listCustomers: search (name/email) + scope", async () => {
     await makeCustomer(orgId, { name: "Bruna Costa", email: "bruna@mail.com" });
     const archived = await makeCustomer(orgId, { name: "Carlos Dias" });
@@ -145,13 +166,17 @@ d("customers actions + queries (SPEC-006)", () => {
       .update({ archived_at: new Date().toISOString() })
       .eq("id", archived.id);
 
-    const active = await listCustomers();
+    const active = (await listCustomers()).items;
     expect(active.map((c) => c.name)).toContain("Bruna Costa");
     expect(active.map((c) => c.id)).not.toContain(archived.id);
 
-    expect((await listCustomers("bruna")).every((c) => /bruna/i.test(c.name + c.email))).toBe(true);
-    expect((await listCustomers("bruna@mail")).length).toBeGreaterThan(0);
-    expect((await listCustomers(undefined, "archived")).map((c) => c.id)).toContain(archived.id);
+    expect((await listCustomers("bruna")).items.every((c) => /bruna/i.test(c.name + c.email))).toBe(
+      true,
+    );
+    expect((await listCustomers("bruna@mail")).items.length).toBeGreaterThan(0);
+    expect((await listCustomers(undefined, "archived")).items.map((c) => c.id)).toContain(
+      archived.id,
+    );
   });
 
   it("getCustomerWithHistory: returns customer + sales stats", async () => {
@@ -166,7 +191,7 @@ d("customers actions + queries (SPEC-006)", () => {
     const otherOrg = await makeOrg(other.userId, "RESELLER");
     await makeCustomer(otherOrg.id, { name: "Segredo" });
 
-    const mine = await listCustomers();
+    const mine = (await listCustomers()).items;
     expect(mine.map((c) => c.name)).not.toContain("Segredo");
   });
 });

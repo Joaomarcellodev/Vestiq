@@ -3,7 +3,8 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrganization, requireActiveOrganization } from "@/features/organizations/queries";
 import type { Database } from "@/types/database";
-import { matchesOfferQuery } from "./search";
+import { pageOf, pageRange, type Page } from "@/lib/pagination";
+import { cleanOfferQuery } from "./search";
 
 export type NetworkOffer = {
   id: string;
@@ -45,15 +46,20 @@ export type OfferDetail = {
 };
 
 /**
- * Active offers of the reseller's networks, optionally narrowed by a search query.
- * Reads the public projection (migration 0022) so peers get the product too.
+ * Active offers of the reseller's networks, optionally narrowed by a search query,
+ * newest first, one page at a time (VES-90). Reads the public projection
+ * (migration 0022) so peers get the product too; it also runs the search
+ * (migration 0039), so a page holds only matches.
  */
-export async function listNetworkOffers(query?: string): Promise<NetworkOffer[]> {
+export async function listNetworkOffers(query?: string, page = 1): Promise<Page<NetworkOffer>> {
   const org = await requireActiveOrganization();
   const supabase = await createClient();
   const { data, error } = await supabase
-    .rpc("list_visible_offers")
-    .in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"]);
+    .rpc("list_visible_offers", { p_query: cleanOfferQuery(query) })
+    .in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"])
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range(...pageRange(page));
   if (error) throw error;
 
   const offers = (data ?? []).map((o) => ({
@@ -69,7 +75,7 @@ export async function listNetworkOffers(query?: string): Promise<NetworkOffer[]>
     descriptor: [o.color, o.size].filter(Boolean).join(" / ") || "Único",
     editedAt: o.edited_at ?? null,
   }));
-  return offers.filter((o) => matchesOfferQuery(o, query));
+  return pageOf(offers, page);
 }
 
 export async function getOffer(id: string) {

@@ -105,7 +105,7 @@ d("negotiated product for both parties (VES-97)", () => {
       imageUrl: "https://img.test/bolsa.jpg",
     };
 
-    const sent = (await listNegotiations()).find((n) => n.id === ctx.negotiationId);
+    const sent = (await listNegotiations("sent")).items.find((n) => n.id === ctx.negotiationId);
     expect(sent).toMatchObject({ direction: "sent", product });
 
     const detail = await getNegotiation(ctx.negotiationId);

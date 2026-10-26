@@ -6,6 +6,8 @@ import { OfferCard } from "@/features/offers/components/offer-card";
 import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
 import { SearchForm } from "@/components/molecules/search-form";
+import { Pager } from "@/components/molecules/pager";
+import { parsePage } from "@/lib/pagination";
 import { Button, Icon } from "@/components/atoms";
 
 export const metadata: Metadata = { title: "Rede" };
@@ -13,10 +15,13 @@ export const metadata: Metadata = { title: "Rede" };
 export default async function NetworkPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; pagina?: string }>;
 }) {
-  const query = cleanOfferQuery((await searchParams).q);
-  const offers = await listNetworkOffers(query);
+  const { q, pagina } = await searchParams;
+  const query = cleanOfferQuery(q);
+  const { items: offers, page, hasNext } = await listNetworkOffers(query, parsePage(pagina));
+  // VES-90: the count is only the total when every match fits in one page.
+  const paged = page > 1 || hasNext;
 
   return (
     <div className="space-y-lg">
@@ -36,7 +41,9 @@ export default async function NetworkPage({
       <SearchForm query={query} placeholder="Buscar peças, marcas, cores..." />
 
       {offers.length === 0 ? (
-        query ? (
+        page > 1 ? (
+          <EmptyState icon="hub" title="Não há mais ofertas nesta página" />
+        ) : query ? (
           <EmptyState
             icon="search"
             title="Nenhuma oferta encontrada"
@@ -53,7 +60,9 @@ export default async function NetworkPage({
         <>
           {query && (
             <p className="font-body-md text-body-md text-on-surface-variant" aria-live="polite">
-              {offers.length} oferta{offers.length === 1 ? "" : "s"} para “{query}”
+              {paged
+                ? `Ofertas para “${query}”`
+                : `${offers.length} oferta${offers.length === 1 ? "" : "s"} para “${query}”`}
             </p>
           )}
           <ul className="grid gap-md sm:grid-cols-2">
@@ -65,6 +74,8 @@ export default async function NetworkPage({
           </ul>
         </>
       )}
+
+      <Pager basePath="/rede" params={{ q: query }} page={page} hasNext={hasNext} />
     </div>
   );
 }

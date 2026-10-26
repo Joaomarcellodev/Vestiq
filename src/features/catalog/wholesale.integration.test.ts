@@ -100,7 +100,7 @@ d("wholesale conditions (SPEC-004 RF-PROD-007)", () => {
         min_order_quantity: 10,
         size_grid: ["P", "M"],
       });
-      const row = (await listProducts()).find((p) => p.name === "Saia");
+      const row = (await listProducts()).items.find((p) => p.name === "Saia");
       expect(row).toMatchObject({ minOrderQuantity: 10, sizeGrid: ["P", "M"] });
     });
   });
