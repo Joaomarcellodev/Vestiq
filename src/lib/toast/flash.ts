@@ -49,6 +49,7 @@ export const FLASH_MESSAGES: Record<string, { message: string; variant: ToastVar
   "offer-published": { message: "Oferta publicada na rede.", variant: "success" },
   "offer-cancelled": { message: "Oferta cancelada.", variant: "success" },
   "offer-photos-updated": { message: "Fotos da oferta atualizadas.", variant: "success" },
+  "offer-updated": { message: "Oferta atualizada.", variant: "success" },
 
   // negotiations
   "negotiation-opened": { message: "Proposta enviada.", variant: "success" },

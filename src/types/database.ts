@@ -488,6 +488,7 @@ export type Database = {
       offers: {
         Row: {
           created_at: string
+          edited_at: string | null
           id: string
           image_urls: string[]
           network_id: string
@@ -502,6 +503,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          edited_at?: string | null
           id?: string
           image_urls?: string[]
           network_id: string
@@ -516,6 +518,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          edited_at?: string | null
           id?: string
           image_urls?: string[]
           network_id?: string
@@ -1463,10 +1466,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      create_product: {
-        Args: { p_organization_id: string; p_product: Json; p_variants: Json }
-        Returns: string
-      }
       fit_offers_to_stock: {
         Args: { p_variant_id: string }
         Returns: undefined
@@ -1585,6 +1584,7 @@ export type Database = {
           color: string
           created_at: string
           description: string
+          edited_at: string
           id: string
           image_urls: string[]
           network_id: string
@@ -1695,6 +1695,7 @@ export type Database = {
         }
         Returns: {
           created_at: string
+          edited_at: string | null
           id: string
           image_urls: string[]
           network_id: string
@@ -1884,13 +1885,38 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      set_product_archived: {
-        Args: { p_archived: boolean; p_product_id: string }
-        Returns: string
-      }
       shares_network: {
         Args: { org_a: string; org_b: string }
         Returns: boolean
+      }
+      update_offer: {
+        Args: {
+          p_note?: string
+          p_offer_id: string
+          p_quantity: number
+          p_transfer_price: number
+        }
+        Returns: {
+          created_at: string
+          edited_at: string | null
+          id: string
+          image_urls: string[]
+          network_id: string
+          note: string | null
+          organization_id: string
+          product_variant_id: string
+          quantity_offered: number
+          quantity_remaining: number
+          status: Database["public"]["Enums"]["offer_status"]
+          transfer_price: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "offers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       update_product: {
         Args: { p_product: Json; p_product_id: string; p_variants?: Json }
