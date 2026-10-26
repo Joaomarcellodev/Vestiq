@@ -20,6 +20,12 @@ export function ForgotPasswordForm() {
             sua caixa de entrada e o spam.
           </p>
         </div>
+        {/* VES-102: production sends Supabase's default (English) template until a
+            custom SMTP lets us use the pt-BR ones in supabase/templates. */}
+        <p className="font-body-md text-body-md text-on-surface-variant">
+          O email pode chegar em inglês, com o assunto “Reset your password”. É só clicar em “Reset
+          password” para criar a nova senha.
+        </p>
         <Link
           href="/login"
           className="font-body-md text-body-md font-semibold text-primary-container transition-colors hover:text-primary"
