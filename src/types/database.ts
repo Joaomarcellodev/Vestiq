@@ -1083,16 +1083,21 @@ export type Database = {
           cancelled_at: string | null
           created_at: string
           created_by: string | null
+          delivered_at: string | null
           id: string
           note: string | null
+          production_started_at: string | null
+          received_by: string | null
           reseller_id: string
           responded_at: string | null
           responded_by: string | null
           response_note: string | null
+          shipped_at: string | null
           status: Database["public"]["Enums"]["supply_order_status"]
           supplier_id: string
           total_amount: number
           total_quantity: number
+          tracking_code: string | null
           updated_at: string
         }
         Insert: {
@@ -1100,16 +1105,21 @@ export type Database = {
           cancelled_at?: string | null
           created_at?: string
           created_by?: string | null
+          delivered_at?: string | null
           id?: string
           note?: string | null
+          production_started_at?: string | null
+          received_by?: string | null
           reseller_id: string
           responded_at?: string | null
           responded_by?: string | null
           response_note?: string | null
+          shipped_at?: string | null
           status?: Database["public"]["Enums"]["supply_order_status"]
           supplier_id: string
           total_amount: number
           total_quantity: number
+          tracking_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -1117,22 +1127,34 @@ export type Database = {
           cancelled_at?: string | null
           created_at?: string
           created_by?: string | null
+          delivered_at?: string | null
           id?: string
           note?: string | null
+          production_started_at?: string | null
+          received_by?: string | null
           reseller_id?: string
           responded_at?: string | null
           responded_by?: string | null
           response_note?: string | null
+          shipped_at?: string | null
           status?: Database["public"]["Enums"]["supply_order_status"]
           supplier_id?: string
           total_amount?: number
           total_quantity?: number
+          tracking_code?: string | null
           updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: "supply_orders_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_orders_received_by_fkey"
+            columns: ["received_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1230,6 +1252,37 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "inventory_movements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      advance_supply_order: {
+        Args: { p_order_id: string; p_stage: string; p_tracking_code?: string }
+        Returns: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          delivered_at: string | null
+          id: string
+          note: string | null
+          production_started_at: string | null
+          received_by: string | null
+          reseller_id: string
+          responded_at: string | null
+          responded_by: string | null
+          response_note: string | null
+          shipped_at: string | null
+          status: Database["public"]["Enums"]["supply_order_status"]
+          supplier_id: string
+          total_amount: number
+          total_quantity: number
+          tracking_code: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "supply_orders"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1406,16 +1459,21 @@ export type Database = {
           cancelled_at: string | null
           created_at: string
           created_by: string | null
+          delivered_at: string | null
           id: string
           note: string | null
+          production_started_at: string | null
+          received_by: string | null
           reseller_id: string
           responded_at: string | null
           responded_by: string | null
           response_note: string | null
+          shipped_at: string | null
           status: Database["public"]["Enums"]["supply_order_status"]
           supplier_id: string
           total_amount: number
           total_quantity: number
+          tracking_code: string | null
           updated_at: string
         }
         SetofOptions: {
@@ -1675,16 +1733,21 @@ export type Database = {
           cancelled_at: string | null
           created_at: string
           created_by: string | null
+          delivered_at: string | null
           id: string
           note: string | null
+          production_started_at: string | null
+          received_by: string | null
           reseller_id: string
           responded_at: string | null
           responded_by: string | null
           response_note: string | null
+          shipped_at: string | null
           status: Database["public"]["Enums"]["supply_order_status"]
           supplier_id: string
           total_amount: number
           total_quantity: number
+          tracking_code: string | null
           updated_at: string
         }
         SetofOptions: {
@@ -1737,6 +1800,37 @@ export type Database = {
           platform_fee_amount: number
           platform_fee_percent: number
         }[]
+      }
+      receive_supply_order: {
+        Args: { p_order_id: string }
+        Returns: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          delivered_at: string | null
+          id: string
+          note: string | null
+          production_started_at: string | null
+          received_by: string | null
+          reseller_id: string
+          responded_at: string | null
+          responded_by: string | null
+          response_note: string | null
+          shipped_at: string | null
+          status: Database["public"]["Enums"]["supply_order_status"]
+          supplier_id: string
+          total_amount: number
+          total_quantity: number
+          tracking_code: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "supply_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       record_inventory_entry: {
         Args: { p_note?: string; p_quantity: number; p_variant_id: string }
@@ -1804,16 +1898,21 @@ export type Database = {
           cancelled_at: string | null
           created_at: string
           created_by: string | null
+          delivered_at: string | null
           id: string
           note: string | null
+          production_started_at: string | null
+          received_by: string | null
           reseller_id: string
           responded_at: string | null
           responded_by: string | null
           response_note: string | null
+          shipped_at: string | null
           status: Database["public"]["Enums"]["supply_order_status"]
           supplier_id: string
           total_amount: number
           total_quantity: number
+          tracking_code: string | null
           updated_at: string
         }
         SetofOptions: {
@@ -1984,6 +2083,9 @@ export type Database = {
         | "SUPPLY_ORDER_CANCELLED"
         | "SUPPLY_ORDER_PAID"
         | "SUPPLY_ORDER_REFUNDED"
+        | "SUPPLY_ORDER_IN_PRODUCTION"
+        | "SUPPLY_ORDER_SHIPPED"
+        | "SUPPLY_ORDER_DELIVERED"
       offer_status:
         | "ACTIVE"
         | "PARTIALLY_NEGOTIATED"
@@ -1994,7 +2096,14 @@ export type Database = {
       payment_method: "PIX" | "CARTAO" | "DINHEIRO"
       payment_status: "PENDING" | "PAID" | "FAILED" | "EXPIRED" | "REFUNDED"
       sale_status: "CONFIRMED" | "CANCELLED"
-      supply_order_status: "PENDING" | "CONFIRMED" | "REJECTED" | "CANCELLED"
+      supply_order_status:
+        | "PENDING"
+        | "CONFIRMED"
+        | "REJECTED"
+        | "CANCELLED"
+        | "IN_PRODUCTION"
+        | "SHIPPED"
+        | "DELIVERED"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2166,6 +2275,9 @@ export const Constants = {
         "SUPPLY_ORDER_CANCELLED",
         "SUPPLY_ORDER_PAID",
         "SUPPLY_ORDER_REFUNDED",
+        "SUPPLY_ORDER_IN_PRODUCTION",
+        "SUPPLY_ORDER_SHIPPED",
+        "SUPPLY_ORDER_DELIVERED",
       ],
       offer_status: [
         "ACTIVE",
@@ -2178,7 +2290,15 @@ export const Constants = {
       payment_method: ["PIX", "CARTAO", "DINHEIRO"],
       payment_status: ["PENDING", "PAID", "FAILED", "EXPIRED", "REFUNDED"],
       sale_status: ["CONFIRMED", "CANCELLED"],
-      supply_order_status: ["PENDING", "CONFIRMED", "REJECTED", "CANCELLED"],
+      supply_order_status: [
+        "PENDING",
+        "CONFIRMED",
+        "REJECTED",
+        "CANCELLED",
+        "IN_PRODUCTION",
+        "SHIPPED",
+        "DELIVERED",
+      ],
     },
   },
 } as const
