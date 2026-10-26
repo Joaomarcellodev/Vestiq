@@ -262,6 +262,7 @@ export function NewSaleForm({
             type="number"
             min={0}
             step="0.01"
+            aria-label="Desconto (R$)"
             value={discount}
             onChange={(e) => setDiscount(e.target.value)}
             className="w-32 rounded-lg border border-outline-variant px-3 py-2 text-right font-body-md text-body-md"
