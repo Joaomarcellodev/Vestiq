@@ -31,12 +31,21 @@ jobs:
           npm run lint
           npm run typecheck
 
+      # Pinned: resolving "latest" hits GitHub's API rate limit now and then.
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.116.0
 
+      # Image pulls fail now and then (registry rate limits) — retry before giving up.
       - name: Start local Supabase
-        run: supabase start
+        run: |
+          for attempt in 1 2 3; do
+            supabase start && exit 0
+            echo "supabase start failed (attempt $attempt), retrying in 30s"
+            supabase stop --no-backup || true
+            sleep 30
+          done
+          exit 1
 
       - name: Write .env.local from the local stack
         run: |
@@ -56,9 +65,33 @@ jobs:
       - name: Unit + integration tests (with coverage gate)
         run: npm run test:coverage
 
+      # The browser download sometimes hangs: keep it in a cache keyed by the
+      # Playwright version, and retry the download when it has to happen.
+      - name: Playwright version
+        id: playwright
+        run: echo "version=$(node -p 'require("@playwright/test/package.json").version')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
       - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 10
+        run: |
+          for attempt in 1 2 3; do
+            timeout 180 npx playwright install --with-deps chromium && exit 0
+            echo "playwright install failed (attempt $attempt), retrying"
+          done
+          exit 1
+
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
         timeout-minutes: 5
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install-deps chromium
 
       - name: Reset + seed the database for E2E
         run: |
