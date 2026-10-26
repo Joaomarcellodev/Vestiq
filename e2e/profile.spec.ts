@@ -106,13 +106,13 @@ test.describe("Profile", () => {
 
     await page.goto("/perfil");
     await page.getByLabel("Senha atual").fill("errada-123");
-    await page.getByLabel("Nova senha").fill("senha-nova-12");
+    await page.getByLabel("Nova senha", { exact: true }).fill("senha-nova-12");
     await page.getByLabel("Confirmar nova senha").fill("senha-nova-12");
     await page.getByRole("button", { name: "Alterar senha" }).click();
     await expect(page.getByText("Senha atual incorreta.")).toBeVisible();
 
     await page.getByLabel("Senha atual").fill("senha-antiga-1");
-    await page.getByLabel("Nova senha").fill("senha-nova-12");
+    await page.getByLabel("Nova senha", { exact: true }).fill("senha-nova-12");
     await page.getByLabel("Confirmar nova senha").fill("senha-nova-12");
     await page.getByRole("button", { name: "Alterar senha" }).click();
     await expect(toast(page)).toHaveText("Senha alterada.");
