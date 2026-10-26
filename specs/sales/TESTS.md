@@ -34,7 +34,7 @@ unit + integration · `line_total = qty * unit_price`; item guarda produto+varia
 
 ### TC-SALE-04 — Cálculo de total com desconto
 
-unit · `total = subtotal - discount`.
+unit · `total = subtotal - discount`; com desconto acima do subtotal o total exibido é R$ 0,00, nunca negativo (VES-81). component · o detalhe da venda mostra subtotal, desconto e total (VES-82).
 
 ### TC-SALE-05 — Desconto > subtotal recusado
 
@@ -54,7 +54,7 @@ integration · **crítica (RF-SALE-007, RNF-REL-002)** · um item excede → 0 e
 
 ### TC-SALE-09 — Cancelamento mantém no histórico
 
-integration · **crítica (RF-SALE-008)** · `CANCELLED` + campos de cancelamento; ainda listada.
+integration · **crítica (RF-SALE-008)** · `CANCELLED` + campos de cancelamento (incluindo `cancelled_by`); ainda listada. `sale_cancelled_by_name` devolve o nome a membros da organização e `null` a quem é de fora; o componente do detalhe mostra motivo, data/hora (Brasília) e quem cancelou (VES-83).
 
 ### TC-SALE-10 — Estorno ao cancelar
 

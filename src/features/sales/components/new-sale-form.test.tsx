@@ -76,6 +76,9 @@ describe("NewSaleForm", () => {
     await userEvent.type(discountInput, "9999");
     expect(await screen.findByText(/desconto maior que o subtotal/i)).toBeInTheDocument();
     expect(submit).toBeDisabled();
+    // VES-81: the total reads R$ 0,00 instead of a negative amount
+    expect(screen.getByText("R$ 0,00")).toBeInTheDocument();
+    expect(screen.queryByText(/-\s*R\$/)).toBeNull();
   });
 
   it("serialises the cart, payment method and customer into the submitted FormData", async () => {
