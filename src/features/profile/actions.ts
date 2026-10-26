@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/features/auth/queries";
+import { sniffImageType } from "@/lib/utils/image-type";
 import { AVATAR_MAX_BYTES, AVATAR_TYPES, profileSchema } from "./validation";
 
 export type ProfileState = { error?: string; ok?: string };
@@ -30,7 +31,8 @@ export async function updateProfile(
   const removeAvatar = formData.get("removeAvatar") === "1";
 
   if (file instanceof File && file.size > 0) {
-    if (!AVATAR_TYPES.includes(file.type)) {
+    // VES-101: o tipo declarado vem do nome do arquivo — confere os bytes também.
+    if (!AVATAR_TYPES.includes(file.type) || !(await sniffImageType(file))) {
       return { error: "Envie uma imagem JPG, PNG ou WebP." };
     }
     if (file.size > AVATAR_MAX_BYTES) {

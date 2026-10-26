@@ -29,9 +29,29 @@ describe("ProfileForm", () => {
 
   it("previews a chosen avatar", async () => {
     render(<ProfileForm profile={profile} />);
-    const file = new File([Uint8Array.from([1, 2, 3])], "me.png", { type: "image/png" });
+    const file = new File([Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10])], "me.png", {
+      type: "image/png",
+    });
     await userEvent.upload(document.querySelector("input[name=avatar]") as HTMLInputElement, file);
-    expect(document.querySelector("section img")).toBeInTheDocument();
+    await waitFor(() => expect(document.querySelector("section img")).toBeInTheDocument());
+  });
+
+  it("refuses a file renamed to .png that isn't an image (VES-101)", async () => {
+    render(<ProfileForm profile={{ ...profile, avatarUrl: "/avatar.png" }} />);
+    const fake = new File(["só texto"], "me.png", { type: "image/png" });
+    await userEvent.upload(document.querySelector("input[name=avatar]") as HTMLInputElement, fake);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Esse arquivo não é uma imagem JPG, PNG ou WebP válida.",
+    );
+    // keeps the current photo and sends nothing new
+    expect(document.querySelector("section img")).toHaveAttribute(
+      "src",
+      expect.stringContaining("avatar.png"),
+    );
+    await userEvent.click(screen.getByRole("button", { name: /salvar alterações/i }));
+    const fd = updateProfile.mock.calls.at(-1)?.[1] as FormData;
+    expect((fd.get("avatar") as File | null)?.size ?? 0).toBe(0);
   });
 
   it("fires a toast on the ok state and an alert on error", async () => {
@@ -73,7 +93,9 @@ describe("ProfileForm", () => {
     render(<ProfileForm profile={{ ...profile, avatarUrl: "/avatar.png" }} />);
     await userEvent.click(screen.getByRole("button", { name: /remover foto/i }));
 
-    const file = new File([Uint8Array.from([1, 2, 3])], "me.png", { type: "image/png" });
+    const file = new File([Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10])], "me.png", {
+      type: "image/png",
+    });
     await userEvent.upload(document.querySelector("input[name=avatar]") as HTMLInputElement, file);
     await waitFor(() => expect(document.querySelector("section img")).toBeInTheDocument());
 
