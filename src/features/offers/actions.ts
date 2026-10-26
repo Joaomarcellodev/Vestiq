@@ -148,7 +148,7 @@ export type UpdateOfferState = {
 
 /**
  * VES-89 — the owner changes the transfer price, quantity and note of an open
- * offer with no negotiation in progress. `update_offer` (migration 0033)
+ * offer with no negotiation in progress. `update_offer` (migration 0038)
  * enforces the rules; the trigger of migration 0029 keeps it in the free stock.
  */
 export async function updateOffer(
