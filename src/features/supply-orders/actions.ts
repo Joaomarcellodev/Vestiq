@@ -6,9 +6,11 @@ import { createClient } from "@/lib/supabase/server";
 import { rpcErrorMessage } from "@/lib/supabase/errors";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 import {
+  advanceSupplyOrderSchema,
   cancelSupplyOrderSchema,
   parseJsonArray,
   placeSupplyOrderSchema,
+  receiveSupplyOrderSchema,
   respondSupplyOrderSchema,
 } from "./validation";
 
@@ -92,4 +94,51 @@ export async function cancelSupplyOrder(
 
   revalidateOrders(parsed.data.orderId);
   redirect(`/pedidos/${parsed.data.orderId}?toast=supply-order-cancelled`);
+}
+
+/** VES-32 — the factory starts production or ships (with an optional tracking code). */
+export async function advanceSupplyOrder(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireActiveOrganization();
+  const parsed = advanceSupplyOrderSchema.safeParse({
+    orderId: formData.get("orderId"),
+    stage: formData.get("stage"),
+    trackingCode: formData.get("trackingCode") ?? undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("advance_supply_order", {
+    p_order_id: parsed.data.orderId,
+    p_stage: parsed.data.stage,
+    p_tracking_code: parsed.data.trackingCode || undefined,
+  });
+  if (error) return { error: rpcErrorMessage(error) };
+
+  revalidateOrders(parsed.data.orderId);
+  const toast =
+    parsed.data.stage === "IN_PRODUCTION" ? "supply-order-in-production" : "supply-order-shipped";
+  redirect(`/pedidos/${parsed.data.orderId}?toast=${toast}`);
+}
+
+/** VES-32 — the reseller marks a shipped order received; its pieces enter her stock. */
+export async function receiveSupplyOrder(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireActiveOrganization();
+  const parsed = receiveSupplyOrderSchema.safeParse({ orderId: formData.get("orderId") });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("receive_supply_order", {
+    p_order_id: parsed.data.orderId,
+  });
+  if (error) return { error: rpcErrorMessage(error) };
+
+  revalidateOrders(parsed.data.orderId);
+  revalidatePath("/produtos");
+  redirect(`/pedidos/${parsed.data.orderId}?toast=supply-order-received`);
 }

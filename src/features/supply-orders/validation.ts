@@ -27,6 +27,20 @@ export const respondSupplyOrderSchema = z.object({
   note,
 });
 
+export const advanceSupplyOrderSchema = z.object({
+  orderId: z.string().uuid(),
+  stage: z.enum(["IN_PRODUCTION", "SHIPPED"]),
+  trackingCode: z
+    .string()
+    .trim()
+    .max(100, "O código de rastreio pode ter até 100 caracteres")
+    .optional(),
+});
+
+export const receiveSupplyOrderSchema = z.object({
+  orderId: z.string().uuid(),
+});
+
 export const cancelSupplyOrderSchema = z.object({
   orderId: z.string().uuid(),
   reason: note,

@@ -61,6 +61,12 @@ export const FLASH_MESSAGES: Record<string, { message: string; variant: ToastVar
   // supply orders
   "supply-order-placed": { message: "Pedido enviado ao fornecedor.", variant: "success" },
   "supply-order-confirmed": { message: "Pedido confirmado.", variant: "success" },
+  "supply-order-in-production": { message: "Pedido em produção.", variant: "success" },
+  "supply-order-shipped": { message: "Pedido marcado como enviado.", variant: "success" },
+  "supply-order-received": {
+    message: "Pedido recebido. As peças entraram no seu estoque.",
+    variant: "success",
+  },
   "supply-order-rejected": { message: "Pedido recusado.", variant: "info" },
   "supply-order-cancelled": { message: "Pedido cancelado.", variant: "info" },
   "supply-order-paid": { message: "Pagamento aprovado.", variant: "success" },

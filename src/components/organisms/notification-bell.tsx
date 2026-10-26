@@ -35,6 +35,9 @@ const ICON: Record<NotificationType, string> = {
   SUPPLY_ORDER_CONFIRMED: "check_circle",
   SUPPLY_ORDER_REJECTED: "warning",
   SUPPLY_ORDER_CANCELLED: "warning",
+  SUPPLY_ORDER_IN_PRODUCTION: "factory",
+  SUPPLY_ORDER_SHIPPED: "local_shipping",
+  SUPPLY_ORDER_DELIVERED: "inventory_2",
   SUPPLY_ORDER_PAID: "payments",
   SUPPLY_ORDER_REFUNDED: "currency_exchange",
 };

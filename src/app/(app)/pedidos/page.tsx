@@ -15,6 +15,9 @@ export const metadata: Metadata = { title: "Pedidos" };
 const STATUS_BY_PARAM: Record<string, SupplyOrderStatus> = {
   pendentes: "PENDING",
   confirmados: "CONFIRMED",
+  "em-producao": "IN_PRODUCTION",
+  enviados: "SHIPPED",
+  entregues: "DELIVERED",
   recusados: "REJECTED",
   cancelados: "CANCELLED",
 };
@@ -62,6 +65,9 @@ export default async function SupplyOrdersPage({
             { value: "", label: "Todos" },
             { value: "pendentes", label: "Pendentes" },
             { value: "confirmados", label: "Confirmados" },
+            { value: "em-producao", label: "Em produção" },
+            { value: "enviados", label: "Enviados" },
+            { value: "entregues", label: "Entregues" },
             { value: "recusados", label: "Recusados" },
             { value: "cancelados", label: "Cancelados" },
           ]}
