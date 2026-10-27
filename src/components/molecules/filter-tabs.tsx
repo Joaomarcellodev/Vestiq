@@ -6,7 +6,8 @@ export interface FilterTabsProps {
   basePath: string;
   param: string;
   current: string;
-  tabs: { value: string; label: string }[];
+  /** `count` > 0 shows a highlighted counter next to the label (e.g. pending items). */
+  tabs: { value: string; label: string; count?: number }[];
   /** Extra query params to preserve (e.g. search). */
   extra?: Record<string, string | undefined>;
 }
@@ -24,14 +25,20 @@ export function FilterTabs({ basePath, param, current, tabs, extra }: FilterTabs
           <Link
             key={t.value || "default"}
             href={qs ? `${basePath}?${qs}` : basePath}
+            aria-current={active ? "page" : undefined}
             className={cn(
-              "rounded-md px-3 py-1.5 font-body-md text-body-md font-semibold transition-colors",
+              "inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 font-body-md text-body-md font-semibold transition-colors",
               active
                 ? "bg-surface-container-lowest text-on-surface shadow-surface"
                 : "text-on-surface-variant hover:text-on-surface",
             )}
           >
             {t.label}
+            {t.count ? (
+              <span className="rounded-full bg-warning-container px-1.5 font-label-sm text-label-sm text-on-warning-container">
+                {t.count}
+              </span>
+            ) : null}
           </Link>
         );
       })}

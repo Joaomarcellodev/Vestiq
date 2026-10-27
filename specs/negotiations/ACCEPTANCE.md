@@ -135,3 +135,9 @@ mensagem opcional e status.
 **Dado** que a compradora está com a negociação aberta
 **Quando** a vendedora aceita a proposta
 **Então** a compradora vê o status "Aceita" e o evento no chat, sem recarregar
+
+## AC-NEG-012-01 — Filtrar por status
+
+**Dado** que tenho negociações pendentes e encerradas
+**Quando** abro a aba "Pendentes" em /negociacoes
+**Então** vejo só as pendentes daquele lado (recebidas ou enviadas), a aba mostra quantas são e cada item traz "Atualizada em dd/mm/aaaa"

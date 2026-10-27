@@ -11,7 +11,7 @@ import {
 } from "@/test/actions";
 import { publishOffer } from "@/features/offers/actions";
 import { negotiationAction, openNegotiation } from "./actions";
-import { getNegotiation, listNegotiations } from "./queries";
+import { countPendingNegotiations, getNegotiation, listNegotiations } from "./queries";
 
 const up = await supabaseUp();
 const d = up ? describe : describe.skip;
@@ -168,5 +168,31 @@ d("negotiations actions + queries (SPEC-009)", () => {
     for (const direction of ["received", "sent"] as const) {
       expect((await listNegotiations(direction)).items.map((n) => n.id)).not.toContain(negId);
     }
+  });
+
+  // VES-91 — status tabs, the pending counter and the last update date.
+  it("listNegotiations: filters by status, counts pending, last updated first", async () => {
+    const pendingId = await openNeg();
+    const rejectedId = await openNeg();
+    setTestClient(ctx.seller.client);
+    await expectRedirect(
+      () => negotiationAction({}, formData({ negotiationId: rejectedId, action: "reject" })),
+      /negotiation-rejected/,
+    );
+
+    const all = (await listNegotiations("received")).items;
+    expect(all.map((n) => n.id)).toEqual([rejectedId, pendingId]);
+    expect(Date.parse(all[0]!.updatedAt)).toBeGreaterThanOrEqual(Date.parse(all[1]!.updatedAt));
+
+    const pending = await listNegotiations("received", 1, "PENDING");
+    expect(pending.items.map((n) => n.id)).toEqual([pendingId]);
+    const rejected = await listNegotiations("received", 1, "REJECTED");
+    expect(rejected.items.map((n) => n.id)).toEqual([rejectedId]);
+    expect((await listNegotiations("received", 1, "COMPLETED")).items).toEqual([]);
+
+    expect(await countPendingNegotiations("received")).toBe(1);
+    expect(await countPendingNegotiations("sent")).toBe(0);
+    setTestClient(ctx.buyer.client);
+    expect(await countPendingNegotiations("sent")).toBe(1);
   });
 });

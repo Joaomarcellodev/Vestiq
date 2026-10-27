@@ -53,6 +53,7 @@ Fluxo completo de negociação com máquina de estados, timeline de eventos
 | RF-NEG-009 | Histórico da negociação permanece armazenado                                                   |
 | RF-NEG-010 | Mensagens chegam à outra parte em tempo real, sem recarregar a página (ADR-0010)               |
 | RF-NEG-011 | Mudanças de status aparecem para a outra parte em tempo real                                   |
+| RF-NEG-012 | Lista filtra por status (abas, "Pendentes" com contador) e mostra a data da última atualização |
 
 ## User Stories
 
@@ -83,6 +84,7 @@ Fluxo completo de negociação com máquina de estados, timeline de eventos
 | BR-NEG-10 | Se `stock_on_hand(origem) < quantity` na conclusão, a conclusão falha com mensagem clara e a negociação continua `ACCEPTED`. Com BR-NEG-14 a venda local já não consome o estoque reservado, então o caso fica restrito a dados anteriores à migration 0029                                                                                                                           |
 | BR-NEG-13 | Aceitar **reserva** a quantidade dentro da oferta: as negociações `ACCEPTED` de uma oferta não somam mais que o `quantity_remaining` dela, e as da variação não passam do `stock_on_hand`. Propostas `PENDING` não reservam nada — a vendedora escolhe quais aceitar. Cancelar uma aceita libera a reserva (VES-73)                                                                   |
 | BR-NEG-14 | O estoque não sai abaixo do reservado por negociações aceitas ("Estoque reservado para negociações aceitas (N un.)…"). `complete_negotiation` tira a negociação e a oferta da reserva **antes** de mover o estoque; oferta sem a quantidade negociada falha com mensagem clara em vez da constraint (VES-73)                                                                          |
+| BR-NEG-15 | A lista (`/negociacoes`) filtra por status via `?status=pendentes                                                                                                                                                                                                                                                                                                                     | aceitas | concluidas | recusadas | canceladas`, mantendo a aba Recebidas/Enviadas; a aba "Pendentes" mostra quantas aguardam resposta daquele lado. Os itens vêm pela última atualização (`updated_at`, que muda a cada troca de status), exibida em cada linha (VES-91) |
 
 ## Fluxos
 

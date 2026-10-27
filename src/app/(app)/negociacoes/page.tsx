@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listNegotiations } from "@/features/negotiations/queries";
+import { countPendingNegotiations, listNegotiations } from "@/features/negotiations/queries";
 import { NegotiationProductSummary } from "@/features/negotiations/components/negotiation-product";
 import { PageHeader } from "@/components/molecules/page-header";
 import { EmptyState } from "@/components/molecules/empty-state";
@@ -10,23 +10,38 @@ import { Badge } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { parsePage } from "@/lib/pagination";
 import { NEGOTIATION_STATUS } from "@/lib/i18n/labels";
+import type { Database } from "@/types/database";
 
 export const metadata: Metadata = { title: "Negociações" };
+
+// VES-91: the status filter, in the URL as `?status=<pt-BR slug>`.
+const STATUS_BY_PARAM: Record<string, Database["public"]["Enums"]["negotiation_status"]> = {
+  pendentes: "PENDING",
+  aceitas: "ACCEPTED",
+  concluidas: "COMPLETED",
+  recusadas: "REJECTED",
+  canceladas: "CANCELLED",
+};
+
+const UPDATED_AT = new Intl.DateTimeFormat("pt-BR", {
+  dateStyle: "short",
+  timeZone: "America/Sao_Paulo",
+});
 
 export default async function NegotiationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tipo?: string; pagina?: string }>;
+  searchParams: Promise<{ tipo?: string; status?: string; pagina?: string }>;
 }) {
-  const { tipo, pagina } = await searchParams;
+  const { tipo, status, pagina } = await searchParams;
   // VES-90: received and sent are tabs, each paged on its own.
   const direction = tipo === "enviadas" ? "sent" : "received";
-  const {
-    items: negotiations,
-    page,
-    hasNext,
-  } = await listNegotiations(direction, parsePage(pagina));
   const tab = direction === "sent" ? "enviadas" : "";
+  const current = status && STATUS_BY_PARAM[status] ? status : "";
+  const [{ items: negotiations, page, hasNext }, pending] = await Promise.all([
+    listNegotiations(direction, parsePage(pagina), STATUS_BY_PARAM[current]),
+    countPendingNegotiations(direction),
+  ]);
 
   return (
     <div className="space-y-lg">
@@ -35,15 +50,34 @@ export default async function NegotiationsPage({
         description="Solicitações de transferência de estoque da sua rede."
       />
 
-      <FilterTabs
-        basePath="/negociacoes"
-        param="tipo"
-        current={tab}
-        tabs={[
-          { value: "", label: "Recebidas" },
-          { value: "enviadas", label: "Enviadas" },
-        ]}
-      />
+      <div className="flex flex-col gap-3">
+        <FilterTabs
+          basePath="/negociacoes"
+          param="tipo"
+          current={tab}
+          extra={{ status: current }}
+          tabs={[
+            { value: "", label: "Recebidas" },
+            { value: "enviadas", label: "Enviadas" },
+          ]}
+        />
+        <div className="overflow-x-auto">
+          <FilterTabs
+            basePath="/negociacoes"
+            param="status"
+            current={current}
+            extra={{ tipo: tab }}
+            tabs={[
+              { value: "", label: "Todas" },
+              { value: "pendentes", label: "Pendentes", count: pending },
+              { value: "aceitas", label: "Aceitas" },
+              { value: "concluidas", label: "Concluídas" },
+              { value: "recusadas", label: "Recusadas" },
+              { value: "canceladas", label: "Canceladas" },
+            ]}
+          />
+        </div>
+      </div>
 
       {negotiations.length === 0 ? (
         <EmptyState
@@ -51,9 +85,11 @@ export default async function NegotiationsPage({
           title={
             page > 1
               ? "Não há mais negociações nesta página"
-              : direction === "sent"
-                ? "Nenhuma negociação enviada"
-                : "Nenhuma negociação recebida"
+              : current
+                ? "Nenhuma negociação com este status"
+                : direction === "sent"
+                  ? "Nenhuma negociação enviada"
+                  : "Nenhuma negociação recebida"
           }
         />
       ) : (
@@ -67,6 +103,10 @@ export default async function NegotiationsPage({
                 <NegotiationProductSummary product={n.product}>
                   <p className="font-body-md text-body-md text-on-surface-variant">
                     {n.counterparty} · {n.quantity} un.
+                  </p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">
+                    Atualizada em{" "}
+                    <time dateTime={n.updatedAt}>{UPDATED_AT.format(new Date(n.updatedAt))}</time>
                   </p>
                 </NegotiationProductSummary>
                 <div className="flex shrink-0 items-center gap-2">
@@ -83,7 +123,12 @@ export default async function NegotiationsPage({
         </ul>
       )}
 
-      <Pager basePath="/negociacoes" params={{ tipo: tab }} page={page} hasNext={hasNext} />
+      <Pager
+        basePath="/negociacoes"
+        params={{ tipo: tab, status: current }}
+        page={page}
+        hasNext={hasNext}
+      />
     </div>
   );
 }

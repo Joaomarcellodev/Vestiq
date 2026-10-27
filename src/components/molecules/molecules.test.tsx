@@ -34,6 +34,23 @@ describe("FilterTabs", () => {
       "/produtos?q=azul&scope=archived",
     );
   });
+
+  it("shows a tab's counter only when above zero and marks the current tab", () => {
+    render(
+      <FilterTabs
+        basePath="/negociacoes"
+        param="status"
+        current="pendentes"
+        tabs={[
+          { value: "", label: "Todas", count: 0 },
+          { value: "pendentes", label: "Pendentes", count: 3 },
+        ]}
+      />,
+    );
+    const pending = screen.getByRole("link", { name: "Pendentes 3" });
+    expect(pending).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Todas" })).not.toHaveAttribute("aria-current");
+  });
 });
 
 describe("PageHeader", () => {
