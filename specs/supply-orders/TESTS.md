@@ -12,6 +12,8 @@
 | RF-ORD-004      | AC-ORD-004-01..03            | TC-ORD-07, TC-ORD-08 | integration        | idem                                                           |
 | RF-ORD-005      | AC-ORD-005-01, AC-ORD-005-02 | TC-ORD-09, TC-ORD-10 | unit + integration | `state.test.ts`, idem                                          |
 | RF-ORD-006      | AC-ORD-006-01                | TC-ORD-11            | integration        | idem                                                           |
+| RF-ORD-007      | AC-ORD-007-01                | TC-ORD-13, TC-ORD-14 | unit + integration | `state.test.ts`, `supply-orders.integration.test.ts`           |
+| RF-ORD-008      | AC-ORD-008-01                | TC-ORD-13, TC-ORD-14 | unit + integration | idem                                                           |
 | RF-ORD-001..004 | AC-ORD-001-01, AC-ORD-004-01 | TC-ORD-12            | e2e                | `e2e/supply-orders.spec.ts`                                    |
 
 ## Casos de teste
@@ -81,3 +83,13 @@
 - **Nível:** e2e
 - **Passos:** revendedora monta pedido do seed (Vestido Midi Canelado, 12 peças) → envia → fábrica confirma
 - **Resultado esperado:** pedido "Pendente" para a revenda, "Confirmado" após a resposta
+
+### TC-ORD-13 — Produção, envio e recebimento (VES-32)
+
+- **Nível:** integration
+- **Resultado esperado:** `CONFIRMED → IN_PRODUCTION → SHIPPED` (rastreio aparado) → `DELIVERED`; datas preenchidas; uma `ENTRADA` por item vinculada ao pedido no estoque da revendedora; um segundo pedido soma na mesma variação; cada etapa notifica a outra parte; filtro por status funciona; pedido em produção ainda pode ser pago
+
+### TC-ORD-14 — Quem avança e em que ordem (VES-32)
+
+- **Nível:** unit + integration
+- **Resultado esperado:** só a fábrica avança e só a revendedora recebe; não se recebe antes do envio nem duas vezes; não se volta para produção depois de enviado; pedido pendente não pula a confirmação

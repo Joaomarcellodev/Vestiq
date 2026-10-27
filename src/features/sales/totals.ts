@@ -23,7 +23,9 @@ export function computeTotals(lines: SaleLineInput[], discount: number): SaleTot
   return {
     subtotal,
     discount: safeDiscount,
-    total: round2(subtotal - safeDiscount),
+    // VES-81: an over-the-subtotal discount is refused by validateDiscount;
+    // until it's fixed the total reads R$ 0,00, never a negative amount.
+    total: round2(Math.max(0, subtotal - safeDiscount)),
   };
 }
 

@@ -101,12 +101,28 @@ Script autenticado (`revenda@vestiq.dev`) contra `vestiq-app.netlify.app`:
   usuário, organização e notificações em paralelo. Uma onda de ~250 ms a menos por
   página, por navegação e por prefetch.
 
-### Decisão pendente (infra)
+### Decisão (infra) — ADR-0013
 
-O ganho grande só vem com função e banco na mesma região:
+O ganho grande só vem com função e banco na mesma região. Decidido em 2026-10-26
+(VES-60, [ADR-0013](adr/0013-functions-region-sao-paulo.md)): **Netlify Pro com as
+funções em South America (São Paulo)**, junto do banco em `sa-east-1`. Recriar o
+Supabase em `us-east-2` foi descartado (migração arriscada e usuários no Brasil).
 
-1. **Netlify Pro** → *Project configuration → Build & deploy → Continuous
-   deployment → Functions region* → **South America (São Paulo)**. Cada consulta
-   cai de ~250 ms para poucos ms.
-2. **ou** recriar o projeto Supabase em `us-east-2` (sem custo, mas exige migrar
-   os dados e trocar URL/chaves).
+**Revisão (2026-10-27):** a troca foi adiada — o time não quer assinatura paga no
+projeto e as páginas já ficam abaixo da meta de 2 s. Infra mantida: funções em
+`us-east-2`, banco em `sa-east-1`.
+
+## Medição antes da troca de região — 2026-10-26
+
+Sem login (não usamos senha em produção), 6 requisições cada, contra
+`vestiq-app.netlify.app`, ainda com as funções em `us-east-2`:
+
+| Requisição | TTFB |
+| --- | --- |
+| `/login` | 0,36–0,68 s (mediana ~0,41 s) |
+| `/dashboard` e `/api/notifications` sem sessão (redirect 307, sem consulta ao banco) | 0,18–0,20 s |
+
+A referência autenticada continua sendo a de 2026-09-11 (0,78–1,1 s com a função
+aquecida). **Depois do deploy com a nova região:** repetir o curl acima e, logado, o
+DevTools → Network → `/dashboard`, `/produtos`, `/vendas`, `/pedidos` → "Waiting
+(TTFB)", e registrar aqui.

@@ -66,6 +66,7 @@ d("sales actions + queries (SPEC-007)", () => {
     const id = dest.split("/")[2]!.split("?")[0]!;
     const sale = await getSale(id);
     expect(Number(sale.total)).toBe(900); // 620 + 300 - 20
+    expect(sale.cancelledByName).toBeNull();
     const { data } = await admin()
       .from("product_variants")
       .select("stock_on_hand")
@@ -120,6 +121,12 @@ d("sales actions + queries (SPEC-007)", () => {
       .eq("id", ctx.v1.id)
       .single();
     expect(data?.stock_on_hand).toBe(10);
+
+    // VES-83: the detail gets the reason, the time and who cancelled
+    const sale = await getSale(id);
+    expect(sale.cancel_reason).toBe("cliente desistiu");
+    expect(sale.cancelled_at).not.toBeNull();
+    expect(sale.cancelledByName).toBe(ctx.u.email.split("@")[0]);
   });
 
   it("cancelSale: returns the error when the sale can't be cancelled (VES-74)", async () => {

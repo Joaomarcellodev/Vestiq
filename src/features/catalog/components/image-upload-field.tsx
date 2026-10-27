@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { Button, Icon } from "@/components/atoms";
 import { PRODUCT_COMPRESSION, compressImages } from "@/lib/utils/image";
+import { isValidImage } from "@/lib/utils/image-type";
 import {
   PRODUCT_IMAGE_MAX_BYTES,
   PRODUCT_IMAGE_MAX_COUNT,
@@ -46,19 +47,35 @@ export function ImageUploadField({
   const canAdd = total < PRODUCT_IMAGE_MAX_COUNT;
 
   const addFiles = async (picked: FileList | null) => {
-    if (!picked) return;
-    const room = PRODUCT_IMAGE_MAX_COUNT - total;
-    const chosen = Array.from(picked)
-      .filter((f) => PRODUCT_IMAGE_TYPES.includes(f.type))
-      .slice(0, Math.max(0, room));
-    if (!chosen.length) return;
+    if (!picked?.length) return;
+    const room = Math.max(0, PRODUCT_IMAGE_MAX_COUNT - total);
 
     setBusy(true);
     try {
+      // VES-101: o `type` vem da extensão — confere os bytes antes de aceitar.
+      const all = Array.from(picked);
+      const checks = await Promise.all(
+        all.map(async (f) => PRODUCT_IMAGE_TYPES.includes(f.type) && (await isValidImage(f))),
+      );
+      const valid = all.filter((_, i) => checks[i]);
+      const chosen = valid.slice(0, room);
+
       // Sem isso, cinco fotos de celular estouram o corpo do Server Action.
       const optimized = await compressImages(chosen, PRODUCT_COMPRESSION);
       const accepted = optimized.filter((f) => f.size <= PRODUCT_IMAGE_MAX_BYTES);
-      setNotice(accepted.length < optimized.length ? "Ignoramos as imagens acima de 5 MB." : null);
+
+      const invalid = all.length - valid.length;
+      const cut = valid.length - chosen.length;
+      const notices = [
+        invalid === 1 && "1 arquivo não é uma imagem JPG, PNG ou WebP válida e foi recusado.",
+        invalid > 1 &&
+          `${invalid} arquivos não são imagens JPG, PNG ou WebP válidas e foram recusados.`,
+        cut > 0 &&
+          `Cabem só ${PRODUCT_IMAGE_MAX_COUNT} imagens por produto — ` +
+            (cut === 1 ? "1 ficou de fora." : `${cut} ficaram de fora.`),
+        accepted.length < optimized.length && "Ignoramos as imagens acima de 5 MB.",
+      ].filter(Boolean);
+      setNotice(notices.length ? notices.join(" ") : null);
       if (accepted.length) onFilesChange([...files, ...accepted]);
     } finally {
       setBusy(false);

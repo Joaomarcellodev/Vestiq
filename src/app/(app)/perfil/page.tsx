@@ -3,6 +3,7 @@ import { getMyProfile } from "@/features/profile/queries";
 import { getActiveOrganization } from "@/features/organizations/queries";
 import { signOut } from "@/features/auth/actions";
 import { ProfileForm } from "@/features/profile/components/profile-form";
+import { ChangePasswordForm } from "@/features/profile/components/change-password-form";
 import { PageHeader } from "@/components/molecules/page-header";
 import { BackButton } from "@/components/molecules/back-button";
 import { Button, Icon, ThemeToggle } from "@/components/atoms";
@@ -22,6 +23,8 @@ export default async function ProfilePage() {
       />
 
       <ProfileForm profile={profile} />
+
+      <ChangePasswordForm />
 
       <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
         <p className="font-title-lg text-title-lg text-on-surface">Aparência</p>

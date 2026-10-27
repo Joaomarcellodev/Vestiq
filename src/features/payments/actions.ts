@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { rpcErrorMessage } from "@/lib/supabase/errors";
 import { getCurrentUser } from "@/features/auth/queries";
 import { requireActiveOrganization } from "@/features/organizations/queries";
-import { orderCode } from "@/features/supply-orders/state";
+import { isAccepted, orderCode } from "@/features/supply-orders/state";
 import {
   createCheckout,
   expireCheckout,
@@ -51,7 +51,7 @@ export async function payOrderWithCard(
   if (error) return { error: rpcErrorMessage(error) };
   if (!order) return { error: "Pedido não encontrado" };
   if (order.reseller_id !== org.id) return { error: "Somente a revendedora do pedido pode pagar" };
-  if (order.status !== "CONFIRMED") {
+  if (!isAccepted(order.status)) {
     return { error: "Só é possível pagar um pedido confirmado pelo fornecedor" };
   }
   if (!paymentsConfigured()) return { error: PAYMENTS_UNAVAILABLE };

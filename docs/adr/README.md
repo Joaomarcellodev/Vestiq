@@ -17,3 +17,4 @@ Decisões técnicas transversais do Vestiq. Formato definido em
 | [0010](./0010-realtime-negotiation-chat.md) | Chat de negociação em tempo real (Supabase Realtime) | Aceito |
 | [0011](./0011-realtime-notifications.md) | Notificações em tempo real e alertas do navegador | Aceito |
 | [0012](./0012-payment-provider.md) | Provedor de pagamentos: Stripe | Aceito |
+| [0013](./0013-functions-region-sao-paulo.md) | Funções do Netlify em São Paulo, junto do banco | Adiado (infra mantida) |

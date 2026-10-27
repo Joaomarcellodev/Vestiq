@@ -11,3 +11,11 @@ export const publishOfferSchema = z.object({
 export const cancelOfferSchema = z.object({ offerId: z.string().uuid() });
 
 export const offerPhotosSchema = z.object({ offerId: z.string().uuid("Oferta inválida") });
+
+/** VES-89 — what the owner can change on an open offer. */
+export const updateOfferSchema = z.object({
+  offerId: z.string().uuid("Oferta inválida"),
+  quantity: z.coerce.number().int("Quantidade inválida").positive("Quantidade inválida"),
+  transferPrice: z.coerce.number().min(0, "Preço inválido"),
+  note: z.string().trim().max(1000).optional().or(z.literal("")),
+});

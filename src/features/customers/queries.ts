@@ -1,15 +1,23 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { pageOf, pageRange } from "@/lib/pagination";
 import { requireActiveOrganization } from "@/features/organizations/queries";
 
-export async function listCustomers(search?: string, scope: "active" | "archived" = "active") {
+export async function listCustomers(
+  search?: string,
+  scope: "active" | "archived" = "active",
+  page = 1,
+) {
   await requireActiveOrganization();
   const supabase = await createClient();
+  // VES-90: one page at a time; `id` breaks ties between equal names.
   let query = supabase
     .from("customers")
     .select("id, name, email, phone, document, archived_at")
-    .order("name");
+    .order("name")
+    .order("id")
+    .range(...pageRange(page));
   query =
     scope === "archived" ? query.not("archived_at", "is", null) : query.is("archived_at", null);
   if (search?.trim()) {
@@ -17,7 +25,7 @@ export async function listCustomers(search?: string, scope: "active" | "archived
   }
   const { data, error } = await query;
   if (error) throw error;
-  return data ?? [];
+  return pageOf(data ?? [], page);
 }
 
 export async function getCustomerWithHistory(id: string) {

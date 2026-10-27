@@ -28,6 +28,7 @@ transacional; bloquear venda acima do disponível; cancelar → estorno + histó
   (subtotal, desconto, total).
 - Tela "Vendas": resumo (faturamento, gráfico simples) + transações recentes.
 - Cancelamento de venda a partir do detalhe.
+- Detalhe da venda com subtotal, desconto e total (VES-82) e, se cancelada, motivo, data/hora e quem cancelou (VES-83).
 
 ## Fora do Escopo
 
@@ -66,18 +67,18 @@ transacional; bloquear venda acima do disponível; cancelar → estorno + histó
 
 ## Regras de Negócio
 
-| ID         | Regra                                                                                                                                                                                         |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| BR-SALE-01 | Venda tem 1..N itens; cada item referencia `product_variant` + `quantity > 0` + `unit_price` (preço no momento)                                                                               |
-| BR-SALE-02 | `subtotal = Σ line_total`; `total = subtotal - discount`; `discount ∈ [0, subtotal]`                                                                                                          |
-| BR-SALE-03 | `payment_method ∈ {PIX, CARTAO, DINHEIRO}`                                                                                                                                                    |
-| BR-SALE-04 | `confirm_sale` é transacional: cria `sales` + `sale_items` + N movimentos `VENDA` (negativos) + atualiza `stock_on_hand`; se **qualquer** item exceder o saldo, aborta tudo (RF-SALE-006/007) |
-| BR-SALE-05 | Item de variação arquivada não pode ser vendido                                                                                                                                               |
-| BR-SALE-06 | Cancelar: `status = CANCELLED`, `cancelled_at`, `cancel_reason`; cria movimentos `CANCELAMENTO` (positivos) estornando cada item; transacional (RF-SALE-008/009)                              |
-| BR-SALE-07 | Venda cancelada não pode ser recancelada nem editada                                                                                                                                          |
-| BR-SALE-08 | Cliente é opcional (venda avulsa)                                                                                                                                                             |
-| BR-SALE-09 | Preço do item é congelado; alterar o preço do produto depois não muda a venda                                                                                                                 |
-| BR-SALE-10 | Faturamento do resumo considera apenas `CONFIRMED`                                                                                                                                            |
+| ID         | Regra                                                                                                                                                                                                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-SALE-01 | Venda tem 1..N itens; cada item referencia `product_variant` + `quantity > 0` + `unit_price` (preço no momento)                                                                                                                                                         |
+| BR-SALE-02 | `subtotal = Σ line_total`; `total = subtotal - discount`; `discount ∈ [0, subtotal]`; enquanto o desconto digitado passa do subtotal, a tela mostra total R$ 0,00 (nunca negativo — VES-81)                                                                             |
+| BR-SALE-03 | `payment_method ∈ {PIX, CARTAO, DINHEIRO}`                                                                                                                                                                                                                              |
+| BR-SALE-04 | `confirm_sale` é transacional: cria `sales` + `sale_items` + N movimentos `VENDA` (negativos) + atualiza `stock_on_hand`; se **qualquer** item exceder o saldo, aborta tudo (RF-SALE-006/007)                                                                           |
+| BR-SALE-05 | Item de variação arquivada não pode ser vendido                                                                                                                                                                                                                         |
+| BR-SALE-06 | Cancelar: `status = CANCELLED`, `cancelled_at`, `cancel_reason`, `cancelled_by` (quem cancelou); o detalhe mostra motivo, data/hora e o nome de quem cancelou (VES-83); cria movimentos `CANCELAMENTO` (positivos) estornando cada item; transacional (RF-SALE-008/009) |
+| BR-SALE-07 | Venda cancelada não pode ser recancelada nem editada                                                                                                                                                                                                                    |
+| BR-SALE-08 | Cliente é opcional (venda avulsa)                                                                                                                                                                                                                                       |
+| BR-SALE-09 | Preço do item é congelado; alterar o preço do produto depois não muda a venda                                                                                                                                                                                           |
+| BR-SALE-10 | Faturamento do resumo considera apenas `CONFIRMED`                                                                                                                                                                                                                      |
 
 ## Fluxos
 

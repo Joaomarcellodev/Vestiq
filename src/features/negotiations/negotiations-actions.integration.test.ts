@@ -158,13 +158,15 @@ d("negotiations actions + queries (SPEC-009)", () => {
     const negId = await openNeg();
 
     setTestClient(ctx.seller.client);
-    expect((await listNegotiations()).map((n) => n.id)).toContain(negId);
+    expect((await listNegotiations("received")).items.map((n) => n.id)).toContain(negId);
     setTestClient(ctx.buyer.client);
-    expect((await listNegotiations()).map((n) => n.id)).toContain(negId);
+    expect((await listNegotiations("sent")).items.map((n) => n.id)).toContain(negId);
 
     const stranger = await makeUser();
     await makeOrg(stranger.userId, "RESELLER", "RESELLER");
     setTestClient(stranger.client);
-    expect((await listNegotiations()).map((n) => n.id)).not.toContain(negId);
+    for (const direction of ["received", "sent"] as const) {
+      expect((await listNegotiations(direction)).items.map((n) => n.id)).not.toContain(negId);
+    }
   });
 });

@@ -48,7 +48,7 @@ export function formData(obj: Record<string, unknown>): FormData {
  */
 export function pngFile(name = "photo.png"): File {
   const bytes = Buffer.from(
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
     "base64",
   );
   return new File([bytes], name, { type: "image/png" });

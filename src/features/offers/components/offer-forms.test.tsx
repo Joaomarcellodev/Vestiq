@@ -13,7 +13,7 @@ const { PublishOfferForm } = await import("./publish-offer-form");
 const { OfferPhotosForm } = await import("./offer-photos-form");
 
 const png = (name: string) =>
-  new File([Uint8Array.from([137, 80, 78, 71])], name, { type: "image/png" });
+  new File([Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10])], name, { type: "image/png" });
 
 describe("PublishOfferForm (TC-OFFER-13)", () => {
   it("sends the picked photos with the offer", async () => {

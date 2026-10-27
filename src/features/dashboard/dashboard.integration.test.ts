@@ -11,6 +11,7 @@ import {
 } from "@/test/actions";
 import { confirmSale } from "@/features/sales/actions";
 import { publishOffer } from "@/features/offers/actions";
+import { openNegotiation } from "@/features/negotiations/actions";
 import { fetchTopProducts } from "./actions";
 import { getResellerDashboard } from "./queries";
 import { getFactoryNetworkOverview } from "@/features/network/queries";
@@ -62,6 +63,61 @@ d("dashboard + factory overview queries", () => {
       pendingNegotiations: 0,
     });
     expect(dash.lowStock).toEqual([]);
+  });
+
+  it("counts a pending proposal as needing action only for the seller (VES-100)", async () => {
+    const factory = await makeUser();
+    const factoryOrg = await makeOrg(factory.userId, "FACTORY", "FACTORY_ADMIN");
+    const network = await makeNetwork(factoryOrg.id);
+    const seller = await makeUser();
+    const sellerOrg = await makeOrg(seller.userId, "RESELLER", "RESELLER");
+    const buyer = await makeUser();
+    const buyerOrg = await makeOrg(buyer.userId, "RESELLER", "RESELLER");
+    await addMember(network.id, sellerOrg.id);
+    await addMember(network.id, buyerOrg.id);
+
+    const v = await makeVariant((await makeProduct(sellerOrg.id)).id, { retail_price: 200 });
+    await stockUp(seller.client, v.id, 5);
+    setTestClient(seller.client);
+    await expectRedirect(
+      () =>
+        publishOffer(
+          {},
+          formData({
+            variantId: v.id,
+            networkId: network.id,
+            quantity: 3,
+            transferPrice: 150,
+            note: "",
+          }),
+        ),
+      /offer-published/,
+    );
+    const { data: offer } = await admin()
+      .from("offers")
+      .select("id")
+      .eq("product_variant_id", v.id)
+      .single();
+
+    setTestClient(buyer.client);
+    await expectRedirect(
+      () =>
+        openNegotiation(
+          {},
+          formData({ offerId: offer!.id, quantity: 1, amount: 150, message: "" }),
+        ),
+      /negotiation-opened/,
+    );
+
+    expect(await getResellerDashboard()).toMatchObject({
+      pendingNegotiations: 0,
+      awaitingReply: 1,
+    });
+    setTestClient(seller.client);
+    expect(await getResellerDashboard()).toMatchObject({
+      pendingNegotiations: 1,
+      awaitingReply: 0,
+    });
   });
 
   it("fetchTopProducts ranks only the sales inside the picked period", async () => {

@@ -16,7 +16,7 @@ const { ImageUploadField } = await import("./image-upload-field");
 
 const CATS = [{ id: "c1", name: "Bolsas" }];
 const png = (name = "a.png") =>
-  new File([Uint8Array.from([137, 80, 78, 71])], name, { type: "image/png" });
+  new File([Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10])], name, { type: "image/png" });
 
 describe("ProductForm", () => {
   it("adds and removes variant rows and shows the estimated margin", async () => {
@@ -63,6 +63,32 @@ describe("ProductForm", () => {
     expect(screen.getByLabelText(/nome do produto/i)).toHaveValue("Jaqueta");
     expect(screen.getByLabelText("Marca")).toHaveValue("Modah");
     expect(screen.getByLabelText("Tamanho")).toHaveValue("M");
+  });
+
+  it("starts size and initial stock blank, so typing doesn't append to a default (VES-86)", async () => {
+    render(<ProductForm categories={CATS} />);
+    const size = screen.getByLabelText("Tamanho");
+    const stock = screen.getByLabelText("Estoque inicial");
+    expect(size).toHaveValue("");
+    expect(size).toHaveAttribute("placeholder", "Único");
+    expect(stock).toHaveValue(null);
+    expect(stock).toHaveAttribute("placeholder", "0");
+
+    await userEvent.type(size, "M");
+    await userEvent.type(stock, "5");
+    expect(size).toHaveValue("M");
+    expect(stock).toHaveValue(5);
+  });
+
+  it("sends a blank size and a zero initial stock when they're left empty (VES-86)", async () => {
+    createProduct.mockClear();
+    render(<ProductForm categories={CATS} />);
+    await userEvent.type(screen.getByLabelText(/nome do produto/i), "Jaqueta");
+    await userEvent.click(screen.getByRole("button", { name: /salvar produto/i }));
+
+    const fd = createProduct.mock.calls.at(-1)![1] as FormData;
+    const [variant] = JSON.parse(fd.get("variants") as string);
+    expect(variant).toMatchObject({ size: "", initialStock: 0 });
   });
 
   it("shows the action's field errors next to their fields (VES-78)", async () => {
@@ -212,6 +238,35 @@ describe("ImageUploadField", () => {
     const input = document.querySelector("input[type=file]") as HTMLInputElement;
     await userEvent.upload(input, [png("1.png"), new File(["x"], "x.txt", { type: "text/plain" })]);
     expect(onFilesChange).toHaveBeenCalledWith([expect.any(File)]);
+  });
+
+  it("refuses a file renamed to .png that isn't an image, and says so (VES-101)", async () => {
+    const onFilesChange = vi.fn();
+    render(<ImageUploadField files={[]} onFilesChange={onFilesChange} />);
+    const input = document.querySelector("input[type=file]") as HTMLInputElement;
+    const fake = new File(["só texto"], "foto.png", { type: "image/png" });
+    await userEvent.upload(input, [png("1.png"), fake]);
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "1 arquivo não é uma imagem JPG, PNG ou WebP válida e foi recusado.",
+    );
+    expect(onFilesChange).toHaveBeenCalledTimes(1);
+    expect(onFilesChange.mock.calls[0]![0]).toHaveLength(1);
+  });
+
+  it("says how many photos the 5-image limit left out (VES-101)", async () => {
+    const onFilesChange = vi.fn();
+    render(<ImageUploadField files={[]} onFilesChange={onFilesChange} />);
+    const input = document.querySelector("input[type=file]") as HTMLInputElement;
+    await userEvent.upload(
+      input,
+      Array.from({ length: 6 }, (_, i) => png(`${i}.png`)),
+    );
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Cabem só 5 imagens por produto — 1 ficou de fora.",
+    );
+    expect(onFilesChange.mock.calls[0]![0]).toHaveLength(5);
   });
 
   it("stops accepting new files once the max count is reached", () => {

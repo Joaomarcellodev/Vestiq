@@ -169,7 +169,7 @@ export function EditProductForm({
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => setVariants((r) => [...r, { ...emptyVariant, size: "" }])}
+            onClick={() => setVariants((r) => [...r, { ...emptyVariant }])}
           >
             <Icon name="add" size={16} />
             Adicionar

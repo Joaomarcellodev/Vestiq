@@ -332,6 +332,18 @@ d("supply order payments (SPEC-014)", () => {
     expect(await paymentRows(o.id)).toEqual([]);
   });
 
+  it("still lets the reseller pay an order in production or shipped (VES-32)", async () => {
+    const o = await order();
+    const advance = await ctx.factoryAdmin.client.rpc("advance_supply_order", {
+      p_order_id: o.id,
+      p_stage: "IN_PRODUCTION",
+    });
+    expect(advance.error).toBeNull();
+    const checkout = await startCheckout(o.id);
+    expect(checkout.id).toBeTruthy();
+    expect(await paymentRows(o.id)).toHaveLength(1);
+  });
+
   it("says payments are unavailable when Stripe is not configured (TC-PAY-04)", async () => {
     stripeApi.configured = false;
     const o = await order();

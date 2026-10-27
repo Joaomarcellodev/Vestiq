@@ -110,7 +110,8 @@ alternativa se o split por recebedores virar requisito forte.
 - **Comissão (VES-27, [SPEC-015](../../specs/commission/SPEC.md)):** marketplace com
   **cobranças com destino**. Cada fábrica tem uma conta conectada **v2 de recebedor**
   (`configuration.recipient` com `stripe_balance.stripe_transfers`, Dashboard
-  Express, Brasil), cadastrada pelo Account Link hospedado. A plataforma paga as
+  Express, Brasil; no Brasil o Stripe exige pedir também `card_payments`, em
+  `configuration.merchant`), cadastrada pelo Account Link hospedado. A plataforma paga as
   tarifas do Stripe e cobre perdas (`fees_collector` e `losses_collector:
   application`). O checkout leva `transfer_data.destination` e
   `application_fee_amount` (percentual por fábrica, padrão 10%). O reembolso usa

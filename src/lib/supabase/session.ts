@@ -61,7 +61,9 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   if (!user && !isPublicPath(pathname)) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
-    redirectUrl.searchParams.set("next", pathname);
+    // keep the query in `next` (e.g. /recebimentos?cadastro=retorno), not on /login
+    redirectUrl.search = "";
+    redirectUrl.searchParams.set("next", pathname + request.nextUrl.search);
     return NextResponse.redirect(redirectUrl);
   }
 

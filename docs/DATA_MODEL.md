@@ -181,6 +181,7 @@ Append-only. Sem `update`/`delete` via RLS (RF-INV-006).
 | `sold_by` | uuid → profiles | |
 | `cancelled_at` | timestamptz | RF-SALE-008 — permanece no histórico |
 | `cancel_reason` | text | null |
+| `cancelled_by` | uuid → profiles | quem cancelou (VES-83, migration 0040); nome lido pela RPC `sale_cancelled_by_name`, só para membros da organização |
 
 ### `sale_items` — RF-SALE-002/003
 | coluna | tipo | notas |
@@ -336,7 +337,7 @@ ou do fornecedor); toda escrita passa pelas funções abaixo.
 
 | Tabela | Colunas principais |
 | --- | --- |
-| `supply_orders` | `reseller_id`, `supplier_id`, `status supply_order_status` (`PENDING`/`CONFIRMED`/`REJECTED`/`CANCELLED`), `note`, `response_note`, `cancel_reason`, `total_quantity`, `total_amount numeric(18,2)`, `responded_at`, `cancelled_at` |
+| `supply_orders` | `reseller_id`, `supplier_id`, `status supply_order_status` (`PENDING`/`CONFIRMED`/`IN_PRODUCTION`/`SHIPPED`/`DELIVERED`/`REJECTED`/`CANCELLED`), `note`, `response_note`, `cancel_reason`, `total_quantity`, `total_amount numeric(18,2)`, `responded_at`, `cancelled_at`, `production_started_at`, `shipped_at`, `tracking_code`, `delivered_at`, `received_by` (VES-32) |
 | `supply_order_items` | `order_id`, `product_id`, `variant_id` + snapshot `product_name`, `color`, `size`, `sku`, `unit_price`; `quantity`; `line_total` (gerada). Único `(order_id, variant_id)` |
 
 | Função | Garante |

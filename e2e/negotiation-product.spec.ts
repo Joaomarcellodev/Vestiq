@@ -25,9 +25,9 @@ test("the buyer sees the negotiated product in the list and the detail", async (
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(productName);
 
-  await page.goto("/negociacoes");
-  const sent = page.locator("section", { has: page.getByRole("heading", { name: "Enviadas" }) });
-  await expect(sent.locator(`a[href="${negPath}"]`)).toContainText(productName);
+  // VES-90: sent negotiations are their own tab.
+  await page.goto("/negociacoes?tipo=enviadas");
+  await expect(page.locator(`a[href="${negPath}"]`)).toContainText(productName);
 
   // Leave the demo data as it was.
   await page.goto(negPath);

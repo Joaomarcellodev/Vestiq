@@ -2,8 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getSupplyOrder } from "@/features/supply-orders/queries";
-import { cancelSupplyOrder, respondSupplyOrder } from "@/features/supply-orders/actions";
-import { availableActions, orderCode } from "@/features/supply-orders/state";
+import {
+  advanceSupplyOrder,
+  cancelSupplyOrder,
+  receiveSupplyOrder,
+  respondSupplyOrder,
+} from "@/features/supply-orders/actions";
+import { availableActions, isAccepted, orderCode } from "@/features/supply-orders/state";
 import { variantLabel } from "@/features/suppliers/format";
 import { BackButton } from "@/components/molecules/back-button";
 import { PageHeader } from "@/components/molecules/page-header";
@@ -17,8 +22,13 @@ import { syncCheckout } from "@/features/payments/sync";
 
 export const metadata: Metadata = { title: "Pedido" };
 
+// Rendered on the server (UTC on Netlify) — pin the Brazilian timezone.
 const dateTime = (iso: string) =>
-  new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  new Date(iso).toLocaleString("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: "America/Sao_Paulo",
+  });
 
 const textareaClass =
   "field-focus-ring w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 font-body-md text-body-md";
@@ -36,15 +46,16 @@ export default async function SupplyOrderPage({
 
   // Back from the Stripe checkout: record its outcome now rather than wait for
   // the webhook. A failure here only delays the status — the webhook settles it.
-  if (order.status === "CONFIRMED" && checkout) {
+  const accepted = isAccepted(order.status);
+  if (accepted && checkout) {
     await syncCheckout(order.id, checkout).catch((err) =>
       console.error("[payments] syncCheckout failed", err),
     );
   }
-  const payment = order.status === "CONFIRMED" ? await getSupplyOrderPayment(order.id) : null;
+  const payment = accepted ? await getSupplyOrderPayment(order.id) : null;
   // VES-27: the supplier sees whether its payout account can receive this payment.
   const payout =
-    order.status === "CONFIRMED" && order.party === "supplier" && !payment
+    accepted && order.party === "supplier" && !payment
       ? await getFactoryPayoutAccount(order.supplierId)
       : null;
 
@@ -57,9 +68,9 @@ export default async function SupplyOrderPage({
       ? [
           {
             label:
-              order.status === "CONFIRMED"
-                ? "Confirmado pelo fornecedor"
-                : "Recusado pelo fornecedor",
+              order.status === "REJECTED"
+                ? "Recusado pelo fornecedor"
+                : "Confirmado pelo fornecedor",
             at: order.respondedAt,
             note: order.responseNote,
             noteLabel: "Mensagem do fornecedor",
@@ -89,7 +100,31 @@ export default async function SupplyOrderPage({
           },
         ]
       : []),
-  ];
+    // VES-32 — fulfillment stages
+    ...(order.productionStartedAt
+      ? [{ label: "Em produção", at: order.productionStartedAt, note: null, noteLabel: "" }]
+      : []),
+    ...(order.shippedAt
+      ? [
+          {
+            label: "Enviado pelo fornecedor",
+            at: order.shippedAt,
+            note: order.trackingCode,
+            noteLabel: "Código de rastreio",
+          },
+        ]
+      : []),
+    ...(order.deliveredAt
+      ? [
+          {
+            label: "Recebido pela revendedora",
+            at: order.deliveredAt,
+            note: "As peças entraram no estoque da revendedora.",
+            noteLabel: "Estoque",
+          },
+        ]
+      : []),
+  ].sort((a, b) => a.at.localeCompare(b.at));
 
   return (
     <div className="space-y-lg">
@@ -182,7 +217,7 @@ export default async function SupplyOrderPage({
         </div>
       </section>
 
-      {order.status === "CONFIRMED" && (
+      {accepted && (
         <OrderPayment
           orderId={order.id}
           party={order.party}
@@ -276,6 +311,65 @@ export default async function SupplyOrderPage({
           </div>
           <div className="flex justify-end">
             <SubmitButton variant="secondary">Cancelar pedido</SubmitButton>
+          </div>
+        </ActionForm>
+      )}
+
+      {(actions.includes("start_production") || actions.includes("ship")) && (
+        <section className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-surface">
+          <h2 className="font-title-lg text-title-lg text-on-surface">Atualizar pedido</h2>
+          {actions.includes("start_production") && (
+            <ActionForm
+              action={advanceSupplyOrder}
+              className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <input type="hidden" name="orderId" value={order.id} />
+              <input type="hidden" name="stage" value="IN_PRODUCTION" />
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                Avise a revendedora que as peças estão sendo produzidas.
+              </p>
+              <SubmitButton variant="secondary">Marcar em produção</SubmitButton>
+            </ActionForm>
+          )}
+          {actions.includes("ship") && (
+            <ActionForm action={advanceSupplyOrder} className="space-y-sm">
+              <input type="hidden" name="orderId" value={order.id} />
+              <input type="hidden" name="stage" value="SHIPPED" />
+              <div>
+                <label
+                  htmlFor="tracking-code"
+                  className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface"
+                >
+                  Código de rastreio (opcional)
+                </label>
+                <input
+                  id="tracking-code"
+                  name="trackingCode"
+                  maxLength={100}
+                  placeholder="Ex.: BR123456789BR"
+                  className={textareaClass}
+                />
+              </div>
+              <div className="flex justify-end">
+                <SubmitButton>Marcar como enviado</SubmitButton>
+              </div>
+            </ActionForm>
+          )}
+        </section>
+      )}
+
+      {actions.includes("receive") && (
+        <ActionForm
+          action={receiveSupplyOrder}
+          className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-surface"
+        >
+          <input type="hidden" name="orderId" value={order.id} />
+          <h2 className="font-title-lg text-title-lg text-on-surface">Recebeu o pedido?</h2>
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            Ao confirmar o recebimento, as {order.totalQuantity} peças entram no seu estoque.
+          </p>
+          <div className="flex justify-end">
+            <SubmitButton>Confirmar recebimento</SubmitButton>
           </div>
         </ActionForm>
       )}

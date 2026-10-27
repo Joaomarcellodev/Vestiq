@@ -88,7 +88,7 @@ d("offer photos (VES-106, RF-OFFER-008)", () => {
     expect(withoutPhotos.image_urls).toEqual([]);
 
     setTestClient(ctx.peer.client);
-    const feed = await listNetworkOffers();
+    const feed = (await listNetworkOffers()).items;
     expect(feed.find((o) => o.id === withPhotos.id)?.imageUrl).toBe(withPhotos.image_urls[0]);
     expect(feed.find((o) => o.id === withoutPhotos.id)?.imageUrl).toBe("https://x/produto.png");
     expect((await getOffer(withPhotos.id)).offer.imageUrls).toEqual(withPhotos.image_urls);

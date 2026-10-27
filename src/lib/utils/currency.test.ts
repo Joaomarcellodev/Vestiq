@@ -18,7 +18,13 @@ describe("currency", () => {
   it("computes estimated margin (BR-CAT-06)", () => {
     expect(estimatedMargin(60, 100)).toBeCloseTo(0.4);
     expect(estimatedMargin(0, 0)).toBeNull();
-    expect(formatPercent(estimatedMargin(60, 100))).toBe("40.0%");
+    expect(formatPercent(estimatedMargin(60, 100))).toBe("40,0%");
     expect(formatPercent(estimatedMargin(10, 0))).toBe("--");
+  });
+
+  it("formats percentages the Brazilian way, with a decimal comma (VES-85)", () => {
+    expect(formatPercent(1 / 3)).toBe("33,3%");
+    expect(formatPercent(-1)).toBe("-100,0%");
+    expect(formatPercent(12.345)).toBe("1.234,5%");
   });
 });

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils/cn";
  */
 
 type IconName =
+  | "account_balance"
   | "add"
   | "add_circle"
   | "check_circle"
@@ -26,11 +27,13 @@ type IconName =
   | "hub"
   | "inbox"
   | "inventory_2"
+  | "local_shipping"
   | "lock"
   | "mail"
   | "menu"
   | "more_horiz"
   | "notifications"
+  | "open_in_new"
   | "person"
   | "point_of_sale"
   | "receipt_long"
@@ -45,6 +48,7 @@ type IconName =
   | "moon";
 
 const PATHS: Record<IconName, React.ReactNode> = {
+  account_balance: <path d="M3 10h18M12 3l9 5H3l9-5ZM5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18" />,
   add: <path d="M12 5v14M5 12h14" />,
   add_circle: (
     <>
@@ -126,6 +130,16 @@ const PATHS: Record<IconName, React.ReactNode> = {
   inventory_2: (
     <>
       <path d="M4 8h16v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8ZM3 4h18v4H3zM10 12h4" />
+    </>
+  ),
+  open_in_new: (
+    <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+  ),
+  local_shipping: (
+    <>
+      <path d="M3 6h11v10H3zM14 9h4l3 3v4h-7" />
+      <circle cx="7" cy="18" r="2" />
+      <circle cx="17" cy="18" r="2" />
     </>
   ),
   lock: (
@@ -231,6 +245,11 @@ export interface IconProps extends React.SVGAttributes<SVGSVGElement> {
   name: string;
   size?: number;
   filled?: boolean;
+}
+
+/** Whether `name` (or its alias) has a drawing — `Icon` renders nothing otherwise. */
+export function hasIcon(name: string): boolean {
+  return (ALIAS[name] ?? name) in PATHS;
 }
 
 export function Icon({ name, size = 24, className, filled: _filled, ...props }: IconProps) {

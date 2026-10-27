@@ -258,6 +258,21 @@ content_path = "./supabase/templates/invite.html"
 subject = "Seu convite no Vestiq"
 content_path = "./supabase/templates/magic_link.html"
 
+# VES-102: the other Auth emails in pt-BR with the Vestiq look. Their links are
+# Supabase's own `ConfirmationURL` (PKCE through /auth/callback). Copy them to
+# the hosted project too (Dashboard → Auth → Email Templates; docs/DEPLOY.md).
+[auth.email.template.recovery]
+subject = "Redefinir sua senha no Vestiq"
+content_path = "./supabase/templates/recovery.html"
+
+[auth.email.template.confirmation]
+subject = "Confirme seu email no Vestiq"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.email_change]
+subject = "Confirme o novo email da sua conta no Vestiq"
+content_path = "./supabase/templates/email_change.html"
+
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]
 # enabled = true

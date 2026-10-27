@@ -488,6 +488,7 @@ export type Database = {
       offers: {
         Row: {
           created_at: string
+          edited_at: string | null
           id: string
           image_urls: string[]
           network_id: string
@@ -502,6 +503,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          edited_at?: string | null
           id?: string
           image_urls?: string[]
           network_id: string
@@ -516,6 +518,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          edited_at?: string | null
           id?: string
           image_urls?: string[]
           network_id?: string
@@ -837,6 +840,7 @@ export type Database = {
         Row: {
           cancel_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
           created_at: string
           customer_id: string | null
           discount: number
@@ -852,6 +856,7 @@ export type Database = {
         Insert: {
           cancel_reason?: string | null
           cancelled_at?: string | null
+          cancelled_by?: string | null
           created_at?: string
           customer_id?: string | null
           discount?: number
@@ -867,6 +872,7 @@ export type Database = {
         Update: {
           cancel_reason?: string | null
           cancelled_at?: string | null
+          cancelled_by?: string | null
           created_at?: string
           customer_id?: string | null
           discount?: number
@@ -880,6 +886,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "sales_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sales_customer_id_fkey"
             columns: ["customer_id"]
@@ -1070,16 +1083,21 @@ export type Database = {
           cancelled_at: string | null
           created_at: string
           created_by: string | null
+          delivered_at: string | null
           id: string
           note: string | null
+          production_started_at: string | null
+          received_by: string | null
           reseller_id: string
           responded_at: string | null
           responded_by: string | null
           response_note: string | null
+          shipped_at: string | null
           status: Database["public"]["Enums"]["supply_order_status"]
           supplier_id: string
           total_amount: number
           total_quantity: number
+          tracking_code: string | null
           updated_at: string
         }
         Insert: {
@@ -1087,16 +1105,21 @@ export type Database = {
           cancelled_at?: string | null
           created_at?: string
           created_by?: string | null
+          delivered_at?: string | null
           id?: string
           note?: string | null
+          production_started_at?: string | null
+          received_by?: string | null
           reseller_id: string
           responded_at?: string | null
           responded_by?: string | null
           response_note?: string | null
+          shipped_at?: string | null
           status?: Database["public"]["Enums"]["supply_order_status"]
           supplier_id: string
           total_amount: number
           total_quantity: number
+          tracking_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -1104,22 +1127,34 @@ export type Database = {
           cancelled_at?: string | null
           created_at?: string
           created_by?: string | null
+          delivered_at?: string | null
           id?: string
           note?: string | null
+          production_started_at?: string | null
+          received_by?: string | null
           reseller_id?: string
           responded_at?: string | null
           responded_by?: string | null
           response_note?: string | null
+          shipped_at?: string | null
           status?: Database["public"]["Enums"]["supply_order_status"]
           supplier_id?: string
           total_amount?: number
           total_quantity?: number
+          tracking_code?: string | null
           updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: "supply_orders_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_orders_received_by_fkey"
+            columns: ["received_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1217,6 +1252,37 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "inventory_movements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      advance_supply_order: {
+        Args: { p_order_id: string; p_stage: string; p_tracking_code?: string }
+        Returns: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          delivered_at: string | null
+          id: string
+          note: string | null
+          production_started_at: string | null
+          received_by: string | null
+          reseller_id: string
+          responded_at: string | null
+          responded_by: string | null
+          response_note: string | null
+          shipped_at: string | null
+          status: Database["public"]["Enums"]["supply_order_status"]
+          supplier_id: string
+          total_amount: number
+          total_quantity: number
+          tracking_code: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "supply_orders"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1366,6 +1432,7 @@ export type Database = {
         Returns: {
           cancel_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
           created_at: string
           customer_id: string | null
           discount: number
@@ -1392,16 +1459,21 @@ export type Database = {
           cancelled_at: string | null
           created_at: string
           created_by: string | null
+          delivered_at: string | null
           id: string
           note: string | null
+          production_started_at: string | null
+          received_by: string | null
           reseller_id: string
           responded_at: string | null
           responded_by: string | null
           response_note: string | null
+          shipped_at: string | null
           status: Database["public"]["Enums"]["supply_order_status"]
           supplier_id: string
           total_amount: number
           total_quantity: number
+          tracking_code: string | null
           updated_at: string
         }
         SetofOptions: {
@@ -1444,6 +1516,7 @@ export type Database = {
         Returns: {
           cancel_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
           created_at: string
           customer_id: string | null
           discount: number
@@ -1463,14 +1536,11 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      create_product: {
-        Args: { p_organization_id: string; p_product: Json; p_variants: Json }
-        Returns: string
-      }
       fit_offers_to_stock: {
         Args: { p_variant_id: string }
         Returns: undefined
       }
+      format_brl: { Args: { p_value: number }; Returns: string }
       get_network_invite: {
         Args: { p_token: string }
         Returns: {
@@ -1579,12 +1649,13 @@ export type Database = {
         }[]
       }
       list_visible_offers: {
-        Args: { p_offer_id?: string }
+        Args: { p_offer_id?: string; p_query?: string }
         Returns: {
           brand: string
           color: string
           created_at: string
           description: string
+          edited_at: string
           id: string
           image_urls: string[]
           network_id: string
@@ -1662,16 +1733,21 @@ export type Database = {
           cancelled_at: string | null
           created_at: string
           created_by: string | null
+          delivered_at: string | null
           id: string
           note: string | null
+          production_started_at: string | null
+          received_by: string | null
           reseller_id: string
           responded_at: string | null
           responded_by: string | null
           response_note: string | null
+          shipped_at: string | null
           status: Database["public"]["Enums"]["supply_order_status"]
           supplier_id: string
           total_amount: number
           total_quantity: number
+          tracking_code: string | null
           updated_at: string
         }
         SetofOptions: {
@@ -1695,6 +1771,7 @@ export type Database = {
         }
         Returns: {
           created_at: string
+          edited_at: string | null
           id: string
           image_urls: string[]
           network_id: string
@@ -1723,6 +1800,37 @@ export type Database = {
           platform_fee_amount: number
           platform_fee_percent: number
         }[]
+      }
+      receive_supply_order: {
+        Args: { p_order_id: string }
+        Returns: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          delivered_at: string | null
+          id: string
+          note: string | null
+          production_started_at: string | null
+          received_by: string | null
+          reseller_id: string
+          responded_at: string | null
+          responded_by: string | null
+          response_note: string | null
+          shipped_at: string | null
+          status: Database["public"]["Enums"]["supply_order_status"]
+          supplier_id: string
+          total_amount: number
+          total_quantity: number
+          tracking_code: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "supply_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       record_inventory_entry: {
         Args: { p_note?: string; p_quantity: number; p_variant_id: string }
@@ -1790,16 +1898,21 @@ export type Database = {
           cancelled_at: string | null
           created_at: string
           created_by: string | null
+          delivered_at: string | null
           id: string
           note: string | null
+          production_started_at: string | null
+          received_by: string | null
           reseller_id: string
           responded_at: string | null
           responded_by: string | null
           response_note: string | null
+          shipped_at: string | null
           status: Database["public"]["Enums"]["supply_order_status"]
           supplier_id: string
           total_amount: number
           total_quantity: number
+          tracking_code: string | null
           updated_at: string
         }
         SetofOptions: {
@@ -1809,6 +1922,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      sale_cancelled_by_name: { Args: { p_sale_id: string }; Returns: string }
       search_matches: {
         Args: { haystack: string; p_query: string }
         Returns: boolean
@@ -1884,13 +1998,38 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      set_product_archived: {
-        Args: { p_archived: boolean; p_product_id: string }
-        Returns: string
-      }
       shares_network: {
         Args: { org_a: string; org_b: string }
         Returns: boolean
+      }
+      update_offer: {
+        Args: {
+          p_note?: string
+          p_offer_id: string
+          p_quantity: number
+          p_transfer_price: number
+        }
+        Returns: {
+          created_at: string
+          edited_at: string | null
+          id: string
+          image_urls: string[]
+          network_id: string
+          note: string | null
+          organization_id: string
+          product_variant_id: string
+          quantity_offered: number
+          quantity_remaining: number
+          status: Database["public"]["Enums"]["offer_status"]
+          transfer_price: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "offers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       update_product: {
         Args: { p_product: Json; p_product_id: string; p_variants?: Json }
@@ -1944,6 +2083,9 @@ export type Database = {
         | "SUPPLY_ORDER_CANCELLED"
         | "SUPPLY_ORDER_PAID"
         | "SUPPLY_ORDER_REFUNDED"
+        | "SUPPLY_ORDER_IN_PRODUCTION"
+        | "SUPPLY_ORDER_SHIPPED"
+        | "SUPPLY_ORDER_DELIVERED"
       offer_status:
         | "ACTIVE"
         | "PARTIALLY_NEGOTIATED"
@@ -1954,7 +2096,14 @@ export type Database = {
       payment_method: "PIX" | "CARTAO" | "DINHEIRO"
       payment_status: "PENDING" | "PAID" | "FAILED" | "EXPIRED" | "REFUNDED"
       sale_status: "CONFIRMED" | "CANCELLED"
-      supply_order_status: "PENDING" | "CONFIRMED" | "REJECTED" | "CANCELLED"
+      supply_order_status:
+        | "PENDING"
+        | "CONFIRMED"
+        | "REJECTED"
+        | "CANCELLED"
+        | "IN_PRODUCTION"
+        | "SHIPPED"
+        | "DELIVERED"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2126,6 +2275,9 @@ export const Constants = {
         "SUPPLY_ORDER_CANCELLED",
         "SUPPLY_ORDER_PAID",
         "SUPPLY_ORDER_REFUNDED",
+        "SUPPLY_ORDER_IN_PRODUCTION",
+        "SUPPLY_ORDER_SHIPPED",
+        "SUPPLY_ORDER_DELIVERED",
       ],
       offer_status: [
         "ACTIVE",
@@ -2138,7 +2290,15 @@ export const Constants = {
       payment_method: ["PIX", "CARTAO", "DINHEIRO"],
       payment_status: ["PENDING", "PAID", "FAILED", "EXPIRED", "REFUNDED"],
       sale_status: ["CONFIRMED", "CANCELLED"],
-      supply_order_status: ["PENDING", "CONFIRMED", "REJECTED", "CANCELLED"],
+      supply_order_status: [
+        "PENDING",
+        "CONFIRMED",
+        "REJECTED",
+        "CANCELLED",
+        "IN_PRODUCTION",
+        "SHIPPED",
+        "DELIVERED",
+      ],
     },
   },
 } as const

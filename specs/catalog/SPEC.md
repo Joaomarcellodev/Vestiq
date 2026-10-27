@@ -62,22 +62,22 @@ sem apagar histórico.
 
 ## Regras de Negócio
 
-| ID        | Regra                                                                                                                               |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| BR-CAT-01 | `categories.name` único por organização                                                                                             |
-| BR-CAT-02 | Produto pertence a uma organização; opcionalmente a uma categoria                                                                   |
-| BR-CAT-03 | Produto tem 1..N variações; ao menos uma é criada com o produto (tamanho "Único" quando não aplicável)                              |
-| BR-CAT-04 | `sku`/`internal_sku` únicos por organização quando informados                                                                       |
-| BR-CAT-05 | `retail_price >= 0`, `cost_price >= 0` (BRL, `numeric(12,2)`)                                                                       |
-| BR-CAT-06 | Margem estimada = `(retail_price - cost_price) / retail_price` quando `retail_price > 0`, senão `--`                                |
-| BR-CAT-07 | Desativar = `archived_at = now()`; registros e histórico permanecem (RF-PROD-006)                                                   |
-| BR-CAT-08 | Produto/variação arquivada não aparece em listas de venda nem pode ser ofertada; continua visível no histórico                      |
-| BR-CAT-09 | Não é permitido `DELETE` físico de produto/variação com movimentações ou itens de venda                                             |
-| BR-CAT-10 | Desativar categoria não desativa seus produtos; apenas some da seleção                                                              |
-| BR-CAT-11 | Pedido mínimo = inteiro de 1 a 10.000 peças; 1 = sem mínimo                                                                         |
-| BR-CAT-12 | Grade = lista ordenada de até 20 tamanhos (até 20 caracteres cada); vazios e repetidos (sem diferenciar maiúsculas) são descartados |
-| BR-CAT-13 | Só organização `FACTORY` define pedido mínimo e grade (trigger no banco; campos ignorados no formulário da revendedora)             |
-| BR-CAT-14 | Produto da fábrica cadastrado sem variações ganha uma variação por tamanho da grade                                                 |
+| ID        | Regra                                                                                                                                                          |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-CAT-01 | `categories.name` único por organização                                                                                                                        |
+| BR-CAT-02 | Produto pertence a uma organização; opcionalmente a uma categoria                                                                                              |
+| BR-CAT-03 | Produto tem 1..N variações; ao menos uma é criada com o produto (tamanho "Único" quando não aplicável)                                                         |
+| BR-CAT-04 | `sku`/`internal_sku` únicos por organização quando informados                                                                                                  |
+| BR-CAT-05 | `retail_price >= 0`, `cost_price >= 0` (BRL, `numeric(12,2)`)                                                                                                  |
+| BR-CAT-06 | Margem estimada = `(retail_price - cost_price) / retail_price` quando `retail_price > 0`, senão `--`; exibida em pt-BR com 1 casa e vírgula ("33,3%" — VES-85) |
+| BR-CAT-07 | Desativar = `archived_at = now()`; registros e histórico permanecem (RF-PROD-006)                                                                              |
+| BR-CAT-08 | Produto/variação arquivada não aparece em listas de venda nem pode ser ofertada; continua visível no histórico                                                 |
+| BR-CAT-09 | Não é permitido `DELETE` físico de produto/variação com movimentações ou itens de venda                                                                        |
+| BR-CAT-10 | Desativar categoria não desativa seus produtos; apenas some da seleção                                                                                         |
+| BR-CAT-11 | Pedido mínimo = inteiro de 1 a 10.000 peças; 1 = sem mínimo                                                                                                    |
+| BR-CAT-12 | Grade = lista ordenada de até 20 tamanhos (até 20 caracteres cada); vazios e repetidos (sem diferenciar maiúsculas) são descartados                            |
+| BR-CAT-13 | Só organização `FACTORY` define pedido mínimo e grade (trigger no banco; campos ignorados no formulário da revendedora)                                        |
+| BR-CAT-14 | Produto da fábrica cadastrado sem variações ganha uma variação por tamanho da grade                                                                            |
 
 ## Fluxos
 

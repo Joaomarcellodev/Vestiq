@@ -93,7 +93,7 @@ test("searching the offer feed narrows it and says when nothing matches", async 
   await page.getByRole("button", { name: "Buscar" }).click();
   await expect(page).toHaveURL(/\/rede\?q=chanel\+PRETO/);
   await expect(page.getByText("Bolsa Chanel Classic Flap").first()).toBeVisible();
-  await expect(page.getByText(/ofertas? para “chanel PRETO”/)).toBeVisible();
+  await expect(page.getByText(/ofertas? para “chanel PRETO”/i)).toBeVisible();
 
   await search.fill("nenhuma-peca-assim");
   await page.getByRole("button", { name: "Buscar" }).click();

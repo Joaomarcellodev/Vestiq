@@ -32,6 +32,7 @@ export function OfferCard({ offer }: { offer: NetworkOffer }) {
       </div>
       <p className="mt-2 font-body-md text-body-md text-on-surface-variant">
         {offer.sellerName} · {offer.remaining} disponíve{offer.remaining === 1 ? "l" : "is"}
+        {offer.editedAt && " · editada"}
       </p>
       <div className="mt-auto flex items-center justify-between pt-3">
         <span className="font-title-lg text-title-lg text-primary-container">

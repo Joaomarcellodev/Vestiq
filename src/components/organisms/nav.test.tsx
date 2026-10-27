@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { setPathname } from "@/test/next";
-import { isActive } from "./nav-items";
+import { hasIcon } from "@/components/atoms/icon";
+import { BOTTOM_NAV, PRIMARY_NAV, isActive } from "./nav-items";
 import { BottomNav } from "./bottom-nav";
 import { SidebarNav } from "./sidebar-nav";
 
@@ -11,6 +12,13 @@ describe("isActive", () => {
     expect(isActive("/produtos/123", "/produtos")).toBe(true);
     expect(isActive("/produtos-arquivados", "/produtos")).toBe(false);
     expect(isActive("/vendas", "/produtos")).toBe(false);
+  });
+});
+
+describe("nav items", () => {
+  it("only use icons the icon set can draw", () => {
+    const missing = [...PRIMARY_NAV, ...BOTTOM_NAV].filter((i) => !hasIcon(i.icon));
+    expect(missing.map((i) => i.icon)).toEqual([]);
   });
 });
 

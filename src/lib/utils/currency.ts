@@ -22,7 +22,14 @@ export function estimatedMargin(cost: number, retail: number): number | null {
   return (retail - cost) / retail;
 }
 
+const percent = new Intl.NumberFormat("pt-BR", {
+  style: "percent",
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+
+/** 0.333 → "33,3%" (pt-BR decimal comma — VES-85). */
 export function formatPercent(ratio: number | null): string {
   if (ratio === null || !Number.isFinite(ratio)) return "--";
-  return `${(ratio * 100).toFixed(1)}%`;
+  return percent.format(ratio);
 }

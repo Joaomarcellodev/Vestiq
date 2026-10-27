@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { profileSchema } from "./validation";
+import { changePasswordSchema, profileSchema } from "./validation";
 
 describe("profileSchema", () => {
   it("accepts a valid profile", () => {
@@ -36,5 +36,39 @@ describe("profileSchema", () => {
   it("rejects a malformed date", () => {
     const r = profileSchema.safeParse({ fullName: "Sarah", email: "a@b.com", birthDate: "10/05" });
     expect(r.success).toBe(false);
+  });
+});
+
+describe("changePasswordSchema (VES-92)", () => {
+  const ok = { current: "senha-antiga", password: "senha-nova-1", confirm: "senha-nova-1" };
+  const issue = (over: Partial<typeof ok>) => {
+    const r = changePasswordSchema.safeParse({ ...ok, ...over });
+    return r.success ? null : r.error.issues[0];
+  };
+
+  it("accepts the current password plus a confirmed new one", () => {
+    expect(changePasswordSchema.safeParse(ok).success).toBe(true);
+  });
+
+  it("requires the current password", () => {
+    expect(issue({ current: "" })).toMatchObject({
+      path: ["current"],
+      message: "Informe a senha atual.",
+    });
+  });
+
+  it("keeps the reset rules: 8 characters and a matching confirmation", () => {
+    expect(issue({ password: "curta", confirm: "curta" })).toMatchObject({ path: ["password"] });
+    expect(issue({ confirm: "outra-senha" })).toMatchObject({
+      path: ["confirm"],
+      message: "As senhas não coincidem.",
+    });
+  });
+
+  it("rejects a new password equal to the current one", () => {
+    expect(issue({ password: "senha-antiga", confirm: "senha-antiga" })).toMatchObject({
+      path: ["password"],
+      message: "A nova senha precisa ser diferente da atual.",
+    });
   });
 });

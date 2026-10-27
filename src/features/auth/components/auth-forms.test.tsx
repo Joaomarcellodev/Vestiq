@@ -67,6 +67,8 @@ describe("ForgotPasswordForm", () => {
     await userEvent.type(screen.getByLabelText(/email profissional/i), "a@b.com");
     await userEvent.click(screen.getByRole("button", { name: /enviar link/i }));
     expect(await screen.findByText(/se existe uma conta com esse email/i)).toBeInTheDocument();
+    // VES-102: the production email may still arrive in English
+    expect(screen.getByText(/assunto “Reset your password”/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /voltar para o login/i })).toBeInTheDocument();
   });
 

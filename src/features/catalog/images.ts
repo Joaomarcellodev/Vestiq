@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
+import { sniffImageType } from "@/lib/utils/image-type";
 import { PRODUCT_IMAGE_MAX_BYTES, PRODUCT_IMAGE_TYPES } from "./validation";
 
 export const IMAGE_BUCKET = "product-images";
@@ -19,7 +20,8 @@ export async function uploadImages(
   const urls: string[] = [];
   for (const file of files) {
     if (!(file instanceof File) || file.size === 0) continue;
-    if (!PRODUCT_IMAGE_TYPES.includes(file.type)) {
+    // VES-101: the declared type comes from the file name — check the bytes too.
+    if (!PRODUCT_IMAGE_TYPES.includes(file.type) || !(await sniffImageType(file))) {
       return { urls, error: "Envie imagens JPG, PNG ou WebP." };
     }
     if (file.size > PRODUCT_IMAGE_MAX_BYTES) {

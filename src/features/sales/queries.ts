@@ -46,7 +46,12 @@ export async function getSale(id: string) {
     .eq("id", id)
     .single();
   if (error) throw error;
-  return data;
+  // VES-83: profiles are private to their owner, so the name comes from an RPC.
+  const cancelledByName =
+    data.status === "CANCELLED" && data.cancelled_by
+      ? ((await supabase.rpc("sale_cancelled_by_name", { p_sale_id: id })).data ?? null)
+      : null;
+  return { ...data, cancelledByName };
 }
 
 /** Variants available to sell (in stock, not archived). */

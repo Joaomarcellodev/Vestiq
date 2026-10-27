@@ -90,6 +90,11 @@ export interface SupplyOrderDetail {
   createdAt: string;
   respondedAt: string | null;
   cancelledAt: string | null;
+  /** VES-32 — fulfillment stages after confirmation. */
+  productionStartedAt: string | null;
+  shippedAt: string | null;
+  trackingCode: string | null;
+  deliveredAt: string | null;
   items: SupplyOrderItem[];
 }
 
@@ -101,7 +106,7 @@ export async function getSupplyOrder(id: string): Promise<SupplyOrderDetail | nu
   const { data: o, error } = await supabase
     .from("supply_orders")
     .select(
-      `${ORDER_COLUMNS}, note, response_note, cancel_reason, responded_at, cancelled_at, supply_order_items(id, product_id, product_name, color, size, sku, unit_price, quantity, line_total, position)`,
+      `${ORDER_COLUMNS}, note, response_note, cancel_reason, responded_at, cancelled_at, production_started_at, shipped_at, tracking_code, delivered_at, supply_order_items(id, product_id, product_name, color, size, sku, unit_price, quantity, line_total, position)`,
     )
     .eq("id", id)
     .maybeSingle();
@@ -126,6 +131,10 @@ export async function getSupplyOrder(id: string): Promise<SupplyOrderDetail | nu
     createdAt: o.created_at,
     respondedAt: o.responded_at,
     cancelledAt: o.cancelled_at,
+    productionStartedAt: o.production_started_at,
+    shippedAt: o.shipped_at,
+    trackingCode: o.tracking_code,
+    deliveredAt: o.delivered_at,
     items: [...(o.supply_order_items ?? [])]
       .sort((a, b) => a.position - b.position)
       .map((i) => ({

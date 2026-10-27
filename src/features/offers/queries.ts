@@ -3,7 +3,8 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrganization, requireActiveOrganization } from "@/features/organizations/queries";
 import type { Database } from "@/types/database";
-import { matchesOfferQuery } from "./search";
+import { pageOf, pageRange, type Page } from "@/lib/pagination";
+import { cleanOfferQuery } from "./search";
 
 export type NetworkOffer = {
   id: string;
@@ -16,6 +17,8 @@ export type NetworkOffer = {
   brand: string | null;
   imageUrl: string | null;
   descriptor: string;
+  /** Set when the owner edited the offer (VES-89). */
+  editedAt: string | null;
 };
 
 export type OfferDetail = {
@@ -31,18 +34,32 @@ export type OfferDetail = {
   imageUrls: string[];
   /** The offer's own photos (owner only, for editing) — `imageUrls` falls back to the product's. */
   ownImageUrls: string[];
+  /** Set when the owner edited the offer (VES-89). */
+  editedAt: string | null;
+  /** Owner only (VES-89): what the edit form needs. */
+  edit: {
+    /** Most the offer can hold: what it holds now plus the variant's free stock. */
+    maxQuantity: number;
+    /** A PENDING or ACCEPTED negotiation blocks the edit. */
+    negotiationInProgress: boolean;
+  } | null;
 };
 
 /**
- * Active offers of the reseller's networks, optionally narrowed by a search query.
- * Reads the public projection (migration 0022) so peers get the product too.
+ * Active offers of the reseller's networks, optionally narrowed by a search query,
+ * newest first, one page at a time (VES-90). Reads the public projection
+ * (migration 0022) so peers get the product too; it also runs the search
+ * (migration 0039), so a page holds only matches.
  */
-export async function listNetworkOffers(query?: string): Promise<NetworkOffer[]> {
+export async function listNetworkOffers(query?: string, page = 1): Promise<Page<NetworkOffer>> {
   const org = await requireActiveOrganization();
   const supabase = await createClient();
   const { data, error } = await supabase
-    .rpc("list_visible_offers")
-    .in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"]);
+    .rpc("list_visible_offers", { p_query: cleanOfferQuery(query) })
+    .in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"])
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range(...pageRange(page));
   if (error) throw error;
 
   const offers = (data ?? []).map((o) => ({
@@ -56,8 +73,9 @@ export async function listNetworkOffers(query?: string): Promise<NetworkOffer[]>
     brand: o.brand ?? null,
     imageUrl: o.image_urls?.[0] ?? null,
     descriptor: [o.color, o.size].filter(Boolean).join(" / ") || "Único",
+    editedAt: o.edited_at ?? null,
   }));
-  return offers.filter((o) => matchesOfferQuery(o, query));
+  return pageOf(offers, page);
 }
 
 export async function getOffer(id: string) {
@@ -68,9 +86,35 @@ export async function getOffer(id: string) {
   const active = await getActiveOrganization();
   const isMine = data.organization_id === active?.id;
   let ownImageUrls: string[] = [];
+  let edit: OfferDetail["edit"] = null;
   if (isMine) {
-    const { data: own } = await supabase.from("offers").select("image_urls").eq("id", id).single();
+    const { data: own } = await supabase
+      .from("offers")
+      .select("image_urls, product_variant_id, product_variants(stock_on_hand)")
+      .eq("id", id)
+      .single();
     ownImageUrls = own?.image_urls ?? [];
+    if (own) {
+      const [{ data: others }, { count }] = await Promise.all([
+        supabase
+          .from("offers")
+          .select("quantity_remaining")
+          .eq("product_variant_id", own.product_variant_id)
+          .in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"])
+          .neq("id", id),
+        supabase
+          .from("negotiations")
+          .select("id", { count: "exact", head: true })
+          .eq("offer_id", id)
+          .in("status", ["PENDING", "ACCEPTED"]),
+      ]);
+      // BR-OFFER-11 — same free stock the update_offer trigger checks.
+      const otherOpen = (others ?? []).reduce((sum, o) => sum + o.quantity_remaining, 0);
+      edit = {
+        maxQuantity: Math.max(0, (own.product_variants?.stock_on_hand ?? 0) - otherOpen),
+        negotiationInProgress: (count ?? 0) > 0,
+      };
+    }
   }
   const offer: OfferDetail = {
     id: data.id,
@@ -84,6 +128,8 @@ export async function getOffer(id: string) {
     descriptor: [data.color, data.size].filter(Boolean).join(" / "),
     imageUrls: data.image_urls ?? [],
     ownImageUrls,
+    editedAt: data.edited_at ?? null,
+    edit,
   };
   return { offer, isMine };
 }
