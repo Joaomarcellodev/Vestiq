@@ -84,6 +84,8 @@ test("a reseller cancels a pending order", async ({ page }) => {
   for (const size of ["36", "38", "40"]) {
     await page.getByLabel(`Calça Wide Leg Alfaiataria Bege ${size}`, { exact: true }).fill("2");
   }
+  // The "E2E <n>" note lets scripts/clean-test-data.mjs find the order (VES-94).
+  await page.getByLabel("Observação para o fornecedor (opcional)").fill(`E2E ${Date.now()}`);
   await page.getByRole("button", { name: "Enviar pedido" }).click();
   await expect(page).toHaveURL(/\/pedidos\/[0-9a-f-]{36}/);
 
