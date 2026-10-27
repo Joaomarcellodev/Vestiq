@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BackButton } from "@/components/molecules/back-button";
 import { getSale } from "@/features/sales/queries";
@@ -25,7 +26,22 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
       <BackButton fallback="/vendas" label="Vendas" />
       <PageHeader
         title={formatBRL(Number(sale.total))}
-        description={`${sale.customers?.name ?? "Venda avulsa"} · ${new Date(sale.created_at).toLocaleString("pt-BR")}`}
+        description={
+          <>
+            {/* VES-104: the customer's name leads back to the customer. */}
+            {sale.customer_id && sale.customers ? (
+              <Link
+                href={`/clientes/${sale.customer_id}`}
+                className="font-semibold text-primary underline-offset-2 hover:underline"
+              >
+                {sale.customers.name}
+              </Link>
+            ) : (
+              "Venda avulsa"
+            )}
+            {` · ${new Date(sale.created_at).toLocaleString("pt-BR")}`}
+          </>
+        }
         action={sale.status === "CANCELLED" ? <Badge tone="error">Cancelada</Badge> : undefined}
       />
 
