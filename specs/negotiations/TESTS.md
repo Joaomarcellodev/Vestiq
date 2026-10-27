@@ -119,3 +119,9 @@ integration · vazia, só espaços, > 1.000 caracteres e negociação encerrada 
 
 component + e2e · evento de status ou `UPDATE` da negociação → `router.refresh()`; a
 outra parte vê "Aceita" sem recarregar.
+
+### TC-NEG-20 — Filtro por status e data
+
+integration + component + e2e · `listNegotiations(direção, página, status)` devolve só o status pedido, pela
+última atualização; `countPendingNegotiations` conta as pendentes de cada lado; a aba mostra o contador
+e o E2E troca de aba sem perder "Enviadas" (`e2e/negotiation-product.spec.ts`).
