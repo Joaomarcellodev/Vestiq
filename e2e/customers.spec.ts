@@ -42,4 +42,23 @@ test.describe("Customers", () => {
     await expect(formAlert(page)).toHaveText(/telefone inválido/i);
     await expect(phone).toHaveAttribute("aria-invalid", "true");
   });
+
+  // VES-104 — the purchase history opens the sale, and the sale leads back to the customer.
+  test("goes from the purchase history to the sale and back to the customer", async ({ page }) => {
+    await login(page, "revenda@vestiq.dev");
+    await page.goto("/clientes");
+    await page.getByRole("link", { name: /Maria Rodrigues/ }).click();
+    await expect(page).toHaveURL(/\/clientes\/[0-9a-f-]{36}$/);
+    const customerPath = new URL(page.url()).pathname;
+
+    const history = page.locator("section", {
+      has: page.getByRole("heading", { name: "Histórico de compras" }),
+    });
+    await history.getByRole("link").first().click();
+    await expect(page).toHaveURL(/\/vendas\/[0-9a-f-]{36}$/);
+
+    await page.getByRole("link", { name: "Maria Rodrigues" }).click();
+    await expect(page).toHaveURL(new RegExp(`${customerPath}$`));
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Maria Rodrigues");
+  });
 });

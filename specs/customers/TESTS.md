@@ -59,3 +59,7 @@ integration · não-crítica · arquivar/reativar cliente de outra organização
 ## Cobertura de RF
 
 `RF-CUSTOMER-001..004` ✔
+
+### TC-CUS-11 — Histórico ↔ venda
+
+e2e · cliente → linha do histórico → /vendas/[id] → nome do cliente → /clientes/[id] (`e2e/customers.spec.ts`).
