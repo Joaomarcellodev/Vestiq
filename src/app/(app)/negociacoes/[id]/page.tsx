@@ -7,6 +7,7 @@ import { NegotiationChat } from "@/features/negotiations/components/negotiation-
 import { NegotiationProductSummary } from "@/features/negotiations/components/negotiation-product";
 import { toChatEvent } from "@/features/negotiations/chat";
 import { negotiationAction } from "@/features/negotiations/actions";
+import { MESSAGE_MAX_LENGTH } from "@/features/negotiations/validation";
 import { transition } from "@/features/negotiations/state-machine";
 import type {
   NegotiationAction,
@@ -77,6 +78,32 @@ export default async function NegotiationDetailPage({
       {available.length > 0 && (
         <ActionForm action={negotiationAction} className="space-y-sm">
           <input type="hidden" name="negotiationId" value={n.id} />
+          {/* VES-105: the seller can say why she turns the proposal down; it shows in the chat. */}
+          {available.some((a) => a.action === "reject") && (
+            <div>
+              <label
+                htmlFor="reject-reason"
+                className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface"
+              >
+                Motivo da recusa (opcional)
+              </label>
+              <textarea
+                id="reject-reason"
+                name="message"
+                rows={2}
+                maxLength={MESSAGE_MAX_LENGTH}
+                placeholder="Ex.: valor abaixo do mínimo, peça reservada..."
+                aria-describedby="reject-reason-hint"
+                className="field-focus-ring w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 font-body-md text-body-md"
+              />
+              <p
+                id="reject-reason-hint"
+                className="mt-1 font-label-sm text-label-sm text-on-surface-variant"
+              >
+                Só é enviado se você recusar; a compradora vê o motivo na conversa.
+              </p>
+            </div>
+          )}
           <div className="flex flex-wrap gap-2">
             {available.map((a) => (
               <SubmitButton

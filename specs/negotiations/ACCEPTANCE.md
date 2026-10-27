@@ -141,3 +141,9 @@ mensagem opcional e status.
 **Dado** que tenho negociações pendentes e encerradas
 **Quando** abro a aba "Pendentes" em /negociacoes
 **Então** vejo só as pendentes daquele lado (recebidas ou enviadas), a aba mostra quantas são e cada item traz "Atualizada em dd/mm/aaaa"
+
+## AC-NEG-013-01 — Motivo da recusa
+
+**Dado** que recebi uma proposta pendente
+**Quando** escrevo um motivo e clico em "Recusar"
+**Então** a negociação fica "Recusada" e a compradora vê o motivo na conversa; sem motivo, a recusa funciona igual

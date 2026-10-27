@@ -114,6 +114,43 @@ d("negotiations actions + queries (SPEC-009)", () => {
     expect((await getNegotiation(negId)).negotiation?.status).toBe("REJECTED");
   });
 
+  // VES-105 — the optional reason travels on the REJECTED event, which the buyer reads in the chat.
+  it("negotiationAction: reject keeps the optional reason on the event", async () => {
+    const negId = await openNeg();
+    setTestClient(ctx.seller.client);
+    await expectRedirect(
+      () =>
+        negotiationAction(
+          {},
+          formData({
+            negotiationId: negId,
+            action: "reject",
+            message: "  Valor abaixo do mínimo  ",
+          }),
+        ),
+      /toast=negotiation-rejected/,
+    );
+
+    setTestClient(ctx.buyer.client);
+    const { events } = await getNegotiation(negId);
+    expect(events.find((e) => e.type === "REJECTED")?.body).toBe("Valor abaixo do mínimo");
+  });
+
+  it("negotiationAction: accept ignores the reason field", async () => {
+    const negId = await openNeg();
+    setTestClient(ctx.seller.client);
+    await expectRedirect(
+      () =>
+        negotiationAction(
+          {},
+          formData({ negotiationId: negId, action: "accept", message: "não deveria ir" }),
+        ),
+      /negotiation-accepted/,
+    );
+    const { events } = await getNegotiation(negId);
+    expect(events.find((e) => e.type === "ACCEPTED")?.body ?? null).toBeNull();
+  });
+
   it("negotiationAction: message → appends an event, no redirect", async () => {
     const negId = await openNeg();
     setTestClient(ctx.seller.client);

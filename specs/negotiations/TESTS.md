@@ -26,6 +26,7 @@
 | RF-NEG-004 | AC-NEG-004-04    | TC-NEG-20 | integration                   | sim (estoque)       |
 | RF-NEG-008 | AC-NEG-008-03    | TC-NEG-21 | integration                   | sim (estoque)       |
 | RF-NEG-012 | AC-NEG-012-01    | TC-NEG-22 | integration + component + e2e | não                 |
+| RF-NEG-013 | AC-NEG-013-01    | TC-NEG-23 | integration + e2e             | não                 |
 
 ## Casos de teste
 
@@ -126,3 +127,8 @@ outra parte vê "Aceita" sem recarregar.
 integration + component + e2e · `listNegotiations(direção, página, status)` devolve só o status pedido, pela
 última atualização; `countPendingNegotiations` conta as pendentes de cada lado; a aba mostra o contador
 e o E2E troca de aba sem perder "Enviadas" (`e2e/negotiation-product.spec.ts`).
+
+### TC-NEG-23 — Motivo da recusa
+
+integration + e2e · recusar com motivo grava o texto aparado no evento `REJECTED`; aceitar com o campo
+preenchido não grava nada; a compradora lê o motivo no chat (`e2e/negotiation-reject.spec.ts`).
