@@ -28,9 +28,22 @@ test("the buyer sees the negotiated product in the list and the detail", async (
   // VES-90: sent negotiations are their own tab.
   await page.goto("/negociacoes?tipo=enviadas");
   await expect(page.locator(`a[href="${negPath}"]`)).toContainText(productName);
+  await expect(page.locator(`a[href="${negPath}"]`)).toContainText(
+    /Atualizada em \d{2}\/\d{2}\/\d{4}/,
+  );
+
+  // VES-91: the status tabs keep the side and narrow the list.
+  await page.getByRole("link", { name: /^Pendentes \d+$/ }).click();
+  await expect(page).toHaveURL(/tipo=enviadas&status=pendentes|status=pendentes&tipo=enviadas/);
+  await expect(page.locator(`a[href="${negPath}"]`)).toBeVisible();
 
   // Leave the demo data as it was.
   await page.goto(negPath);
   await page.getByRole("button", { name: "Cancelar" }).click();
   await expect(page.getByText("Cancelada", { exact: true })).toBeVisible();
+
+  await page.goto("/negociacoes?tipo=enviadas&status=pendentes");
+  await expect(page.locator(`a[href="${negPath}"]`)).toHaveCount(0);
+  await page.getByRole("link", { name: "Canceladas" }).click();
+  await expect(page.locator(`a[href="${negPath}"]`)).toBeVisible();
 });
