@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login, toast, formAlert } from "./helpers";
+import { confirmAction, login, toast, formAlert } from "./helpers";
 
 test.describe("Customers", () => {
   test("create, edit, archive and unarchive a customer", async ({ page }) => {
@@ -18,6 +18,23 @@ test.describe("Customers", () => {
     await page.getByLabel("Nome").fill(`${name} (editado)`);
     await page.getByRole("button", { name: /salvar alterações/i }).click();
     await expect(toast(page).filter({ hasText: /cliente atualizado/i })).toBeVisible();
+
+    // VES-93: archiving asks first — "Voltar" leaves the customer as it was.
+    await page.getByRole("button", { name: "Arquivar", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Arquivar este cliente?" });
+    await expect(dialog).toContainText(/histórico de compras fica guardado/);
+    await dialog.getByRole("button", { name: "Voltar" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page.getByText(/cliente arquivado — não aparece/i)).toHaveCount(0);
+
+    await confirmAction(page, "Arquivar", "Arquivar cliente");
+    await expect(page).toHaveURL(/\/clientes(\?|$)/);
+    await expect(toast(page).filter({ hasText: /cliente arquivado/i })).toBeVisible();
+
+    await page.goto("/clientes?scope=archived");
+    await page.getByRole("link", { name: `${name} (editado)` }).click();
+    await page.getByRole("button", { name: "Desarquivar" }).click();
+    await expect(toast(page).filter({ hasText: /cliente reativado/i })).toBeVisible();
   });
 
   test("rejects an invalid CPF", async ({ page }) => {
