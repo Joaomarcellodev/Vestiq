@@ -58,7 +58,10 @@ describe("ProfileForm", () => {
     updateProfile.mockResolvedValueOnce({ ok: "Perfil atualizado." });
     render(<ProfileForm profile={profile} />);
     await userEvent.click(screen.getByRole("button", { name: /salvar alterações/i }));
-    expect(toast).toHaveBeenCalledWith({ message: "Perfil atualizado.", variant: "success" });
+    // The toast fires in an effect once the action resolves — wait for it.
+    await waitFor(() =>
+      expect(toast).toHaveBeenCalledWith({ message: "Perfil atualizado.", variant: "success" }),
+    );
 
     updateProfile.mockResolvedValueOnce({ error: "Falha" });
     await userEvent.click(screen.getByRole("button", { name: /salvar alterações/i }));
