@@ -118,10 +118,14 @@ export function NewSaleForm({
       )}
 
       <section className="space-y-sm rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
-        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
+        <label
+          htmlFor="sale-customer"
+          className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface"
+        >
           Cliente
         </label>
         <select
+          id="sale-customer"
           value={customerId}
           onChange={(e) => setCustomerId(e.target.value)}
           className="field-focus-ring w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3 font-body-md text-body-md"
@@ -136,11 +140,15 @@ export function NewSaleForm({
       </section>
 
       <section className="space-y-md rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
-        <label className="block font-body-md text-body-md font-semibold text-on-surface">
+        <label
+          htmlFor="sale-product-search"
+          className="block font-body-md text-body-md font-semibold text-on-surface"
+        >
           Produtos
         </label>
         <div className="relative">
           <input
+            id="sale-product-search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar produto no estoque..."
@@ -198,6 +206,7 @@ export function NewSaleForm({
                 </div>
                 <input
                   type="number"
+                  aria-label={`Quantidade de ${l.label}`}
                   min={1}
                   max={l.stock}
                   value={l.quantity}
@@ -230,14 +239,18 @@ export function NewSaleForm({
       </section>
 
       <section className="space-y-sm rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
-        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
+        <p
+          id="sale-payment-label"
+          className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface"
+        >
           Método de pagamento
-        </label>
-        <div className="grid grid-cols-3 gap-2">
+        </p>
+        <div role="group" aria-labelledby="sale-payment-label" className="grid grid-cols-3 gap-2">
           {(["PIX", "CARTAO", "DINHEIRO"] as const).map((m) => (
             <button
               key={m}
               type="button"
+              aria-pressed={payment === m}
               onClick={() => setPayment(m)}
               className={`rounded-lg border px-3 py-3 font-label-md text-label-md ${
                 payment === m
@@ -257,12 +270,17 @@ export function NewSaleForm({
           <span className="text-on-surface">{formatBRL(totals.subtotal)}</span>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <span className="font-body-md text-body-md text-on-surface-variant">Desconto (R$)</span>
+          <label
+            htmlFor="sale-discount"
+            className="font-body-md text-body-md text-on-surface-variant"
+          >
+            Desconto (R$)
+          </label>
           <input
+            id="sale-discount"
             type="number"
             min={0}
             step="0.01"
-            aria-label="Desconto (R$)"
             value={discount}
             onChange={(e) => setDiscount(e.target.value)}
             className="w-32 rounded-lg border border-outline-variant px-3 py-2 text-right font-body-md text-body-md"
