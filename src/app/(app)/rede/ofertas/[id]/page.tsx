@@ -7,7 +7,8 @@ import { cancelOffer } from "@/features/offers/actions";
 import { ProposeForm } from "@/features/negotiations/components/propose-form";
 import { OfferPhotosForm } from "@/features/offers/components/offer-photos-form";
 import { PageHeader } from "@/components/molecules/page-header";
-import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
+import { ActionForm } from "@/components/molecules/action-form";
+import { ConfirmButton } from "@/components/molecules/confirm-button";
 import Link from "next/link";
 import { Badge, Button, Icon } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
@@ -95,9 +96,15 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
         offer.status !== "CANCELLED" && (
           <ActionForm action={cancelOffer} className="space-y-sm">
             <input type="hidden" name="offerId" value={offer.id} />
-            <SubmitButton variant="danger" size="sm">
+            <ConfirmButton
+              size="sm"
+              title="Cancelar esta oferta?"
+              description="A oferta sai da rede e deixa de receber propostas. Não dá para desfazer: para oferecer a peça de novo, publique outra oferta."
+              confirmLabel="Cancelar oferta"
+              cancelLabel="Manter oferta"
+            >
               Cancelar oferta
-            </SubmitButton>
+            </ConfirmButton>
           </ActionForm>
         )
       ) : (
