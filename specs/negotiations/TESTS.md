@@ -25,6 +25,7 @@
 | RF-NEG-011 | AC-NEG-011-01    | TC-NEG-19 | component + e2e               | não                 |
 | RF-NEG-004 | AC-NEG-004-04    | TC-NEG-20 | integration                   | sim (estoque)       |
 | RF-NEG-008 | AC-NEG-008-03    | TC-NEG-21 | integration                   | sim (estoque)       |
+| RF-NEG-012 | AC-NEG-012-01    | TC-NEG-22 | integration + component + e2e | não                 |
 
 ## Casos de teste
 
@@ -120,7 +121,7 @@ integration · vazia, só espaços, > 1.000 caracteres e negociação encerrada 
 component + e2e · evento de status ou `UPDATE` da negociação → `router.refresh()`; a
 outra parte vê "Aceita" sem recarregar.
 
-### TC-NEG-20 — Filtro por status e data
+### TC-NEG-22 — Filtro por status e data
 
 integration + component + e2e · `listNegotiations(direção, página, status)` devolve só o status pedido, pela
 última atualização; `countPendingNegotiations` conta as pendentes de cada lado; a aba mostra o contador
