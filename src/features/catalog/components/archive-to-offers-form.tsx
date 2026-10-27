@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Button } from "@/components/atoms";
+import { ConfirmButton } from "@/components/molecules/confirm-button";
 import { formatBRL } from "@/lib/utils/currency";
 import { archiveProductToOffers, type ActionState } from "../actions";
 import type { ArchiveOption } from "../queries";
@@ -185,11 +185,23 @@ export function ArchiveToOffersForm({
       )}
 
       <div className="flex justify-end">
-        <Button type="submit" size="lg" loading={pending} className="w-full sm:w-auto sm:px-10">
+        {/* VES-93: confirm before archiving (and publishing). */}
+        <ConfirmButton
+          variant="primary"
+          size="lg"
+          pending={pending}
+          className="w-full sm:w-auto sm:px-10"
+          title="Arquivar este produto?"
+          description={
+            offering.length > 0
+              ? `O produto sai do catálogo e do registro de vendas, e ${offering.length === 1 ? "1 oferta é publicada" : `${offering.length} ofertas são publicadas`} na rede. Dá para desarquivar depois; as ofertas ficam na rede até você cancelá-las.`
+              : "O produto sai do catálogo e do registro de vendas. Dá para desarquivar depois, na aba Arquivados."
+          }
+        >
           {offering.length > 0
             ? `Arquivar e publicar ${offering.length} oferta${offering.length === 1 ? "" : "s"}`
             : "Arquivar produto"}
-        </Button>
+        </ConfirmButton>
       </div>
     </form>
   );

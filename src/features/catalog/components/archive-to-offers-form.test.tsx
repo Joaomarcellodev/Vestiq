@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const archiveProductToOffers = vi.fn().mockResolvedValue({});
@@ -15,6 +15,12 @@ const VARIANTS = [
 ];
 const NETWORK = [{ id: "n1", name: "Rede Modah" }];
 
+/** VES-93 — the button only opens the dialog; confirming there submits. */
+async function confirmArchive(name: string) {
+  await userEvent.click(screen.getByRole("button", { name }));
+  await userEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name }));
+}
+
 describe("ArchiveToOffersForm (TC-PROD-19)", () => {
   it("prefills all the stock at cost price and posts the edited items", async () => {
     render(<ArchiveToOffersForm productId="p1" variants={VARIANTS} networks={NETWORK} />);
@@ -28,7 +34,7 @@ describe("ArchiveToOffersForm (TC-PROD-19)", () => {
     const qty2 = screen.getByLabelText("Quantidade", { selector: "#qty-v2" });
     await userEvent.clear(qty2);
     await userEvent.type(qty2, "0");
-    await userEvent.click(screen.getByRole("button", { name: "Arquivar e publicar 1 oferta" }));
+    await confirmArchive("Arquivar e publicar 1 oferta");
 
     const fd = archiveProductToOffers.mock.calls[0]![1] as FormData;
     expect(fd.get("productId")).toBe("p1");
@@ -53,7 +59,7 @@ describe("ArchiveToOffersForm (TC-PROD-19)", () => {
   it("only archives without a network (TC-PROD-20)", async () => {
     render(<ArchiveToOffersForm productId="p1" variants={VARIANTS} networks={[]} />);
     expect(screen.getByText(/não participa de nenhuma rede/)).toBeVisible();
-    await userEvent.click(screen.getByRole("button", { name: "Arquivar produto" }));
+    await confirmArchive("Arquivar produto");
     const fd = archiveProductToOffers.mock.calls.at(-1)![1] as FormData;
     expect(fd.get("items")).toBe("[]");
   });
@@ -78,7 +84,7 @@ describe("ArchiveToOffersForm (TC-PROD-19)", () => {
     expect(screen.getByText("Todo o estoque já está na rede.")).toBeVisible();
     expect(screen.queryByLabelText("Quantidade", { selector: "#qty-v2" })).toBeNull();
 
-    await userEvent.click(screen.getByRole("button", { name: "Arquivar e publicar 1 oferta" }));
+    await confirmArchive("Arquivar e publicar 1 oferta");
     const fd = archiveProductToOffers.mock.calls.at(-1)![1] as FormData;
     expect(JSON.parse(fd.get("items") as string)).toEqual([
       { variantId: "v1", quantity: 2, transferPrice: 40 },
@@ -101,7 +107,7 @@ describe("ArchiveToOffersForm (TC-PROD-19)", () => {
     archiveProductToOffers.mockResolvedValueOnce({ error: "Você tem apenas 3 em estoque" });
     render(<ArchiveToOffersForm productId="p1" variants={[]} networks={NETWORK} />);
     expect(screen.getByText(/sem estoque/)).toBeVisible();
-    await userEvent.click(screen.getByRole("button", { name: "Arquivar produto" }));
+    await confirmArchive("Arquivar produto");
     expect(await screen.findByRole("alert")).toHaveTextContent("Você tem apenas 3 em estoque");
   });
 });
