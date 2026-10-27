@@ -13,6 +13,7 @@ import { variantLabel } from "@/features/suppliers/format";
 import { BackButton } from "@/components/molecules/back-button";
 import { PageHeader } from "@/components/molecules/page-header";
 import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
+import { ConfirmButton } from "@/components/molecules/confirm-button";
 import { Badge } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { SUPPLY_ORDER_STATUS } from "@/lib/i18n/labels";
@@ -275,9 +276,16 @@ export default async function SupplyOrderPage({
             />
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <SubmitButton name="decision" value="reject" variant="danger">
+            <ConfirmButton
+              name="decision"
+              value="reject"
+              title="Recusar este pedido?"
+              description="A revendedora é avisada, com a mensagem acima se você escreveu uma. Não dá para desfazer: para atender, ela precisa fazer um novo pedido."
+              confirmLabel="Recusar pedido"
+              cancelLabel="Voltar ao pedido"
+            >
               Recusar pedido
-            </SubmitButton>
+            </ConfirmButton>
             <SubmitButton name="decision" value="confirm">
               Confirmar pedido
             </SubmitButton>
