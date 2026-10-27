@@ -52,16 +52,17 @@ CRUD de clientes; histórico de compras; isolamento estrito por revendedora.
 
 ## Regras de Negócio
 
-| ID        | Regra                                                                              |
-| --------- | ---------------------------------------------------------------------------------- |
-| BR-CUS-01 | Cliente pertence a uma organização; nunca compartilhado                            |
-| BR-CUS-02 | Nome obrigatório; email/telefone/CPF opcionais                                     |
-| BR-CUS-03 | CPF, quando informado, é validado (formato + dígitos) e único por organização      |
-| BR-CUS-04 | Total gasto e nº de pedidos derivam de `sales` com `status = CONFIRMED`            |
-| BR-CUS-05 | Última compra = `max(sales.created_at)` confirmada                                 |
-| BR-CUS-06 | Desativar (`archived_at`) não apaga; some do seletor de venda; histórico permanece |
-| BR-CUS-07 | Cliente com vendas não pode ser excluído fisicamente                               |
-| BR-CUS-08 | "Ativo" = teve compra confirmada nos últimos 12 meses (derivado)                   |
+| ID        | Regra                                                                                                                                                |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-CUS-01 | Cliente pertence a uma organização; nunca compartilhado                                                                                              |
+| BR-CUS-02 | Nome obrigatório; email/telefone/CPF opcionais                                                                                                       |
+| BR-CUS-03 | CPF, quando informado, é validado (formato + dígitos) e único por organização                                                                        |
+| BR-CUS-04 | Total gasto e nº de pedidos derivam de `sales` com `status = CONFIRMED`                                                                              |
+| BR-CUS-05 | Última compra = `max(sales.created_at)` confirmada                                                                                                   |
+| BR-CUS-06 | Desativar (`archived_at`) não apaga; some do seletor de venda; histórico permanece                                                                   |
+| BR-CUS-07 | Cliente com vendas não pode ser excluído fisicamente                                                                                                 |
+| BR-CUS-08 | "Ativo" = teve compra confirmada nos últimos 12 meses (derivado)                                                                                     |
+| BR-CUS-09 | Cada linha do histórico de compras abre `/vendas/[id]` e marca as canceladas; no detalhe da venda, o nome do cliente abre `/clientes/[id]` (VES-104) |
 
 ## Fluxos
 

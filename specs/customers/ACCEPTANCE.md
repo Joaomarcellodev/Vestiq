@@ -59,3 +59,9 @@
 **Então** ele some do seletor de nova venda
 **E** o histórico e as vendas dele permanecem
 **E** a exclusão física é bloqueada.
+
+## AC-CUSTOMER-history-links — Histórico ligado às vendas
+
+**Dado** um cliente com compras
+**Quando** clico numa linha do "Histórico de compras"
+**Então** abro a venda (/vendas/[id]); e, no detalhe da venda, clicar no nome do cliente me leva de volta a /clientes/[id]
