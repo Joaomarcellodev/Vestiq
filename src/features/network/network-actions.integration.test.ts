@@ -50,7 +50,7 @@ d("network actions (SPEC-003)", () => {
     const network = await makeNetwork(factoryOrgId);
     const first = await inviteReseller(
       {},
-      formData({ networkId: network.id, email: "nova@loja.com" }),
+      formData({ networkId: network.id, email: "nova@vestiq.test" }),
     );
     expect(first.ok).toBe(true);
 
@@ -58,7 +58,7 @@ d("network actions (SPEC-003)", () => {
       .from("network_members")
       .select("status, invited_email")
       .eq("network_id", network.id);
-    expect(data?.[0]).toMatchObject({ status: "INVITED", invited_email: "nova@loja.com" });
+    expect(data?.[0]).toMatchObject({ status: "INVITED", invited_email: "nova@vestiq.test" });
   });
 
   describe("inviteReseller: an e-mail already in the network (VES-76)", () => {
@@ -67,11 +67,11 @@ d("network actions (SPEC-003)", () => {
 
     it("rejects a pending invite to the same e-mail, ignoring case", async () => {
       const network = await makeNetwork(factoryOrgId);
-      await inviteMember(network.id, "pendente@loja.com");
+      await inviteMember(network.id, "pendente@vestiq.test");
 
       const dup = await inviteReseller(
         {},
-        formData({ networkId: network.id, email: "Pendente@Loja.com" }),
+        formData({ networkId: network.id, email: "Pendente@Vestiq.Test" }),
       );
       expect(dup.error).toBe("Já existe um convite pendente para esse e-mail");
       expect(await rowsFor(network.id)).toHaveLength(1);
@@ -107,7 +107,7 @@ d("network actions (SPEC-003)", () => {
 
     it("lets the admin invite again once the old invite expired", async () => {
       const network = await makeNetwork(factoryOrgId);
-      const old = await inviteMember(network.id, "expirou@loja.com");
+      const old = await inviteMember(network.id, "expirou@vestiq.test");
       await admin()
         .from("network_members")
         .update({ invite_expires_at: new Date(Date.now() - 86_400_000).toISOString() })
@@ -115,7 +115,7 @@ d("network actions (SPEC-003)", () => {
 
       const again = await inviteReseller(
         {},
-        formData({ networkId: network.id, email: "expirou@loja.com" }),
+        formData({ networkId: network.id, email: "expirou@vestiq.test" }),
       );
       expect(again.ok).toBe(true);
     });
@@ -123,11 +123,11 @@ d("network actions (SPEC-003)", () => {
     it("the same e-mail can still be invited to another network", async () => {
       const first = await makeNetwork(factoryOrgId);
       const second = await makeNetwork(factoryOrgId);
-      await inviteMember(first.id, "duas@loja.com");
+      await inviteMember(first.id, "duas@vestiq.test");
 
       const other = await inviteReseller(
         {},
-        formData({ networkId: second.id, email: "duas@loja.com" }),
+        formData({ networkId: second.id, email: "duas@vestiq.test" }),
       );
       expect(other.ok).toBe(true);
     });
