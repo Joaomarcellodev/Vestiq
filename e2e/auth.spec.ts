@@ -14,6 +14,15 @@ test.describe("Auth", () => {
     await expect(page).toHaveURL(/\/login\?next=%2Fvendas/);
   });
 
+  test("keeps the target's query string through the login", async ({ page }) => {
+    await page.goto("/produtos?q=vestido");
+    await expect(page).toHaveURL(/\/login\?next=%2Fprodutos%3Fq%3Dvestido$/);
+    await page.getByLabel("Email profissional").fill("revenda@vestiq.dev");
+    await page.getByLabel("Senha", { exact: true }).fill("vestiq123");
+    await page.getByRole("button", { name: /entrar na plataforma/i }).click();
+    await expect(page).toHaveURL(/\/produtos\?q=vestido$/);
+  });
+
   test("ignores a protocol-relative open redirect", async ({ page }) => {
     await page.goto("/login?next=//evil.example");
     await page.getByLabel("Email profissional").fill("revenda@vestiq.dev");

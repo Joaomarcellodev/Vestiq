@@ -1,6 +1,6 @@
 # ADR-0013 — Funções do Netlify na mesma região do banco (São Paulo)
 
-- **Status:** Aceito pelo time (2026-10-26) — falta assinar o Netlify Pro e trocar a região
+- **Status:** Adiado (2026-10-27) — infraestrutura mantida como está; reavaliar se o desempenho piorar
 - **Data:** 2026-10-26
 - **Requisitos:** VES-60; RNF-PERF-001/002 (páginas principais abaixo de 2 s)
 
@@ -31,6 +31,15 @@ função e banco na mesma região.
 
 **Netlify Pro, com as funções em South America (São Paulo)**, no mesmo lugar do banco.
 O projeto Supabase continua como está.
+
+## Revisão — 2026-10-27
+
+O time decidiu **não mudar a infraestrutura agora**: nenhuma assinatura paga no
+projeto, e recriar o Supabase em `us-east-2` continua arriscado. O Vestiq atende bem
+os usuários no Brasil com as funções em `us-east-2` e o banco em `sa-east-1`
+(TTFB autenticado de 0,78–1,1 s com a função aquecida, abaixo da meta de 2 s).
+A decisão acima fica registrada para quando a latência voltar a ser um problema; os
+passos de *Como aplicar* continuam válidos.
 
 ## Consequências
 

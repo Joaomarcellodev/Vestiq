@@ -108,6 +108,10 @@ O ganho grande só vem com função e banco na mesma região. Decidido em 2026-1
 funções em South America (São Paulo)**, junto do banco em `sa-east-1`. Recriar o
 Supabase em `us-east-2` foi descartado (migração arriscada e usuários no Brasil).
 
+**Revisão (2026-10-27):** a troca foi adiada — o time não quer assinatura paga no
+projeto e as páginas já ficam abaixo da meta de 2 s. Infra mantida: funções em
+`us-east-2`, banco em `sa-east-1`.
+
 ## Medição antes da troca de região — 2026-10-26
 
 Sem login (não usamos senha em produção), 6 requisições cada, contra
