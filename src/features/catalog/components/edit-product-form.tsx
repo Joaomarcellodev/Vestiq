@@ -132,10 +132,14 @@ export function EditProductForm({
         defaultValue={product.category_id ?? ""}
       />
       <div>
-        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
+        <label
+          htmlFor="edit-product-description"
+          className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface"
+        >
           Descrição
         </label>
         <textarea
+          id="edit-product-description"
           name="description"
           rows={3}
           defaultValue={product.description ?? ""}
@@ -149,9 +153,9 @@ export function EditProductForm({
         />
       )}
       <div>
-        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
+        <p className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
           Fotos
-        </label>
+        </p>
         <ImageUploadField
           files={images}
           onFilesChange={setImages}

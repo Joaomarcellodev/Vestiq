@@ -74,10 +74,14 @@ export function ProductForm({
         <TextField label="Marca" name="brand" placeholder="Ex: Chanel" />
         <CategoryField categories={categories} emptyLabel="Selecione uma categoria" />
         <div>
-          <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
+          <label
+            htmlFor="product-description"
+            className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface"
+          >
             Descrição
           </label>
           <textarea
+            id="product-description"
             name="description"
             rows={3}
             className="field-focus-ring w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3 font-body-md text-body-md"
