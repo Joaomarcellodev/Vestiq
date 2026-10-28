@@ -72,10 +72,14 @@ export function CustomerForm({ customer }: { customer?: Customer }) {
         error={errors.document}
       />
       <div>
-        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
+        <label
+          htmlFor="customer-notes"
+          className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface"
+        >
           Notas internas
         </label>
         <textarea
+          id="customer-notes"
           name="notes"
           rows={3}
           defaultValue={customer?.notes ?? ""}

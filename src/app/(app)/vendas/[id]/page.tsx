@@ -86,10 +86,14 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
           className="space-y-sm rounded-xl border border-outline-variant p-lg"
         >
           <input type="hidden" name="saleId" value={sale.id} />
-          <label className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
+          <label
+            htmlFor="sale-cancel-reason"
+            className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant"
+          >
             Cancelar venda
           </label>
           <input
+            id="sale-cancel-reason"
             name="reason"
             required
             placeholder="Motivo do cancelamento"

@@ -36,6 +36,7 @@ transferência transacional), autorização, isolamento de dados.
 | Unit / Component | Vitest, @testing-library/react, jsdom | `npm test` |
 | Integration | Vitest + `supabase start` (Postgres real) | `npm test` (com DB no ar) |
 | E2E | Playwright (`chromium` + `mobile`) | `npm run test:e2e` |
+| Acessibilidade | `@axe-core/playwright` (WCAG 2 A/AA) em `e2e/a11y.spec.ts` | `npm run test:e2e` |
 | Cobertura | `@vitest/coverage-v8` | `npm run test:coverage` |
 
 ## Convenções
@@ -122,6 +123,13 @@ Factory Admin faz login → cria rede → convida revendedora
 
 Mais E2E por sprint: login/logout/guarda de rota, registrar+cancelar venda,
 cadastro de produto com variações.
+
+**Acessibilidade (VES-103):** `e2e/a11y.spec.ts` roda o axe (WCAG 2/2.1 A e AA) nas
+telas principais da revendedora e da fábrica, inclusive estados que só aparecem
+depois de um passo (venda com item, detalhes de venda, cliente e produto). Qualquer
+violação falha o teste e aparece como `<tela> [impacto] <regra>: <elemento>`. Todo
+campo tem rótulo ligado (`<label htmlFor>` + `id`) ou `aria-label`; grupos de botões
+usam `role="group"` com `aria-labelledby`.
 
 ## Cobertura
 
