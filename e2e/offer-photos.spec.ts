@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmAction, login } from "./helpers";
 
 const PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
@@ -51,6 +51,6 @@ test("an offer published with a photo shows it to the network, and the owner edi
   await expect(page.getByText(/mostra as fotos do produto/)).toBeVisible();
 
   // Leave the demo network as it was.
-  await page.getByRole("button", { name: "Cancelar oferta" }).click();
+  await confirmAction(page, "Cancelar oferta");
   await expect(page.getByText("Oferta cancelada.")).toBeVisible();
 });

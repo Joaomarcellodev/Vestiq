@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmAction, login } from "./helpers";
 
 // SPEC-011 TC-SUP-11 — relies on the demo factory catalog from scripts/seed.mjs.
 test("a reseller searches suppliers and products to restock", async ({ page }) => {
@@ -84,6 +84,6 @@ test("a photo the factory uploads shows up for the reseller in Fornecedores", as
   // Keep the demo catalog clean: archived products leave Fornecedores.
   await page.getByRole("button", { name: "Arquivar" }).click();
   await expect(page).toHaveURL(/\/produtos\/[0-9a-f-]{36}\/arquivar/);
-  await page.getByRole("button", { name: "Arquivar produto" }).click();
+  await confirmAction(page, "Arquivar produto");
   await expect(page.getByText("Produto arquivado.")).toBeVisible();
 });

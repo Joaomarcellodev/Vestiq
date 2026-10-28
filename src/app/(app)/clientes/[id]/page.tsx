@@ -6,6 +6,7 @@ import { getCustomerWithHistory } from "@/features/customers/queries";
 import { PageHeader } from "@/components/molecules/page-header";
 import { StatCard } from "@/components/molecules/stat-card";
 import { EmptyState } from "@/components/molecules/empty-state";
+import { ConfirmButton } from "@/components/molecules/confirm-button";
 import { Badge, Button, Icon } from "@/components/atoms";
 import { archiveCustomer, unarchiveCustomer } from "@/features/customers/actions";
 import { formatBRL } from "@/lib/utils/currency";
@@ -49,10 +50,16 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
             ) : (
               <form action={archiveCustomer}>
                 <input type="hidden" name="id" value={id} />
-                <Button variant="ghost" size="sm" type="submit">
+                <ConfirmButton
+                  variant="ghost"
+                  size="sm"
+                  title="Arquivar este cliente?"
+                  description="O cliente some da lista e do seletor de venda, mas o histórico de compras fica guardado. Dá para desfazer: é só desarquivar na aba Arquivados."
+                  confirmLabel="Arquivar cliente"
+                >
                   <Icon name="archive" size={16} />
                   Arquivar
-                </Button>
+                </ConfirmButton>
               </form>
             )}
           </div>

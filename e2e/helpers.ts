@@ -51,3 +51,11 @@ export async function latestEmailBody(
   const body = (await msg.json()) as { Text?: string; HTML?: string };
   return body.HTML ?? body.Text ?? "";
 }
+
+/** VES-93 — click a guarded button, then confirm in its dialog. */
+export async function confirmAction(page: Page, button: string, confirm = button) {
+  await page.getByRole("button", { name: button, exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("button", { name: confirm, exact: true }).click();
+  await expect(dialog).toBeHidden();
+}

@@ -130,6 +130,14 @@ Toda superfície assíncrona expõe os quatro estados (RNF-USA-003): `loading`
 (`loading.tsx` / `<Spinner>` / `aria-busy`), `empty` (`<EmptyState>`), `success`,
 `error` (`error.tsx` / alerta `role="alert"`).
 
+Ações destrutivas pedem confirmação (VES-93) com `<ConfirmButton>`
+(`components/molecules/confirm-button.tsx`): o botão só abre um `<dialog>` modal
+nativo — foco preso e devolvido, Esc fecha, fundo inerte, título e descrição ligados
+por `aria-labelledby`/`aria-describedby` — que explica a consequência e se dá para
+desfazer. O diálogo fica dentro do `<form>`, então o botão de confirmar é o submit de
+verdade (leva `name`/`value`). Usado em cancelar oferta, recusar pedido, arquivar
+produto e arquivar cliente; nunca `window.confirm`.
+
 ## Responsividade
 
 Mobile-first. `AppShell` usa `BottomNav` (mobile) e abre espaço para `SidebarNav`
