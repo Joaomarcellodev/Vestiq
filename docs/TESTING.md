@@ -155,6 +155,14 @@ npm ci → lint → typecheck → supabase start → gerar .env.local
 `main` e `develop` protegidas: PR só faz merge com o job verde, review aprovado e
 o checklist de PR do SDD §42 preenchido.
 
+**Dados de teste (VES-94):** no CI o banco é resetado e semeado antes dos E2E. Ao
+fim de cada execução (Vitest e Playwright), `scripts/clean-test-data.mjs` remove o que
+os testes criaram — usuários `@vestiq.test` e as organizações só deles (o resto cai
+em cascata) e, nas lojas de demonstração, o que os specs nomeiam com marcadores
+(`Peça Foto 12345`, `Cliente E2E 12345`, nota `E2E 12345`…). Só roda contra o
+Supabase local (recusa outra URL). Novos specs devem usar `@vestiq.test` e esses
+marcadores. Na mão: `node scripts/clean-test-data.mjs`.
+
 ## Definition of Done (recorte de testes — SDD §37)
 
 - [ ] Testes unitários previstos no `TESTS.md` da feature: verdes.
