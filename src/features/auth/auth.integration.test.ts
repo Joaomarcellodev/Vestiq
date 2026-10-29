@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { makeUser, supabaseUp, uniqueEmail } from "@/test/supabase";
+import { admin, makeOrg, makeUser, supabaseUp, uniqueEmail } from "@/test/supabase";
 import { clearTestClient, expectRedirect, formData, setTestClient } from "@/test/actions";
 import { requestPasswordReset, signInWithPassword, signOut, updatePassword } from "./actions";
 
@@ -44,6 +44,23 @@ d("auth actions (SPEC-002)", () => {
         formData({ email: user.email, password: "wrong-password" }),
       );
       expect(state.error).toMatch(/email ou senha/i);
+    });
+
+    it("refuses a store suspended by the moderation and says why (VES-44, TC-MOD-05)", async () => {
+      const org = await makeOrg(user.userId, "RESELLER", "RESELLER", "Loja Suspensa Login");
+      await admin()
+        .from("organizations")
+        .update({ status: "SUSPENDED", suspension_reason: "Venda de réplicas" })
+        .eq("id", org.id);
+      const state = await signInWithPassword(
+        {},
+        formData({ email: user.email, password: "test-pass-1234" }),
+      );
+      expect(state.error).toBe(
+        "A conta de Loja Suspensa Login está suspensa pela moderação do Vestiq. Motivo: Venda de réplicas. Fale com o suporte para recorrer.",
+      );
+      // the session it opened was closed again
+      expect((await user.client.auth.getSession()).data.session).toBeNull();
     });
 
     it("returns field errors for malformed input", async () => {
