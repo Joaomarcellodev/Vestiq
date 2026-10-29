@@ -787,6 +787,78 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          negotiation_id: string | null
+          rating: number
+          reviewed_org_id: string
+          reviewer_org_id: string
+          supply_order_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          negotiation_id?: string | null
+          rating: number
+          reviewed_org_id: string
+          reviewer_org_id: string
+          supply_order_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          negotiation_id?: string | null
+          rating?: number
+          reviewed_org_id?: string
+          reviewer_org_id?: string
+          supply_order_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_negotiation_id_fkey"
+            columns: ["negotiation_id"]
+            isOneToOne: false
+            referencedRelation: "negotiations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewed_org_id_fkey"
+            columns: ["reviewed_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewer_org_id_fkey"
+            columns: ["reviewer_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_supply_order_id_fkey"
+            columns: ["supply_order_id"]
+            isOneToOne: false
+            referencedRelation: "supply_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sale_items: {
         Row: {
           id: string
@@ -1564,6 +1636,8 @@ export type Database = {
           id: string
           member_since: string
           name: string
+          rating_average: number
+          rating_count: number
         }[]
       }
       get_supplier_product: {
@@ -2020,6 +2094,31 @@ export type Database = {
       shares_network: {
         Args: { org_a: string; org_b: string }
         Returns: boolean
+      }
+      submit_review: {
+        Args: {
+          p_comment?: string
+          p_negotiation_id?: string
+          p_rating: number
+          p_supply_order_id?: string
+        }
+        Returns: {
+          comment: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          negotiation_id: string | null
+          rating: number
+          reviewed_org_id: string
+          reviewer_org_id: string
+          supply_order_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reviews"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       update_offer: {
         Args: {
