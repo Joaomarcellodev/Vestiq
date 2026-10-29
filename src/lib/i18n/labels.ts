@@ -129,3 +129,25 @@ export const MEMBER_ROLE: Record<Database["public"]["Enums"]["member_role"], str
   FACTORY_ADMIN: "Administrador da fábrica",
   RESELLER: "Revendedora",
 };
+
+/** SPEC-017 — why a report was filed (VES-43). */
+export const REPORT_REASON: Record<Database["public"]["Enums"]["report_reason"], string> = {
+  SPAM: "Spam ou anúncio repetido",
+  FRAUDE: "Golpe ou tentativa de fraude",
+  PRODUTO_FALSIFICADO: "Produto falsificado",
+  CONTEUDO_INADEQUADO: "Conteúdo ofensivo ou inadequado",
+  ASSEDIO: "Assédio ou comportamento abusivo",
+  OUTRO: "Outro motivo",
+};
+
+export const REPORT_TARGET: Record<Database["public"]["Enums"]["report_target"], string> = {
+  OFFER: "Oferta",
+  NEGOTIATION: "Conversa de negociação",
+  ORGANIZATION: "Revendedora",
+};
+
+export const REPORT_STATUS: LabelMap<Database["public"]["Enums"]["report_status"]> = {
+  OPEN: { label: "Aberta", tone: "warning" },
+  ACTIONED: { label: "Resolvida com ação", tone: "success" },
+  DISMISSED: { label: "Arquivada", tone: "neutral" },
+};
