@@ -21,6 +21,8 @@ export const E2E_PRODUCT = /^Peça (Foto|Ofertada|Arquivo|Histórico|Fábrica|Av
 export const E2E_CUSTOMER = /^Cliente E2E \d+( \(editado\))?$/;
 export const E2E_OFFER_NOTE = /^Foto e2e \d+$/;
 export const E2E_ORDER_NOTE = /^E2E \d+$/;
+/** The description `e2e/moderation.spec.ts` gives its report (VES-43). */
+export const E2E_REPORT_NOTE = E2E_ORDER_NOTE;
 export const TEST_EMAIL = /@vestiq\.test$/i;
 
 export function isLocalUrl(url) {
@@ -60,7 +62,15 @@ export async function cleanTestData({
     return null;
   }
   const db = createClient(url, secretKey, { auth: { persistSession: false } });
-  const removed = { users: 0, organizations: 0, products: 0, customers: 0, offers: 0, orders: 0 };
+  const removed = {
+    users: 0,
+    organizations: 0,
+    products: 0,
+    customers: 0,
+    offers: 0,
+    orders: 0,
+    reports: 0,
+  };
 
   // 1. Test users and the organizations that have no one else.
   const testUsers = new Set();
@@ -152,9 +162,19 @@ export async function cleanTestData({
     if (!error) removed.orders += count ?? 0;
   }
 
+  // Reports the moderation spec filed against the demo offers — an open one left
+  // by a failed run would block the next run ("Você já denunciou isto").
+  const reports = (
+    await all(() => db.from("reports").select("id, description").order("id"))
+  ).filter((r) => r.description && E2E_REPORT_NOTE.test(r.description));
+  for (const ids of chunks(reports.map((r) => r.id))) {
+    const { error, count } = await db.from("reports").delete({ count: "exact" }).in("id", ids);
+    if (!error) removed.reports += count ?? 0;
+  }
+
   log(
     `[clean-test-data] removidos: ${removed.users} usuários de teste, ${removed.organizations} organizações, ` +
-      `${removed.products} produtos, ${removed.customers} clientes, ${removed.offers} ofertas, ${removed.orders} pedidos.`,
+      `${removed.products} produtos, ${removed.customers} clientes, ${removed.offers} ofertas, ${removed.orders} pedidos, ${removed.reports} denúncias.`,
   );
   return removed;
 }

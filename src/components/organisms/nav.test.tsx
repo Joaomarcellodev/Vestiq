@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { setPathname } from "@/test/next";
 import { hasIcon } from "@/components/atoms/icon";
-import { BOTTOM_NAV, PRIMARY_NAV, isActive } from "./nav-items";
+import { BOTTOM_NAV, PLATFORM_BOTTOM_NAV, PRIMARY_NAV, isActive } from "./nav-items";
 import { BottomNav } from "./bottom-nav";
 import { SidebarNav } from "./sidebar-nav";
 
@@ -17,7 +17,9 @@ describe("isActive", () => {
 
 describe("nav items", () => {
   it("only use icons the icon set can draw", () => {
-    const missing = [...PRIMARY_NAV, ...BOTTOM_NAV].filter((i) => !hasIcon(i.icon));
+    const missing = [...PRIMARY_NAV, ...BOTTOM_NAV, ...PLATFORM_BOTTOM_NAV].filter(
+      (i) => !hasIcon(i.icon),
+    );
     expect(missing.map((i) => i.icon)).toEqual([]);
   });
 });
@@ -54,5 +56,25 @@ describe("SidebarNav", () => {
     expect(screen.getByRole("link", { name: /rede da fábrica/i })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /^Fornecedores$/ })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /^Pedidos$/ })).toHaveAttribute("aria-current", "page");
+  });
+});
+
+describe("platform admin navigation (VES-44)", () => {
+  it("shows only the moderation panel, on desktop and mobile", () => {
+    setPathname("/moderacao");
+    render(<SidebarNav role="PLATFORM_ADMIN" orgName="Vestiq Plataforma" userName="Moderação" />);
+    const sidebar = screen.getByRole("complementary");
+    expect(sidebar.querySelectorAll("nav a")).toHaveLength(1);
+    expect(screen.getAllByRole("link", { name: /Moderação/ })[0]).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
+
+  it("gives the platform admin a two-item mobile bar", () => {
+    setPathname("/perfil");
+    const { container } = render(<BottomNav role="PLATFORM_ADMIN" />);
+    expect(container.querySelectorAll("a")).toHaveLength(2);
+    expect(screen.getByRole("link", { name: /Perfil/ })).toHaveAttribute("aria-current", "page");
   });
 });

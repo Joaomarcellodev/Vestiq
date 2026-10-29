@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Icon, Logo } from "@/components/atoms";
 import { cn } from "@/lib/utils/cn";
-import { PRIMARY_NAV, isActive, type NavItem } from "./nav-items";
+import { isActive, navItemsFor } from "./nav-items";
 
 export interface SidebarNavProps {
   role?: "RESELLER" | "FACTORY_ADMIN" | "PLATFORM_ADMIN";
@@ -17,7 +17,7 @@ export interface SidebarNavProps {
 /** Persistent left navigation for desktop (lg+). */
 export function SidebarNav({ role, orgName, userName, avatarUrl }: SidebarNavProps) {
   const pathname = usePathname();
-  const items = PRIMARY_NAV.filter((i: NavItem) => !i.roles || (role && i.roles.includes(role)));
+  const items = navItemsFor(role);
   const profileActive = isActive(pathname, "/perfil");
 
   return (

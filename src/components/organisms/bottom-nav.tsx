@@ -4,11 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/atoms";
 import { cn } from "@/lib/utils/cn";
-import { BOTTOM_NAV, isActive } from "./nav-items";
+import { BOTTOM_NAV, PLATFORM_BOTTOM_NAV, isActive } from "./nav-items";
 
 /** Mobile bottom navigation (hidden on lg+, where the sidebar takes over). */
-export function BottomNav() {
+export function BottomNav({ role }: { role?: "RESELLER" | "FACTORY_ADMIN" | "PLATFORM_ADMIN" }) {
   const pathname = usePathname();
+  const items = role === "PLATFORM_ADMIN" ? PLATFORM_BOTTOM_NAV : BOTTOM_NAV;
 
   return (
     <nav
@@ -17,7 +18,7 @@ export function BottomNav() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-around">
-        {BOTTOM_NAV.map((item) => {
+        {items.map((item) => {
           const active = isActive(pathname, item.match);
           return (
             <li key={item.href} className="flex-1">

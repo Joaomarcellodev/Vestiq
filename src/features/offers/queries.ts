@@ -12,6 +12,8 @@ export type NetworkOffer = {
   price: number;
   note: string | null;
   isMine: boolean;
+  /** The seller's organization — links to her public profile (VES-65). */
+  sellerId: string;
   sellerName: string;
   productName: string;
   brand: string | null;
@@ -27,6 +29,7 @@ export type OfferDetail = {
   remaining: number;
   price: number;
   note: string | null;
+  sellerId: string;
   sellerName: string;
   productName: string;
   brand: string | null;
@@ -45,37 +48,53 @@ export type OfferDetail = {
   } | null;
 };
 
-/**
- * Active offers of the reseller's networks, optionally narrowed by a search query,
- * newest first, one page at a time (VES-90). Reads the public projection
- * (migration 0022) so peers get the product too; it also runs the search
- * (migration 0039), so a page holds only matches.
- */
-export async function listNetworkOffers(query?: string, page = 1): Promise<Page<NetworkOffer>> {
-  const org = await requireActiveOrganization();
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .rpc("list_visible_offers", { p_query: cleanOfferQuery(query) })
-    .in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"])
-    .order("created_at", { ascending: false })
-    .order("id", { ascending: false })
-    .range(...pageRange(page));
-  if (error) throw error;
+type VisibleOfferRow = Database["public"]["Functions"]["list_visible_offers"]["Returns"][number];
 
-  const offers = (data ?? []).map((o) => ({
+function toNetworkOffer(o: VisibleOfferRow, myOrgId: string): NetworkOffer {
+  return {
     id: o.id,
     remaining: o.quantity_remaining,
     price: Number(o.transfer_price),
     note: o.note ?? null,
-    isMine: o.organization_id === org.id,
+    isMine: o.organization_id === myOrgId,
+    sellerId: o.organization_id,
     sellerName: o.seller_name,
     productName: o.product_name,
     brand: o.brand ?? null,
     imageUrl: o.image_urls?.[0] ?? null,
     descriptor: [o.color, o.size].filter(Boolean).join(" / ") || "Único",
     editedAt: o.edited_at ?? null,
-  }));
-  return pageOf(offers, page);
+  };
+}
+
+/**
+ * Active offers of the reseller's networks, optionally narrowed by a search query,
+ * newest first, one page at a time (VES-90). Reads the public projection
+ * (migration 0022) so peers get the product too; it also runs the search
+ * (migration 0039), so a page holds only matches. `sellerId` narrows the feed
+ * to one reseller's showcase (her public profile, VES-65).
+ */
+export async function listNetworkOffers(
+  query?: string,
+  page = 1,
+  sellerId?: string,
+): Promise<Page<NetworkOffer>> {
+  const org = await requireActiveOrganization();
+  const supabase = await createClient();
+  let request = supabase
+    .rpc("list_visible_offers", { p_query: cleanOfferQuery(query) })
+    .in("status", ["ACTIVE", "PARTIALLY_NEGOTIATED"]);
+  if (sellerId) request = request.eq("organization_id", sellerId);
+  const { data, error } = await request
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range(...pageRange(page));
+  if (error) throw error;
+
+  return pageOf(
+    (data ?? []).map((o) => toNetworkOffer(o, org.id)),
+    page,
+  );
 }
 
 export async function getOffer(id: string) {
@@ -122,6 +141,7 @@ export async function getOffer(id: string) {
     remaining: data.quantity_remaining,
     price: Number(data.transfer_price),
     note: data.note ?? null,
+    sellerId: data.organization_id,
     sellerName: data.seller_name,
     productName: data.product_name,
     brand: data.brand ?? null,

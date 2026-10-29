@@ -177,7 +177,21 @@ Apple desabilitados em **Authentication → Providers**.
 - **Push na `main` não publica nada** enquanto o site não estiver ligado ao
   repositório (ver seção 2). Hoje o deploy é manual, pela CLI.
 - Usuários de teste (senha `vestiq123`): `revenda@vestiq.dev`, `revenda2@vestiq.dev`,
-  `fabrica@vestiq.dev` — já existem no banco hospedado (seed).
+  `fabrica@vestiq.dev` — já existem no banco hospedado (seed). O seed local também
+  cria `admin@vestiq.dev` (moderação, `/moderacao`); em produção a conta de
+  moderação é criada à mão — um usuário do Auth + uma organização `PLATFORM` + o
+  vínculo `PLATFORM_ADMIN` (SQL Editor do Supabase):
+
+  ```sql
+  with org as (
+    insert into public.organizations (name, type) values ('Vestiq Plataforma', 'PLATFORM')
+    returning id
+  )
+  insert into public.organization_members (organization_id, user_id, role, status)
+  select org.id, u.id, 'PLATFORM_ADMIN', 'ACTIVE'
+  from org, auth.users u
+  where u.email = '<email da moderação>';
+  ```
 - Schema: migrations 0001–0015 aplicadas ao projeto hospedado (tabelas e os buckets
   `avatars` e `product-images` verificados em 2026-09-04).
 

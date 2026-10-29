@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { signOut } from "@/features/auth/actions";
+import { getMySuspension } from "@/features/organizations/queries";
 import { Button, Icon } from "@/components/atoms";
 
 export const metadata: Metadata = { title: "Aguardando convite" };
 
-export default function WaitingForInvitePage() {
+export default async function WaitingForInvitePage() {
+  // VES-44: a suspended store isn't waiting for an invite.
+  if (await getMySuspension()) redirect("/conta-suspensa");
+
   return (
     <div className="mx-auto max-w-md space-y-lg py-12 text-center">
       <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-primary-fixed text-primary-container">

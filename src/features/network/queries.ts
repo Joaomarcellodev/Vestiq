@@ -1,7 +1,51 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import { requireRole } from "@/features/organizations/queries";
+import { requireActiveOrganization, requireRole } from "@/features/organizations/queries";
+
+export interface ResellerProfile {
+  id: string;
+  name: string;
+  city: string | null;
+  avatarUrl: string | null;
+  memberSince: string;
+  activeOffers: number;
+  completedDeals: number;
+  /** Average of the reviews she received (VES-42), `null` without any. */
+  ratingAverage: number | null;
+  ratingCount: number;
+  /** The viewer's own organization — her profile as the network sees it. */
+  isMine: boolean;
+}
+
+/**
+ * VES-65 — public profile of a reseller of one of the viewer's networks
+ * (`get_reseller_profile`, migration 0044). `null` for anyone else — the page
+ * answers 404, so the profile of an outsider doesn't even reveal it exists.
+ */
+export async function getResellerProfile(id: string): Promise<ResellerProfile | null> {
+  const org = await requireActiveOrganization();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .rpc("get_reseller_profile", { p_org_id: id })
+    .maybeSingle();
+  // 22P02: not a uuid — same as a profile that doesn't exist.
+  if (error?.code === "22P02") return null;
+  if (error) throw error;
+  if (!data) return null;
+  return {
+    id: data.id,
+    name: data.name,
+    city: data.city ?? null,
+    avatarUrl: data.avatar_url ?? null,
+    memberSince: data.member_since,
+    activeOffers: data.active_offers,
+    completedDeals: data.completed_deals,
+    ratingAverage: data.rating_average === null ? null : Number(data.rating_average),
+    ratingCount: data.rating_count,
+    isMine: data.id === org.id,
+  };
+}
 
 export async function getFactoryNetworkOverview() {
   const org = await requireRole("FACTORY_ADMIN", "PLATFORM_ADMIN");

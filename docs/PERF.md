@@ -126,3 +126,10 @@ A referência autenticada continua sendo a de 2026-09-11 (0,78–1,1 s com a fun
 aquecida). **Depois do deploy com a nova região:** repetir o curl acima e, logado, o
 DevTools → Network → `/dashboard`, `/produtos`, `/vendas`, `/pedidos` → "Waiting
 (TTFB)", e registrar aqui.
+
+## Teste de carga — 2026-10-29 (VES-71)
+
+20 usuários simultâneos no ambiente local: p95 ≤ 143 ms em todos os fluxos, 0,03%
+de erro. O gargalo é o custo fixo de 4 idas ao Supabase por página (layout) e o
+Postgres; detalhes em [LOAD_TEST.md](./LOAD_TEST.md).
+

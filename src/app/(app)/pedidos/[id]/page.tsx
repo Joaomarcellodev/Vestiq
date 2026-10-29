@@ -19,6 +19,8 @@ import { formatBRL } from "@/lib/utils/currency";
 import { SUPPLY_ORDER_STATUS } from "@/lib/i18n/labels";
 import { OrderPayment } from "@/features/payments/components/order-payment";
 import { getFactoryPayoutAccount, getSupplyOrderPayment } from "@/features/payments/queries";
+import { getTransactionReviews } from "@/features/reviews/queries";
+import { ReviewSection } from "@/features/reviews/components/review-section";
 import { syncCheckout } from "@/features/payments/sync";
 
 export const metadata: Metadata = { title: "Pedido" };
@@ -53,7 +55,11 @@ export default async function SupplyOrderPage({
       console.error("[payments] syncCheckout failed", err),
     );
   }
-  const payment = accepted ? await getSupplyOrderPayment(order.id) : null;
+  const [payment, reviews] = await Promise.all([
+    accepted ? getSupplyOrderPayment(order.id) : null,
+    // VES-42: a delivered order can be rated by both sides.
+    order.status === "DELIVERED" ? getTransactionReviews("supply_order", order.id) : null,
+  ]);
   // VES-27: the supplier sees whether its payout account can receive this payment.
   const payout =
     accepted && order.party === "supplier" && !payment
@@ -380,6 +386,16 @@ export default async function SupplyOrderPage({
             <SubmitButton>Confirmar recebimento</SubmitButton>
           </div>
         </ActionForm>
+      )}
+
+      {reviews && (
+        <ReviewSection
+          kind="supply_order"
+          transactionId={order.id}
+          counterpartyName={order.party === "reseller" ? order.supplierName : order.resellerName}
+          mine={reviews.mine}
+          received={reviews.received}
+        />
       )}
     </div>
   );

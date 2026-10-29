@@ -4,6 +4,7 @@ import {
   E2E_OFFER_NOTE,
   E2E_ORDER_NOTE,
   E2E_PRODUCT,
+  E2E_REPORT_NOTE,
   TEST_EMAIL,
   cleanTestData,
   isLocalUrl,
@@ -40,6 +41,8 @@ describe("clean-test-data", () => {
     expect(E2E_OFFER_NOTE.test("Foto e2e 123")).toBe(true);
     expect(E2E_ORDER_NOTE.test("E2E 1730000000000")).toBe(true);
     expect(E2E_ORDER_NOTE.test("Entrega na segunda")).toBe(false);
+    expect(E2E_REPORT_NOTE.test("E2E 1793272719829")).toBe(true);
+    expect(E2E_REPORT_NOTE.test("Logo torto, parece réplica")).toBe(false);
     expect(TEST_EMAIL.test("user-1-1-abc@vestiq.test")).toBe(true);
     expect(TEST_EMAIL.test("revenda@vestiq.dev")).toBe(false);
   });

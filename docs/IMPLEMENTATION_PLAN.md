@@ -57,7 +57,7 @@ As demais migrations acompanham cada feature.
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | **auth** | 1 | RF-AUTH-001..004 | login | Fase 0 | ✅ |
 | 2 | **organizations** | 1 | base RF-NET, RF-AUTH-004 | — | auth | ✅ |
-| 3 | **network** | 1 / 6 | RF-NET-001..008 | rede conectada 1·2, perfil da revendedora | organizations | 🟨 back-end + telas base + email de convite pelo Supabase Auth (senha definida no aceite); falta perfil público |
+| 3 | **network** | 1 / 6 | RF-NET-001..008 | rede conectada 1·2, perfil da revendedora | organizations | 🟨 back-end + telas base + email de convite pelo Supabase Auth (senha definida no aceite); perfil público da revendedora (`/rede/revendedoras/[id]`, migration 0044, VES-65) |
 | 4 | **catalog** | 2 | RF-PROD-001..006 | novo produto, detalhes do produto, inventário | organizations | 🟨 CRUD funcional; upload e gestão de fotos (capa, remover), archive UI (arquivar publica o estoque como ofertas na rede, VES-69, `0025`), gestão de categorias (`/produtos/categorias` + filtro) e edição das variações (VES-68, `0027`) prontos |
 | 5 | **inventory** | 3 | RF-INV-001..006 | inventário, detalhes do produto | catalog | ✅ RPCs + controles + histórico de movimentações por variação; tela de inventário pendente |
 | 6 | **customers** | 3 | RF-CUSTOMER-001..004 | clientes, detalhes do cliente | organizations | 🟨 CRUD + histórico; falta editar/arquivar na UI |
@@ -79,6 +79,8 @@ Cada feature: `SPEC → ACCEPTANCE → TESTS` (em `specs/<feature>/`) → migrat
 | 13 | **supply-orders** — pedido de abastecimento ao fornecedor (SPEC-012) | RF-ORD-001..006 | pedido (grade cor × tamanho), `/pedidos`, detalhe | suppliers | ✅ pedido + resposta da fábrica; despacho/recebimento/entrada no estoque pendentes |
 | 14 | **negotiations** — chat em tempo real (ADR-0010) | RF-NEG-010..011 | chat de negociação | negotiations | ✅ Supabase Realtime + envio otimista |
 | 15 | **notifications** — sino em tempo real + alertas do navegador (SPEC-013, ADR-0011) | RF-NOTIF-001..003 | sino de notificações | negotiations, offers | ✅ Realtime + alerta com aba em segundo plano + contador no título; Web Push (navegador fechado) pendente |
+| 16 | **reviews** — avaliação de transação concluída (SPEC-016, VES-42) | RF-REV-001..003 | bloco "Avaliação" na negociação e no pedido, nota no perfil público | negotiations, supply-orders, network | ✅ `reviews` + `submit_review` (migration 0045) |
+| 17 | **moderation** — denúncias e painel de moderação (SPEC-017, VES-43/44) | RF-MOD-001..004 | `/denunciar`, `/moderacao`, `/moderacao/denuncias/[id]`, `/conta-suspensa` | network, offers, negotiations | ✅ `reports` (0046) + `moderation_actions` e suspensão aplicada pelos helpers de RLS (0047) |
 
 ## Fase 4 — Estabilização (Sprint 7)
 

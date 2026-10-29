@@ -58,6 +58,22 @@ export const FLASH_MESSAGES: Record<string, { message: string; variant: ToastVar
   "negotiation-cancelled": { message: "Negociação cancelada.", variant: "info" },
   "negotiation-completed": { message: "Transferência concluída.", variant: "success" },
 
+  // reviews (VES-42)
+  "review-submitted": { message: "Avaliação enviada. Obrigado!", variant: "success" },
+
+  // reports (VES-43)
+  "report-submitted": {
+    message: "Denúncia enviada. A moderação do Vestiq vai analisar.",
+    variant: "success",
+  },
+
+  // moderation (VES-44)
+  "report-dismissed": { message: "Denúncia arquivada.", variant: "info" },
+  "report-offer-removed": { message: "Oferta removida da rede.", variant: "success" },
+  "report-org-suspended": { message: "Organização suspensa.", variant: "success" },
+  "org-suspended": { message: "Organização suspensa.", variant: "success" },
+  "org-reactivated": { message: "Organização reativada.", variant: "success" },
+
   // supply orders
   "supply-order-placed": { message: "Pedido enviado ao fornecedor.", variant: "success" },
   "supply-order-confirmed": { message: "Pedido confirmado.", variant: "success" },

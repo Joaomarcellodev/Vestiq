@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/features/auth/queries";
+import { getActiveOrganization } from "@/features/organizations/queries";
 import { getResellerDashboard } from "@/features/dashboard/queries";
 import { DASHBOARD_TIME_ZONE, greeting } from "@/features/dashboard/greeting";
 import {
@@ -14,6 +16,8 @@ import { Reveal, RevealGroup, RevealCell } from "@/components/motion";
 export const metadata: Metadata = { title: "Dashboard" };
 
 export default async function DashboardPage() {
+  // VES-44: the platform has no store to summarise — its home is the moderation queue.
+  if ((await getActiveOrganization())?.type === "PLATFORM") redirect("/moderacao");
   const [user, data] = await Promise.all([getCurrentUser(), getResellerDashboard()]);
   const name =
     (user?.user_metadata?.full_name as string | undefined)?.split(" ")[0] ??
