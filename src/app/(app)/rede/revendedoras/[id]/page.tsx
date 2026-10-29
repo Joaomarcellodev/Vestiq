@@ -8,6 +8,7 @@ import { Badge, Icon } from "@/components/atoms";
 import { getResellerProfile } from "@/features/network/queries";
 import { listNetworkOffers } from "@/features/offers/queries";
 import { OfferCard } from "@/features/offers/components/offer-card";
+import { StarRating } from "@/features/reviews/components/star-rating";
 import { parsePage } from "@/lib/pagination";
 
 export const metadata: Metadata = { title: "Perfil da revendedora" };
@@ -67,6 +68,19 @@ export default async function ResellerProfilePage({
             </h1>
             {profile.isMine && <Badge tone="primary">Seu perfil</Badge>}
           </div>
+          <p className="mt-1 flex flex-wrap items-center justify-center gap-2 font-body-md text-body-md text-on-surface-variant sm:justify-start">
+            {profile.ratingAverage !== null ? (
+              <>
+                <StarRating value={profile.ratingAverage} size={16} />
+                <span>
+                  {profile.ratingAverage.toLocaleString("pt-BR", { minimumFractionDigits: 1 })} (
+                  {profile.ratingCount} avaliaç{profile.ratingCount === 1 ? "ão" : "ões"})
+                </span>
+              </>
+            ) : (
+              "Ainda sem avaliações"
+            )}
+          </p>
           {profile.city && (
             <p className="mt-1 inline-flex items-center gap-1 font-body-md text-body-md text-on-surface-variant">
               <Icon name="location_on" size={16} />

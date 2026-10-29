@@ -20,6 +20,8 @@ import Link from "next/link";
 import { Badge, Icon } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { NEGOTIATION_STATUS } from "@/lib/i18n/labels";
+import { getTransactionReviews } from "@/features/reviews/queries";
+import { ReviewSection } from "@/features/reviews/components/review-section";
 
 export const metadata: Metadata = { title: "Negociação" };
 
@@ -51,6 +53,10 @@ export default async function NegotiationDetailPage({
     party === "seller"
       ? { id: n.buyer_org_id, name: n.buyer?.name }
       : { id: n.seller_org_id, name: n.seller?.name };
+
+  // VES-42: a completed transfer can be rated by both sides.
+  const reviews =
+    n.status === "COMPLETED" ? await getTransactionReviews("negotiation", n.id) : null;
 
   const available = ACTIONS.filter(
     (a) => !(transition(n.status as NegotiationStatus, a.action, party as Party) instanceof Error),
@@ -133,6 +139,16 @@ export default async function NegotiationDetailPage({
             ))}
           </div>
         </ActionForm>
+      )}
+
+      {reviews && (
+        <ReviewSection
+          kind="negotiation"
+          transactionId={n.id}
+          counterpartyName={counterparty.name ?? "a outra loja"}
+          mine={reviews.mine}
+          received={reviews.received}
+        />
       )}
 
       <NegotiationChat

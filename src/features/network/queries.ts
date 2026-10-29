@@ -11,6 +11,9 @@ export interface ResellerProfile {
   memberSince: string;
   activeOffers: number;
   completedDeals: number;
+  /** Average of the reviews she received (VES-42), `null` without any. */
+  ratingAverage: number | null;
+  ratingCount: number;
   /** The viewer's own organization — her profile as the network sees it. */
   isMine: boolean;
 }
@@ -38,6 +41,8 @@ export async function getResellerProfile(id: string): Promise<ResellerProfile | 
     memberSince: data.member_since,
     activeOffers: data.active_offers,
     completedDeals: data.completed_deals,
+    ratingAverage: data.rating_average === null ? null : Number(data.rating_average),
+    ratingCount: data.rating_count,
     isMine: data.id === org.id,
   };
 }
