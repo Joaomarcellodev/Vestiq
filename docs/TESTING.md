@@ -131,6 +131,12 @@ violação falha o teste e aparece como `<tela> [impacto] <regra>: <elemento>`. 
 campo tem rótulo ligado (`<label htmlFor>` + `id`) ou `aria-label`; grupos de botões
 usam `role="group"` com `aria-labelledby`.
 
+## Carga (VES-71)
+
+Cenário k6 com 20 revendedoras simultâneas nos fluxos principais (feed, venda,
+inventário/histórico, dashboard), metas p95 < 1 s e erro < 1%, sempre contra o
+ambiente local. Script, resultados e gargalos em [LOAD_TEST.md](./LOAD_TEST.md).
+
 ## Cobertura
 
 `npm run test:coverage` — gate no CI (`vitest.config.ts` → `coverage.thresholds`).
