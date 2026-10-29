@@ -420,3 +420,16 @@ create index on negotiation_events (negotiation_id, created_at);
 - Toda migration que cria tabela de domínio cria **junto** o `enable row level security`
   e as policies. PR sem policy para tabela nova é bloqueado ([SECURITY.md](./SECURITY.md)).
 - Seeds de desenvolvimento em `supabase/seed.sql` (nunca dados reais).
+
+### `reviews` — SPEC-016 (VES-42, migration 0045)
+| coluna | tipo | notas |
+| --- | --- | --- |
+| `negotiation_id` | uuid → negotiations | exatamente um entre este e `supply_order_id` |
+| `supply_order_id` | uuid → supply_orders | idem |
+| `reviewer_org_id` | uuid → organizations | quem avaliou; único por transação (índices parciais) |
+| `reviewed_org_id` | uuid → organizations | a outra parte (derivada em `submit_review`) |
+| `rating` | smallint | 1–5 |
+| `comment` | text | opcional, até 500 |
+
+RLS: leitura só pelas duas partes; escrita só por `submit_review` (SECURITY DEFINER).
+
