@@ -4,8 +4,18 @@ import { Badge, Button, Icon } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import type { NetworkOffer } from "../queries";
 
-/** Card of the network offer feed (SPEC-008 RF-OFFER-004), with the product photo. */
-export function OfferCard({ offer }: { offer: NetworkOffer }) {
+/**
+ * Card of the network offer feed (SPEC-008 RF-OFFER-004), with the product photo.
+ * A peer's name links to her public profile (VES-65) — `linkSeller={false}` on
+ * that profile itself.
+ */
+export function OfferCard({
+  offer,
+  linkSeller = true,
+}: {
+  offer: NetworkOffer;
+  linkSeller?: boolean;
+}) {
   return (
     <article className="flex h-full flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-surface">
       <div className="flex items-start justify-between gap-3">
@@ -31,7 +41,17 @@ export function OfferCard({ offer }: { offer: NetworkOffer }) {
         {offer.isMine ? <Badge tone="primary">Sua oferta</Badge> : <Badge>Oferta</Badge>}
       </div>
       <p className="mt-2 font-body-md text-body-md text-on-surface-variant">
-        {offer.sellerName} · {offer.remaining} disponíve{offer.remaining === 1 ? "l" : "is"}
+        {linkSeller && !offer.isMine ? (
+          <Link
+            href={`/rede/revendedoras/${offer.sellerId}`}
+            className="font-semibold text-primary-container hover:underline"
+          >
+            {offer.sellerName}
+          </Link>
+        ) : (
+          offer.sellerName
+        )}{" "}
+        · {offer.remaining} disponíve{offer.remaining === 1 ? "l" : "is"}
         {offer.editedAt && " · editada"}
       </p>
       <div className="mt-auto flex items-center justify-between pt-3">

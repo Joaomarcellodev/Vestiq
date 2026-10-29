@@ -58,7 +58,8 @@ export async function negotiationAction(
       : await supabase.rpc("negotiation_transition", {
           p_negotiation_id: negotiationId,
           p_action: action,
-          p_message: message || undefined,
+          // VES-105: the reason field sits next to every button — only a refusal carries it.
+          p_message: action === "reject" || action === "message" ? message || undefined : undefined,
         });
 
   if (error) return { error: rpcErrorMessage(error) };

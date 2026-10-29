@@ -34,6 +34,8 @@ export default defineConfig({
     environmentMatchGlobs: [["src/**/*.integration.test.{ts,tsx}", "node"]],
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
+    // VES-94: after the run, remove the test users/orgs (local database only).
+    globalSetup: ["./src/test/global-setup.ts"],
     // Local Supabase / GoTrue occasionally returns a transient
     // "Database error creating new user" under heavy parallel load.
     // `retry` does not cover hooks, so `makeUser` also retries (src/test/supabase.ts).

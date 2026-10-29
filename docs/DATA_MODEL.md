@@ -79,6 +79,8 @@ Espelha `auth.users`. Criado por trigger `on_auth_user_created`.
 | `name` | text | not null |
 | `type` | `organization_type` | not null |
 | `status` | `organization_status` | default `ACTIVE` |
+| `city` | text | opcional, até 80 caracteres — perfil público da revendedora (VES-65, migration 0044) |
+| `suspended_at` / `suspension_reason` | timestamptz / text | preenchidos quando a moderação suspende (`status = SUSPENDED`, VES-44, migration 0047) |
 
 ### `organization_members` — SDD §25
 | coluna | tipo | notas |
@@ -419,3 +421,42 @@ create index on negotiation_events (negotiation_id, created_at);
 - Toda migration que cria tabela de domínio cria **junto** o `enable row level security`
   e as policies. PR sem policy para tabela nova é bloqueado ([SECURITY.md](./SECURITY.md)).
 - Seeds de desenvolvimento em `supabase/seed.sql` (nunca dados reais).
+
+### `reviews` — SPEC-016 (VES-42, migration 0045)
+| coluna | tipo | notas |
+| --- | --- | --- |
+| `negotiation_id` | uuid → negotiations | exatamente um entre este e `supply_order_id` |
+| `supply_order_id` | uuid → supply_orders | idem |
+| `reviewer_org_id` | uuid → organizations | quem avaliou; único por transação (índices parciais) |
+| `reviewed_org_id` | uuid → organizations | a outra parte (derivada em `submit_review`) |
+| `rating` | smallint | 1–5 |
+| `comment` | text | opcional, até 500 |
+
+RLS: leitura só pelas duas partes; escrita só por `submit_review` (SECURITY DEFINER).
+
+### `reports` — SPEC-017 (VES-43, migration 0046)
+| coluna | tipo | notas |
+| --- | --- | --- |
+| `reporter_org_id` / `reporter_user_id` | uuid | quem denunciou |
+| `target_type` | `report_target` | `OFFER`, `NEGOTIATION`, `ORGANIZATION` |
+| `target_id` | uuid | a oferta, negociação ou loja (polimórfico, sem FK) |
+| `target_org_id` | uuid → organizations | a loja por trás do alvo — onde a moderação age |
+| `reason` | `report_reason` | `SPAM`, `FRAUDE`, `PRODUTO_FALSIFICADO`, `CONTEUDO_INADEQUADO`, `ASSEDIO`, `OUTRO` |
+| `description` | text | opcional, até 1000 |
+| `status` | `report_status` | `OPEN` → `DISMISSED` \| `ACTIONED`; uma aberta por denunciante e alvo |
+| `resolution_note` / `resolved_by` / `resolved_at` | | a decisão da moderação |
+
+RLS: quem denunciou vê só as próprias denúncias; `PLATFORM_ADMIN` vê todas. Escrita só por `submit_report` / `moderate_report`.
+
+### `moderation_actions` — SPEC-017 (VES-44, migration 0047)
+| coluna | tipo | notas |
+| --- | --- | --- |
+| `action` | `moderation_action` | `DISMISS_REPORT`, `REMOVE_OFFER`, `SUSPEND_ORGANIZATION`, `REACTIVATE_ORGANIZATION` |
+| `report_id` | uuid → reports | nulo na suspensão/reativação fora de denúncia |
+| `target_org_id` | uuid → organizations | |
+| `offer_id` | uuid → offers | na remoção de oferta |
+| `reason` | text | obrigatório |
+| `actor_id` | uuid → profiles | o `PLATFORM_ADMIN` |
+
+RLS: leitura só para `PLATFORM_ADMIN`; append-only (sem policy de escrita).
+

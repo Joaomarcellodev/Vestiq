@@ -103,7 +103,9 @@ async function scenario() {
   return { factory, network, a, aOffer, c, otherNetwork };
 }
 
-d("factory network indicators (RF-FACTORY-DASH-001)", () => {
+// Each scenario creates four users and a dozen rows one after another — well past
+// the default 5 s when the whole suite runs in parallel.
+d("factory network indicators (RF-FACTORY-DASH-001)", { timeout: 20_000 }, () => {
   afterEach(() => clearTestClient());
 
   it("counts the resellers' offers and negotiations for the factory admin", async () => {

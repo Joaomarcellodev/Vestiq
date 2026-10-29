@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login, toast, formAlert } from "./helpers";
+import { confirmAction, login, toast, formAlert } from "./helpers";
 
 test.describe("Customers", () => {
   test("create, edit, archive and unarchive a customer", async ({ page }) => {
@@ -18,6 +18,23 @@ test.describe("Customers", () => {
     await page.getByLabel("Nome").fill(`${name} (editado)`);
     await page.getByRole("button", { name: /salvar alterações/i }).click();
     await expect(toast(page).filter({ hasText: /cliente atualizado/i })).toBeVisible();
+
+    // VES-93: archiving asks first — "Voltar" leaves the customer as it was.
+    await page.getByRole("button", { name: "Arquivar", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Arquivar este cliente?" });
+    await expect(dialog).toContainText(/histórico de compras fica guardado/);
+    await dialog.getByRole("button", { name: "Voltar" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page.getByText(/cliente arquivado — não aparece/i)).toHaveCount(0);
+
+    await confirmAction(page, "Arquivar", "Arquivar cliente");
+    await expect(page).toHaveURL(/\/clientes(\?|$)/);
+    await expect(toast(page).filter({ hasText: /cliente arquivado/i })).toBeVisible();
+
+    await page.goto("/clientes?scope=archived");
+    await page.getByRole("link", { name: `${name} (editado)` }).click();
+    await page.getByRole("button", { name: "Desarquivar" }).click();
+    await expect(toast(page).filter({ hasText: /cliente reativado/i })).toBeVisible();
   });
 
   test("rejects an invalid CPF", async ({ page }) => {
@@ -41,5 +58,24 @@ test.describe("Customers", () => {
     await page.getByRole("button", { name: /salvar cliente/i }).click();
     await expect(formAlert(page)).toHaveText(/telefone inválido/i);
     await expect(phone).toHaveAttribute("aria-invalid", "true");
+  });
+
+  // VES-104 — the purchase history opens the sale, and the sale leads back to the customer.
+  test("goes from the purchase history to the sale and back to the customer", async ({ page }) => {
+    await login(page, "revenda@vestiq.dev");
+    await page.goto("/clientes");
+    await page.getByRole("link", { name: /Maria Rodrigues/ }).click();
+    await expect(page).toHaveURL(/\/clientes\/[0-9a-f-]{36}$/);
+    const customerPath = new URL(page.url()).pathname;
+
+    const history = page.locator("section", {
+      has: page.getByRole("heading", { name: "Histórico de compras" }),
+    });
+    await history.getByRole("link").first().click();
+    await expect(page).toHaveURL(/\/vendas\/[0-9a-f-]{36}$/);
+
+    await page.getByRole("link", { name: "Maria Rodrigues" }).click();
+    await expect(page).toHaveURL(new RegExp(`${customerPath}$`));
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Maria Rodrigues");
   });
 });

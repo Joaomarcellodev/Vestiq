@@ -20,6 +20,8 @@
 | RF-NET-007 | AC-NET-007-01 | TC-NET-10 | integration             |
 | RF-NET-008 | AC-NET-008-01 | TC-NET-11 | integration (2 redes)   |
 | RF-NET-008 | AC-NET-008-02 | TC-NET-12 | integration + e2e       |
+| RF-NET-008 | AC-NET-008-03 | TC-NET-12 | integration + e2e       |
+| RF-NET-008 | AC-NET-008-04 | TC-NET-13 | integration             |
 
 ## Casos de teste
 
@@ -86,6 +88,10 @@
 ### TC-NET-12 — Diretório sem dados operacionais
 
 - integration + e2e · **crítica (privacidade — SDD §8)** · perfil de peer expõe só campos públicos; queries de estoque/clientes/vendas do peer retornam vazio.
+
+### TC-NET-13 — Perfil público fora da rede
+
+- integration · **crítica (isolamento)** · `get_reseller_profile` vazio para revendedora de fora da rede, para a fábrica e para id inválido (→ 404); `set_organization_city` recusa quem não é membro. `src/features/network/reseller-profile.integration.test.ts`.
 
 ## Cobertura de RF
 

@@ -34,6 +34,16 @@ if (hasDOM) {
       disconnect() {}
     };
   }
+  // jsdom has <dialog> but not its modal API (ConfirmButton, VES-93).
+  if (typeof HTMLDialogElement !== "undefined" && !HTMLDialogElement.prototype.showModal) {
+    HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+      this.open = true;
+    };
+    HTMLDialogElement.prototype.close = function (this: HTMLDialogElement) {
+      this.open = false;
+      this.dispatchEvent(new Event("close"));
+    };
+  }
   if (!URL.createObjectURL) {
     URL.createObjectURL = () => `blob:mock/${Math.random().toString(36).slice(2)}`;
     URL.revokeObjectURL = () => {};

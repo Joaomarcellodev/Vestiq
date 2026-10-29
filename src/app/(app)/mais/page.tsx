@@ -11,7 +11,12 @@ export default async function MorePage() {
   const org = await getActiveOrganization();
   const isFactory = org?.role === "FACTORY_ADMIN" || org?.role === "PLATFORM_ADMIN";
 
-  const links = [
+  // VES-44: the platform admin has no store, only the moderation panel.
+  const platformLinks = [
+    { href: "/moderacao", label: "Moderação", icon: "shield" },
+    { href: "/perfil", label: "Meu perfil", icon: "person" },
+  ];
+  const storeLinks = [
     { href: "/perfil", label: "Meu perfil", icon: "person" },
     { href: "/clientes", label: "Clientes", icon: "group" },
     { href: "/negociacoes", label: "Negociações", icon: "swap_horiz" },
@@ -26,6 +31,7 @@ export default async function MorePage() {
         ]
       : []),
   ];
+  const links = org?.role === "PLATFORM_ADMIN" ? platformLinks : storeLinks;
 
   return (
     <div className="space-y-lg">

@@ -7,11 +7,13 @@ import { cancelOffer } from "@/features/offers/actions";
 import { ProposeForm } from "@/features/negotiations/components/propose-form";
 import { OfferPhotosForm } from "@/features/offers/components/offer-photos-form";
 import { PageHeader } from "@/components/molecules/page-header";
-import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
+import { ActionForm } from "@/components/molecules/action-form";
+import { ConfirmButton } from "@/components/molecules/confirm-button";
 import Link from "next/link";
 import { Badge, Button, Icon } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { OFFER_STATUS } from "@/lib/i18n/labels";
+import { ReportLink } from "@/features/reports/components/report-link";
 
 export const metadata: Metadata = { title: "Detalhes da oferta" };
 
@@ -68,7 +70,17 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
           {formatBRL(offer.price)}
         </p>
         <p className="mt-2 font-body-md text-body-md text-on-surface-variant">
-          {offer.sellerName} · {offer.remaining} disponíve
+          {isMine ? (
+            offer.sellerName
+          ) : (
+            <Link
+              href={`/rede/revendedoras/${offer.sellerId}`}
+              className="font-semibold text-primary-container hover:underline"
+            >
+              {offer.sellerName}
+            </Link>
+          )}{" "}
+          · {offer.remaining} disponíve
           {offer.remaining === 1 ? "l" : "is"}
         </p>
         {offer.note && (
@@ -95,13 +107,24 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
         offer.status !== "CANCELLED" && (
           <ActionForm action={cancelOffer} className="space-y-sm">
             <input type="hidden" name="offerId" value={offer.id} />
-            <SubmitButton variant="danger" size="sm">
+            <ConfirmButton
+              size="sm"
+              title="Cancelar esta oferta?"
+              description="A oferta sai da rede e deixa de receber propostas. Não dá para desfazer: para oferecer a peça de novo, publique outra oferta."
+              confirmLabel="Cancelar oferta"
+              cancelLabel="Manter oferta"
+            >
               Cancelar oferta
-            </SubmitButton>
+            </ConfirmButton>
           </ActionForm>
         )
       ) : (
-        <ProposeForm offerId={offer.id} remaining={offer.remaining} />
+        <>
+          <ProposeForm offerId={offer.id} remaining={offer.remaining} />
+          <div className="flex justify-end">
+            <ReportLink target="OFFER" id={offer.id} label="Denunciar oferta" />
+          </div>
+        </>
       )}
     </div>
   );

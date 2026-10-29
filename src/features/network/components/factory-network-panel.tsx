@@ -42,10 +42,14 @@ export function InviteResellerForm({ networks }: { networks: { id: string; name:
         <p className="font-body-md text-body-md text-on-success-container">Convite enviado.</p>
       )}
       <div>
-        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
+        <label
+          htmlFor="factory-network"
+          className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface"
+        >
           Rede
         </label>
         <select
+          id="factory-network"
           name="networkId"
           required
           className="field-focus-ring w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3 font-body-md text-body-md"

@@ -62,6 +62,11 @@ export function ActionForm({
   );
 }
 
+/** Whether the enclosing `ActionForm` is running, and which button sent it. */
+export function useActionFormStatus() {
+  return useContext(ActionFormContext);
+}
+
 /** Submit button that shows the spinner while its `ActionForm` is running. */
 export function SubmitButton({ name, value, ...props }: ButtonProps) {
   const { pending, submitter } = useContext(ActionFormContext);

@@ -11,7 +11,7 @@ import {
 } from "@/test/actions";
 import { publishOffer } from "@/features/offers/actions";
 import { negotiationAction, openNegotiation } from "./actions";
-import { getNegotiation, listNegotiations } from "./queries";
+import { countPendingNegotiations, getNegotiation, listNegotiations } from "./queries";
 
 const up = await supabaseUp();
 const d = up ? describe : describe.skip;
@@ -114,6 +114,43 @@ d("negotiations actions + queries (SPEC-009)", () => {
     expect((await getNegotiation(negId)).negotiation?.status).toBe("REJECTED");
   });
 
+  // VES-105 — the optional reason travels on the REJECTED event, which the buyer reads in the chat.
+  it("negotiationAction: reject keeps the optional reason on the event", async () => {
+    const negId = await openNeg();
+    setTestClient(ctx.seller.client);
+    await expectRedirect(
+      () =>
+        negotiationAction(
+          {},
+          formData({
+            negotiationId: negId,
+            action: "reject",
+            message: "  Valor abaixo do mínimo  ",
+          }),
+        ),
+      /toast=negotiation-rejected/,
+    );
+
+    setTestClient(ctx.buyer.client);
+    const { events } = await getNegotiation(negId);
+    expect(events.find((e) => e.type === "REJECTED")?.body).toBe("Valor abaixo do mínimo");
+  });
+
+  it("negotiationAction: accept ignores the reason field", async () => {
+    const negId = await openNeg();
+    setTestClient(ctx.seller.client);
+    await expectRedirect(
+      () =>
+        negotiationAction(
+          {},
+          formData({ negotiationId: negId, action: "accept", message: "não deveria ir" }),
+        ),
+      /negotiation-accepted/,
+    );
+    const { events } = await getNegotiation(negId);
+    expect(events.find((e) => e.type === "ACCEPTED")?.body ?? null).toBeNull();
+  });
+
   it("negotiationAction: message → appends an event, no redirect", async () => {
     const negId = await openNeg();
     setTestClient(ctx.seller.client);
@@ -168,5 +205,31 @@ d("negotiations actions + queries (SPEC-009)", () => {
     for (const direction of ["received", "sent"] as const) {
       expect((await listNegotiations(direction)).items.map((n) => n.id)).not.toContain(negId);
     }
+  });
+
+  // VES-91 — status tabs, the pending counter and the last update date.
+  it("listNegotiations: filters by status, counts pending, last updated first", async () => {
+    const pendingId = await openNeg();
+    const rejectedId = await openNeg();
+    setTestClient(ctx.seller.client);
+    await expectRedirect(
+      () => negotiationAction({}, formData({ negotiationId: rejectedId, action: "reject" })),
+      /negotiation-rejected/,
+    );
+
+    const all = (await listNegotiations("received")).items;
+    expect(all.map((n) => n.id)).toEqual([rejectedId, pendingId]);
+    expect(Date.parse(all[0]!.updatedAt)).toBeGreaterThanOrEqual(Date.parse(all[1]!.updatedAt));
+
+    const pending = await listNegotiations("received", 1, "PENDING");
+    expect(pending.items.map((n) => n.id)).toEqual([pendingId]);
+    const rejected = await listNegotiations("received", 1, "REJECTED");
+    expect(rejected.items.map((n) => n.id)).toEqual([rejectedId]);
+    expect((await listNegotiations("received", 1, "COMPLETED")).items).toEqual([]);
+
+    expect(await countPendingNegotiations("received")).toBe(1);
+    expect(await countPendingNegotiations("sent")).toBe(0);
+    setTestClient(ctx.buyer.client);
+    expect(await countPendingNegotiations("sent")).toBe(1);
   });
 });

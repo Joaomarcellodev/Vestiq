@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmAction, login } from "./helpers";
 
 test("archive then unarchive a product", async ({ page }) => {
   await login(page, "revenda@vestiq.dev");
@@ -13,7 +13,7 @@ test("archive then unarchive a product", async ({ page }) => {
   await page.waitForLoadState("networkidle"); // controlled inputs: fill after hydration
   // Keep the seed stock out of the network: offer nothing, just archive.
   for (const qty of await page.getByLabel("Quantidade").all()) await qty.fill("0");
-  await page.getByRole("button", { name: "Arquivar produto" }).click();
+  await confirmAction(page, "Arquivar produto");
   await expect(page).toHaveURL(/\/produtos(\?|$)/);
   await expect(page.getByText("Produto arquivado.")).toBeVisible();
 
@@ -60,14 +60,14 @@ test("an offer published before archiving stays on the network (VES-98)", async 
   await expect(page.getByText(/2 peças já estão em ofertas na rede/)).toBeVisible();
   await expect(page.getByLabel("Quantidade")).toHaveValue("1");
   await page.getByLabel("Quantidade").fill("0");
-  await page.getByRole("button", { name: "Arquivar produto" }).click();
+  await confirmAction(page, "Arquivar produto");
   await expect(page.getByText("Produto arquivado.")).toBeVisible();
 
   // …and the earlier offer is still there.
   await page.goto(`/rede?q=${encodeURIComponent(name)}`);
   await page.getByRole("button", { name: "Ver detalhes" }).click();
   await expect(page).toHaveURL(/\/rede\/ofertas\//);
-  await page.getByRole("button", { name: "Cancelar oferta" }).click();
+  await confirmAction(page, "Cancelar oferta");
   await expect(page.getByText("Oferta cancelada.")).toBeVisible();
 });
 
@@ -89,7 +89,7 @@ test("archiving publishes the stock as an offer the network sees (VES-69)", asyn
   await page.waitForLoadState("networkidle");
   await expect(page.getByLabel("Quantidade")).toHaveValue("2");
   await expect(page.getByLabel("Preço de repasse (R$)")).toHaveValue("80");
-  await page.getByRole("button", { name: "Arquivar e publicar 1 oferta" }).click();
+  await confirmAction(page, "Arquivar e publicar 1 oferta");
   await expect(page.getByText("Produto arquivado e peças publicadas na rede.")).toBeVisible();
 
   const peer = await (await browser.newContext()).newPage();
@@ -101,6 +101,6 @@ test("archiving publishes the stock as an offer the network sees (VES-69)", asyn
   await page.goto(`/rede?q=${encodeURIComponent(name)}`);
   await page.getByRole("button", { name: "Ver detalhes" }).click();
   await expect(page).toHaveURL(/\/rede\/ofertas\//);
-  await page.getByRole("button", { name: "Cancelar oferta" }).click();
+  await confirmAction(page, "Cancelar oferta");
   await expect(page.getByText("Oferta cancelada.")).toBeVisible();
 });

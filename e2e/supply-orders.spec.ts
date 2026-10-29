@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmAction, login } from "./helpers";
 
 // SPEC-012 TC-ORD-12 — relies on the demo factory catalog from scripts/seed.mjs.
 test("a reseller orders, the factory confirms and ships, and the reseller receives it", async ({
@@ -84,6 +84,8 @@ test("a reseller cancels a pending order", async ({ page }) => {
   for (const size of ["36", "38", "40"]) {
     await page.getByLabel(`Calça Wide Leg Alfaiataria Bege ${size}`, { exact: true }).fill("2");
   }
+  // The "E2E <n>" note lets scripts/clean-test-data.mjs find the order (VES-94).
+  await page.getByLabel("Observação para o fornecedor (opcional)").fill(`E2E ${Date.now()}`);
   await page.getByRole("button", { name: "Enviar pedido" }).click();
   await expect(page).toHaveURL(/\/pedidos\/[0-9a-f-]{36}/);
 
@@ -92,4 +94,43 @@ test("a reseller cancels a pending order", async ({ page }) => {
   await expect(page.getByText("Pedido cancelado.")).toBeVisible();
   await expect(page.getByText("Cancelado", { exact: true })).toBeVisible();
   await expect(page.getByText("Pedi a cor errada")).toBeVisible();
+});
+
+// VES-93 — the factory confirms before rejecting; the reseller reads the reason.
+test("the factory rejects a pending order after confirming", async ({ browser }) => {
+  const resellerCtx = await browser.newContext();
+  const factoryCtx = await browser.newContext();
+  const reseller = await resellerCtx.newPage();
+  const factory = await factoryCtx.newPage();
+  await login(reseller, "revenda@vestiq.dev");
+  await login(factory, "fabrica@vestiq.dev");
+
+  await reseller.goto("/fornecedores?view=fornecedores&q=modah");
+  await reseller.getByRole("link", { name: /Fábrica Modah/ }).click();
+  await reseller.getByRole("link", { name: "Fazer pedido" }).click();
+  for (const size of ["36", "38", "40"]) {
+    await reseller.getByLabel(`Calça Wide Leg Alfaiataria Bege ${size}`, { exact: true }).fill("2");
+  }
+  await reseller.getByRole("button", { name: "Enviar pedido" }).click();
+  await expect(reseller).toHaveURL(/\/pedidos\/[0-9a-f-]{36}/);
+  const orderPath = new URL(reseller.url()).pathname;
+
+  await factory.goto(orderPath);
+  const reason = `Sem tecido (${Date.now()})`;
+  await factory.getByLabel("Mensagem para a revendedora (opcional)").fill(reason);
+  await factory.getByRole("button", { name: "Recusar pedido" }).click();
+  const dialog = factory.getByRole("dialog", { name: "Recusar este pedido?" });
+  await expect(dialog).toContainText(/não dá para desfazer/i);
+  await dialog.getByRole("button", { name: "Voltar ao pedido" }).click();
+  await expect(factory.getByText("Pendente", { exact: true })).toBeVisible();
+
+  await confirmAction(factory, "Recusar pedido");
+  await expect(factory.getByText("Pedido recusado.")).toBeVisible();
+  await expect(factory.getByText("Recusado", { exact: true })).toBeVisible();
+
+  await reseller.goto(orderPath);
+  await expect(reseller.getByText(reason)).toBeVisible();
+
+  await resellerCtx.close();
+  await factoryCtx.close();
 });

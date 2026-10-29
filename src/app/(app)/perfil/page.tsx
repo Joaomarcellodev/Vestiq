@@ -4,6 +4,7 @@ import { getActiveOrganization } from "@/features/organizations/queries";
 import { signOut } from "@/features/auth/actions";
 import { ProfileForm } from "@/features/profile/components/profile-form";
 import { ChangePasswordForm } from "@/features/profile/components/change-password-form";
+import { OrganizationCityForm } from "@/features/organizations/components/organization-city-form";
 import { PageHeader } from "@/components/molecules/page-header";
 import { BackButton } from "@/components/molecules/back-button";
 import { Button, Icon, ThemeToggle } from "@/components/atoms";
@@ -23,6 +24,14 @@ export default async function ProfilePage() {
       />
 
       <ProfileForm profile={profile} />
+
+      {org?.type === "RESELLER" && (
+        <OrganizationCityForm
+          orgName={org.name}
+          city={org.city}
+          profileHref={`/rede/revendedoras/${org.id}`}
+        />
+      )}
 
       <ChangePasswordForm />
 

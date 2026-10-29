@@ -14,6 +14,8 @@ export interface ActiveOrg {
   name: string;
   type: OrganizationType;
   role: MemberRole;
+  /** Shown on the reseller's public profile (VES-65). */
+  city: string | null;
 }
 
 /**
@@ -28,7 +30,7 @@ export const listMyOrganizations = cache(async (): Promise<ActiveOrg[]> => {
 
   const { data, error } = await supabase
     .from("organization_members")
-    .select("role, organizations(id, name, type)")
+    .select("role, organizations(id, name, type, city)")
     .eq("user_id", userId)
     .eq("status", "ACTIVE");
 
@@ -41,6 +43,7 @@ export const listMyOrganizations = cache(async (): Promise<ActiveOrg[]> => {
       name: m.organizations!.name,
       type: m.organizations!.type,
       role: m.role,
+      city: m.organizations!.city ?? null,
     }));
 });
 
@@ -50,10 +53,37 @@ export const getActiveOrganization = cache(async (): Promise<ActiveOrg | null> =
   return orgs[0] ?? null;
 });
 
-/** Require an active organization; redirect to the waiting screen otherwise. */
+export interface Suspension {
+  organizationName: string;
+  reason: string | null;
+  suspendedAt: string | null;
+}
+
+/**
+ * VES-44 — the user's store was suspended by the moderation and she has no
+ * other active organization (`get_my_suspension`, migration 0047). Suspended
+ * memberships don't count in `listMyOrganizations` (RLS), so this tells a
+ * suspended account apart from one still waiting for an invite.
+ */
+export const getMySuspension = cache(async (): Promise<Suspension | null> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_my_suspension").maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  return {
+    organizationName: data.organization_name,
+    reason: data.reason ?? null,
+    suspendedAt: data.suspended_at ?? null,
+  };
+});
+
+/**
+ * Require an active organization; otherwise redirect to the suspension notice
+ * (VES-44) or to the waiting screen.
+ */
 export async function requireActiveOrganization(): Promise<ActiveOrg> {
   const org = await getActiveOrganization();
-  if (!org) redirect("/aguardando-convite");
+  if (!org) redirect((await getMySuspension()) ? "/conta-suspensa" : "/aguardando-convite");
   return org;
 }
 

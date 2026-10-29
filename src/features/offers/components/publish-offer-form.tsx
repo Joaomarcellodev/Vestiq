@@ -48,10 +48,14 @@ export function PublishOfferForm({
         </p>
       )}
       <div>
-        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
+        <label
+          htmlFor="offer-variant"
+          className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface"
+        >
           Produto / variação
         </label>
         <select
+          id="offer-variant"
           name="variantId"
           required
           className="field-focus-ring w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3 font-body-md text-body-md"
@@ -64,10 +68,14 @@ export function PublishOfferForm({
         </select>
       </div>
       <div>
-        <label className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface">
+        <label
+          htmlFor="offer-network"
+          className="mb-1.5 block font-body-md text-body-md font-semibold text-on-surface"
+        >
           Rede
         </label>
         <select
+          id="offer-network"
           name="networkId"
           required
           className="field-focus-ring w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3 font-body-md text-body-md"

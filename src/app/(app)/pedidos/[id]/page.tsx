@@ -13,11 +13,14 @@ import { variantLabel } from "@/features/suppliers/format";
 import { BackButton } from "@/components/molecules/back-button";
 import { PageHeader } from "@/components/molecules/page-header";
 import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
+import { ConfirmButton } from "@/components/molecules/confirm-button";
 import { Badge } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { SUPPLY_ORDER_STATUS } from "@/lib/i18n/labels";
 import { OrderPayment } from "@/features/payments/components/order-payment";
 import { getFactoryPayoutAccount, getSupplyOrderPayment } from "@/features/payments/queries";
+import { getTransactionReviews } from "@/features/reviews/queries";
+import { ReviewSection } from "@/features/reviews/components/review-section";
 import { syncCheckout } from "@/features/payments/sync";
 
 export const metadata: Metadata = { title: "Pedido" };
@@ -52,7 +55,11 @@ export default async function SupplyOrderPage({
       console.error("[payments] syncCheckout failed", err),
     );
   }
-  const payment = accepted ? await getSupplyOrderPayment(order.id) : null;
+  const [payment, reviews] = await Promise.all([
+    accepted ? getSupplyOrderPayment(order.id) : null,
+    // VES-42: a delivered order can be rated by both sides.
+    order.status === "DELIVERED" ? getTransactionReviews("supply_order", order.id) : null,
+  ]);
   // VES-27: the supplier sees whether its payout account can receive this payment.
   const payout =
     accepted && order.party === "supplier" && !payment
@@ -275,9 +282,16 @@ export default async function SupplyOrderPage({
             />
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <SubmitButton name="decision" value="reject" variant="danger">
+            <ConfirmButton
+              name="decision"
+              value="reject"
+              title="Recusar este pedido?"
+              description="A revendedora é avisada, com a mensagem acima se você escreveu uma. Não dá para desfazer: para atender, ela precisa fazer um novo pedido."
+              confirmLabel="Recusar pedido"
+              cancelLabel="Voltar ao pedido"
+            >
               Recusar pedido
-            </SubmitButton>
+            </ConfirmButton>
             <SubmitButton name="decision" value="confirm">
               Confirmar pedido
             </SubmitButton>
@@ -372,6 +386,16 @@ export default async function SupplyOrderPage({
             <SubmitButton>Confirmar recebimento</SubmitButton>
           </div>
         </ActionForm>
+      )}
+
+      {reviews && (
+        <ReviewSection
+          kind="supply_order"
+          transactionId={order.id}
+          counterpartyName={order.party === "reseller" ? order.supplierName : order.resellerName}
+          mine={reviews.mine}
+          received={reviews.received}
+        />
       )}
     </div>
   );

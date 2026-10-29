@@ -45,3 +45,7 @@ yarn-error.log*
 # Netlify
 .netlify
 deno.lock
+
+# VES-71 load test: session cookies and raw k6 output
+scripts/load/.sessions.json
+scripts/load/results/

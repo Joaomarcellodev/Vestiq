@@ -7,6 +7,9 @@ import {
   NEGOTIATION_STATUS,
   OFFER_STATUS,
   PAYMENT_METHOD,
+  REPORT_REASON,
+  REPORT_STATUS,
+  REPORT_TARGET,
   SALE_STATUS,
   SUPPLY_ORDER_STATUS,
 } from "./labels";
@@ -29,6 +32,16 @@ const ENUM_VALUES: Record<string, string[]> = {
     "TRANSFERENCIA_ENTRADA",
     "TRANSFERENCIA_SAIDA",
   ],
+  REPORT_REASON: [
+    "SPAM",
+    "FRAUDE",
+    "PRODUTO_FALSIFICADO",
+    "CONTEUDO_INADEQUADO",
+    "ASSEDIO",
+    "OUTRO",
+  ],
+  REPORT_TARGET: ["OFFER", "NEGOTIATION", "ORGANIZATION"],
+  REPORT_STATUS: ["OPEN", "DISMISSED", "ACTIONED"],
 };
 
 const MAPS = {
@@ -41,6 +54,9 @@ const MAPS = {
   PAYMENT_METHOD,
   MEMBER_ROLE,
   INVENTORY_MOVEMENT,
+  REPORT_REASON,
+  REPORT_TARGET,
+  REPORT_STATUS,
 } as Record<string, Record<string, unknown>>;
 
 describe("i18n labels", () => {
