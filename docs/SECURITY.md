@@ -44,6 +44,14 @@ Regras gerais:
   - `is_org_member(org uuid)` → boolean.
   - `has_org_role(org uuid, roles member_role[])` → boolean.
   - `shares_network(org_a uuid, org_b uuid)` → boolean (mesma `factory_networks`).
+  - `is_platform_admin()` → boolean: `PLATFORM_ADMIN` ativo de uma organização
+    `PLATFORM` ativa (moderação, SPEC-017, migration 0046).
+- **Suspensão (VES-44, migration 0047):** os três primeiros helpers só contam
+  vínculos com organizações `status = ACTIVE`. Uma loja suspensa pela moderação
+  perde, no banco, toda leitura e escrita — qualquer que seja o cliente — e some
+  do feed e do perfil público (`list_visible_offers`, `get_reseller_profile`).
+  O login é recusado com o motivo (`get_my_suspension`); sessão já aberta cai em
+  `/conta-suspensa`.
 - Policy padrão para tabela `com organization_id`:
   ```sql
   create policy tenant_read  on <t> for select using (is_org_member(organization_id));

@@ -80,6 +80,7 @@ Cada feature: `SPEC → ACCEPTANCE → TESTS` (em `specs/<feature>/`) → migrat
 | 14 | **negotiations** — chat em tempo real (ADR-0010) | RF-NEG-010..011 | chat de negociação | negotiations | ✅ Supabase Realtime + envio otimista |
 | 15 | **notifications** — sino em tempo real + alertas do navegador (SPEC-013, ADR-0011) | RF-NOTIF-001..003 | sino de notificações | negotiations, offers | ✅ Realtime + alerta com aba em segundo plano + contador no título; Web Push (navegador fechado) pendente |
 | 16 | **reviews** — avaliação de transação concluída (SPEC-016, VES-42) | RF-REV-001..003 | bloco "Avaliação" na negociação e no pedido, nota no perfil público | negotiations, supply-orders, network | ✅ `reviews` + `submit_review` (migration 0045) |
+| 17 | **moderation** — denúncias e painel de moderação (SPEC-017, VES-43/44) | RF-MOD-001..004 | `/denunciar`, `/moderacao`, `/moderacao/denuncias/[id]`, `/conta-suspensa` | network, offers, negotiations | ✅ `reports` (0046) + `moderation_actions` e suspensão aplicada pelos helpers de RLS (0047) |
 
 ## Fase 4 — Estabilização (Sprint 7)
 
