@@ -13,6 +13,7 @@ import Link from "next/link";
 import { Badge, Button, Icon } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { OFFER_STATUS } from "@/lib/i18n/labels";
+import { ReportLink } from "@/features/reports/components/report-link";
 
 export const metadata: Metadata = { title: "Detalhes da oferta" };
 
@@ -118,7 +119,12 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
           </ActionForm>
         )
       ) : (
-        <ProposeForm offerId={offer.id} remaining={offer.remaining} />
+        <>
+          <ProposeForm offerId={offer.id} remaining={offer.remaining} />
+          <div className="flex justify-end">
+            <ReportLink target="OFFER" id={offer.id} label="Denunciar oferta" />
+          </div>
+        </>
       )}
     </div>
   );

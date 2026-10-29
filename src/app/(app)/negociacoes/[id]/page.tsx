@@ -22,6 +22,7 @@ import { formatBRL } from "@/lib/utils/currency";
 import { NEGOTIATION_STATUS } from "@/lib/i18n/labels";
 import { getTransactionReviews } from "@/features/reviews/queries";
 import { ReviewSection } from "@/features/reviews/components/review-section";
+import { ReportLink } from "@/features/reports/components/report-link";
 
 export const metadata: Metadata = { title: "Negociação" };
 
@@ -75,14 +76,17 @@ export default async function NegotiationDetailPage({
         }
       />
 
-      {/* VES-65 — who she is dealing with. */}
-      <Link
-        href={`/rede/revendedoras/${counterparty.id}`}
-        className="inline-flex items-center gap-1 font-body-md text-body-md font-semibold text-primary-container hover:underline"
-      >
-        <Icon name="person" size={16} />
-        Ver perfil de {counterparty.name ?? "outra parte"}
-      </Link>
+      {/* VES-65 — who she is dealing with; VES-43 — report the conversation. */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Link
+          href={`/rede/revendedoras/${counterparty.id}`}
+          className="inline-flex items-center gap-1 font-body-md text-body-md font-semibold text-primary-container hover:underline"
+        >
+          <Icon name="person" size={16} />
+          Ver perfil de {counterparty.name ?? "outra parte"}
+        </Link>
+        <ReportLink target="NEGOTIATION" id={n.id} label="Denunciar conversa" />
+      </div>
 
       <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
         <NegotiationProductSummary product={product} size={64} />

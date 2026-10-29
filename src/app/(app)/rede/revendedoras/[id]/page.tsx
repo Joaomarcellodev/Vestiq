@@ -9,6 +9,7 @@ import { getResellerProfile } from "@/features/network/queries";
 import { listNetworkOffers } from "@/features/offers/queries";
 import { OfferCard } from "@/features/offers/components/offer-card";
 import { StarRating } from "@/features/reviews/components/star-rating";
+import { ReportLink } from "@/features/reports/components/report-link";
 import { parsePage } from "@/lib/pagination";
 
 export const metadata: Metadata = { title: "Perfil da revendedora" };
@@ -89,6 +90,12 @@ export default async function ResellerProfilePage({
           )}
         </div>
       </section>
+
+      {!profile.isMine && (
+        <div className="flex justify-end">
+          <ReportLink target="ORGANIZATION" id={profile.id} label="Denunciar revendedora" />
+        </div>
+      )}
 
       <dl className="grid grid-cols-3 gap-sm">
         {stats.map((s) => (
