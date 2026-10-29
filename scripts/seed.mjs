@@ -59,6 +59,8 @@ async function main() {
   const factoryAdmin = await ensureUser("fabrica@vestiq.dev", "vestiq123", "Ana (Fábrica)");
   const resellerA = await ensureUser("revenda@vestiq.dev", "vestiq123", "Sarah Mendes");
   const resellerB = await ensureUser("revenda2@vestiq.dev", "vestiq123", "Clara Boutique");
+  // VES-44: reviews the reports in /moderacao.
+  const platformAdmin = await ensureUser("admin@vestiq.dev", "vestiq123", "Moderação Vestiq");
 
   // --- organizations -----------------------------------------------------
   const factory = await insert(
@@ -76,11 +78,22 @@ async function main() {
     { name: "Clara Boutique", type: "RESELLER" },
     { name: "Clara Boutique" },
   );
+  const platform = await insert(
+    "organizations",
+    { name: "Vestiq Plataforma", type: "PLATFORM" },
+    { name: "Vestiq Plataforma" },
+  );
 
   const members = [
     { organization_id: factory.id, user_id: factoryAdmin, role: "FACTORY_ADMIN", status: "ACTIVE" },
     { organization_id: orgA.id, user_id: resellerA, role: "RESELLER", status: "ACTIVE" },
     { organization_id: orgB.id, user_id: resellerB, role: "RESELLER", status: "ACTIVE" },
+    {
+      organization_id: platform.id,
+      user_id: platformAdmin,
+      role: "PLATFORM_ADMIN",
+      status: "ACTIVE",
+    },
   ];
   for (const m of members) {
     await insert("organization_members", m, {
@@ -352,7 +365,8 @@ async function main() {
   console.log("Usuários (senha: vestiq123):");
   console.log("  • revenda@vestiq.dev   — revendedora (Atelier Sarah) — use este para entrar");
   console.log("  • revenda2@vestiq.dev  — revendedora (Clara Boutique)");
-  console.log("  • fabrica@vestiq.dev   — admin de fábrica (Fábrica Modah)\n");
+  console.log("  • fabrica@vestiq.dev   — admin de fábrica (Fábrica Modah)");
+  console.log("  • admin@vestiq.dev     — moderação da plataforma (/moderacao)\n");
 }
 
 main().catch((e) => {
