@@ -39,6 +39,28 @@ export const PRIMARY_NAV: NavItem[] = [
   },
 ];
 
+type Role = NonNullable<NavItem["roles"]>[number];
+
+/**
+ * VES-44 — the platform admin has no store: only the moderation panel (the
+ * store items would show an empty organization).
+ */
+export const PLATFORM_NAV: NavItem[] = [
+  { href: "/moderacao", label: "Moderação", icon: "shield", match: "/moderacao" },
+];
+
+/** Mobile bar of the platform admin — the sidebar has its own profile link. */
+export const PLATFORM_BOTTOM_NAV: NavItem[] = [
+  ...PLATFORM_NAV,
+  { href: "/perfil", label: "Perfil", icon: "person", match: "/perfil" },
+];
+
+/** The sidebar items a role sees. */
+export function navItemsFor(role?: Role): NavItem[] {
+  if (role === "PLATFORM_ADMIN") return PLATFORM_NAV;
+  return PRIMARY_NAV.filter((i) => !i.roles || (role && i.roles.includes(role)));
+}
+
 /** The 5 items shown in the mobile bottom bar. */
 export const BOTTOM_NAV: NavItem[] = [
   { href: "/dashboard", label: "Início", icon: "dashboard", match: "/dashboard" },
