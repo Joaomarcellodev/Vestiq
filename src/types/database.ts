@@ -609,6 +609,7 @@ export type Database = {
       }
       organizations: {
         Row: {
+          city: string | null
           created_at: string
           id: string
           name: string
@@ -617,6 +618,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          city?: string | null
           created_at?: string
           id?: string
           name: string
@@ -625,6 +627,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          city?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -1551,6 +1554,18 @@ export type Database = {
           state: string
         }[]
       }
+      get_reseller_profile: {
+        Args: { p_org_id: string }
+        Returns: {
+          active_offers: number
+          avatar_url: string
+          city: string
+          completed_deals: number
+          id: string
+          member_since: string
+          name: string
+        }[]
+      }
       get_supplier_product: {
         Args: { p_product_id: string }
         Returns: {
@@ -1997,6 +2012,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      set_organization_city: {
+        Args: { p_city: string; p_org_id: string }
+        Returns: undefined
       }
       shares_network: {
         Args: { org_a: string; org_b: string }
