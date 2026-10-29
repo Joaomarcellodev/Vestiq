@@ -14,6 +14,8 @@ export interface ActiveOrg {
   name: string;
   type: OrganizationType;
   role: MemberRole;
+  /** Shown on the reseller's public profile (VES-65). */
+  city: string | null;
 }
 
 /**
@@ -28,7 +30,7 @@ export const listMyOrganizations = cache(async (): Promise<ActiveOrg[]> => {
 
   const { data, error } = await supabase
     .from("organization_members")
-    .select("role, organizations(id, name, type)")
+    .select("role, organizations(id, name, type, city)")
     .eq("user_id", userId)
     .eq("status", "ACTIVE");
 
@@ -41,6 +43,7 @@ export const listMyOrganizations = cache(async (): Promise<ActiveOrg[]> => {
       name: m.organizations!.name,
       type: m.organizations!.type,
       role: m.role,
+      city: m.organizations!.city ?? null,
     }));
 });
 
