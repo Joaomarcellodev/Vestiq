@@ -133,3 +133,11 @@ DevTools → Network → `/dashboard`, `/produtos`, `/vendas`, `/pedidos` → "W
 de erro. O gargalo é o custo fixo de 4 idas ao Supabase por página (layout) e o
 Postgres; detalhes em [LOAD_TEST.md](./LOAD_TEST.md).
 
+## Teste de estresse — 2026-10-29 (VES-72)
+
+Local: vazão máxima ~55 req/s com 100 usuários; p95 passa de 2 s entre 106 e 131
+usuários, erros passam de 5% com ~260; o Postgres satura primeiro e o sistema se
+recupera sozinho quando a carga baixa. O dashboard lê todo o histórico de itens
+de venda e fica mais lento conforme a loja vende. Detalhes e recomendações (e a
+relação com a ADR-0013) em [STRESS_TEST.md](./STRESS_TEST.md).
+
