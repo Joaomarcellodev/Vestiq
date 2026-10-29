@@ -56,3 +56,10 @@ passos de *Como aplicar* continuam válidos.
    **South America (São Paulo) — `sa-east-1`**.
 3. Novo deploy de produção (junto com o próximo release `develop → main`).
 4. Medir de novo e registrar em [PERF.md](../PERF.md).
+
+## Evidência posterior — teste de estresse (2026-10-29, VES-72)
+
+O teste de estresse local ([STRESS_TEST.md](../STRESS_TEST.md)) quebrou pelo
+**banco** (CPU do Postgres e fila do PostgREST), não pela função nem pela rede.
+O adiamento continua valendo: reduzir as idas ao Supabase por página e agregar o
+dashboard no banco ataca a carga e a distância ao mesmo tempo, sem plano pago.

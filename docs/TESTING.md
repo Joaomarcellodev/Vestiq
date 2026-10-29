@@ -136,6 +136,8 @@ usam `role="group"` com `aria-labelledby`.
 Cenário k6 com 20 revendedoras simultâneas nos fluxos principais (feed, venda,
 inventário/histórico, dashboard), metas p95 < 1 s e erro < 1%, sempre contra o
 ambiente local. Script, resultados e gargalos em [LOAD_TEST.md](./LOAD_TEST.md).
+O teste de estresse (VES-72) sobe a carga em degraus até quebrar e mede a
+recuperação: [STRESS_TEST.md](./STRESS_TEST.md).
 
 ## Cobertura
 

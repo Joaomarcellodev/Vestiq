@@ -8,7 +8,7 @@ Execução em **2026-10-29**, branch `feature/sprint6-network-trust` (migrations
 | Item | Valor |
 | --- | --- |
 | Ferramenta | [k6](https://k6.io) 0.54.0, pela imagem Docker oficial `grafana/k6:0.54.0` (nada instalado no projeto) |
-| Script | [`scripts/load/vestiq-load.js`](../scripts/load/vestiq-load.js) |
+| Script | [`scripts/load/vestiq-load.js`](../scripts/load/vestiq-load.js) — a jornada fica em [`journey.js`](../scripts/load/journey.js), compartilhada com o teste de estresse |
 | Dados | [`scripts/load/setup.mjs`](../scripts/load/setup.mjs): 1 fábrica, 1 rede e **20 revendedoras próprias do teste** (`carga-N@vestiq.test`), cada uma com produto, 100 000 peças em estoque, oferta publicada e 3 vendas |
 | Usuários simultâneos | **20** (uma revendedora por usuário virtual) — a rede piloto esperada: uma fábrica com ~20 revendedoras ativas ao mesmo tempo |
 | Duração | 30 s de rampa → **3 min no pico** → 30 s de descida |
@@ -63,7 +63,7 @@ PostgREST ~8%, Kong ~5%; o `next-server` ~23%.
 
 ### Referência — 50 usuários (2,5× a carga esperada, 1 min no pico)
 
-Rodada curta só para ver a folga e onde a carga pesa; o teste de estresse em si é o VES-72.
+Rodada curta só para ver a folga e onde a carga pesa; o teste de estresse em si é o VES-72 ([STRESS_TEST.md](./STRESS_TEST.md)).
 
 | Fluxo | p50 | p95 | p99 |
 | --- | ---: | ---: | ---: |
