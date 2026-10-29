@@ -20,6 +20,13 @@ export type NewPasswordState = {
   fieldErrors?: Partial<Record<"password" | "confirm", string>>;
 };
 
+/** VES-44 — what a suspended store reads on the login screen. */
+function suspendedMessage(organizationName: string, reason: string | null): string {
+  return `A conta de ${organizationName} está suspensa pela moderação do Vestiq${
+    reason ? `. Motivo: ${reason}` : ""
+  }. Fale com o suporte para recorrer.`;
+}
+
 /** RF-AUTH-001 — sign in with email + password. */
 export async function signInWithPassword(
   _prev: AuthFormState,
@@ -49,6 +56,13 @@ export async function signInWithPassword(
 
   if (error) {
     return { error: "Email ou senha incorretos." };
+  }
+
+  // VES-44: a store suspended by the moderation doesn't get in — and is told why.
+  const { data: suspension } = await supabase.rpc("get_my_suspension").maybeSingle();
+  if (suspension) {
+    await supabase.auth.signOut({ scope: "local" });
+    return { error: suspendedMessage(suspension.organization_name, suspension.reason) };
   }
 
   const next = sanitizeNext(formData.get("next"));
