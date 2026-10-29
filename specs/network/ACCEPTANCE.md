@@ -109,3 +109,16 @@ convidado para outra rede.
 **Quando** ela abre o perfil de outra revendedora
 **Então** vê dados públicos (nome, localização, vitrine de ofertas)
 **E não** vê estoque completo, clientes, vendas ou faturamento.
+
+## AC-NET-008-03 — Perfil público acessível pela oferta e pela negociação (VES-65)
+
+**Dado** uma revendedora vendo uma oferta ou uma negociação com outra revendedora da rede
+**Quando** ela toca no nome da outra loja (ou em "Ver perfil de …")
+**Então** abre `/rede/revendedoras/[id]` com nome, cidade, avatar, ofertas ativas,
+negócios concluídos e a vitrine das ofertas ativas da loja.
+
+## AC-NET-008-04 — Perfil fora da rede é 404 (VES-65)
+
+**Dado** uma revendedora que não compartilha nenhuma rede ativa com a loja X
+**Quando** ela abre `/rede/revendedoras/<id de X>`
+**Então** recebe a página de "não encontrado", sem revelar se a loja existe.

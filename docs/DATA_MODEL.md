@@ -79,6 +79,7 @@ Espelha `auth.users`. Criado por trigger `on_auth_user_created`.
 | `name` | text | not null |
 | `type` | `organization_type` | not null |
 | `status` | `organization_status` | default `ACTIVE` |
+| `city` | text | opcional, até 80 caracteres — perfil público da revendedora (VES-65, migration 0044) |
 
 ### `organization_members` — SDD §25
 | coluna | tipo | notas |

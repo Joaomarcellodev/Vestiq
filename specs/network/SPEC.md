@@ -52,29 +52,32 @@ impedir acesso a redes não pertencentes.
 
 ## User Stories
 
-| ID        | Como…         | Quero…                                   | Para…                             |
-| --------- | ------------- | ---------------------------------------- | --------------------------------- |
-| US-NET-01 | FACTORY_ADMIN | criar a rede da minha fábrica            | organizar minhas revendedoras     |
-| US-NET-02 | FACTORY_ADMIN | convidar uma revendedora por email       | trazê-la para a rede              |
-| US-NET-03 | RESELLER      | aceitar um convite                       | passar a fazer parte da rede      |
-| US-NET-04 | FACTORY_ADMIN | ver a lista de revendedoras e seu status | acompanhar a adesão               |
-| US-NET-05 | FACTORY_ADMIN | desativar uma revendedora                | remover acesso de quem saiu       |
-| US-NET-06 | RESELLER      | navegar o diretório da minha rede        | descobrir parceiros para negociar |
+| ID        | Como…         | Quero…                                                                                          | Para…                              |
+| --------- | ------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------- |
+| US-NET-01 | FACTORY_ADMIN | criar a rede da minha fábrica                                                                   | organizar minhas revendedoras      |
+| US-NET-02 | FACTORY_ADMIN | convidar uma revendedora por email                                                              | trazê-la para a rede               |
+| US-NET-03 | RESELLER      | aceitar um convite                                                                              | passar a fazer parte da rede       |
+| US-NET-04 | FACTORY_ADMIN | ver a lista de revendedoras e seu status                                                        | acompanhar a adesão                |
+| US-NET-05 | FACTORY_ADMIN | desativar uma revendedora                                                                       | remover acesso de quem saiu        |
+| US-NET-06 | RESELLER      | navegar o diretório da minha rede                                                               | descobrir parceiros para negociar  |
+| US-NET-07 | RESELLER      | ver o perfil público de outra revendedora da minha rede (nome, cidade, avatar e ofertas ativas) | decidir com quem negociar (VES-65) |
 
 ## Regras de Negócio
 
-| ID        | Regra                                                                                                                                                |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| BR-NET-01 | Só `type = FACTORY` pode ser `factory_id` de uma rede                                                                                                |
-| BR-NET-02 | Convite tem `invited_email` + `invite_token` único; expira em 14 dias                                                                                |
-| BR-NET-03 | Aceite exige usuário autenticado cujo email confere com `invited_email` (ou fluxo de vínculo explícito)                                              |
-| BR-NET-04 | Aceite cria/ativa `network_members` (`status = ACTIVE`, `joined_at = now()`) e o `organization_members` da revendedora                               |
-| BR-NET-05 | Uma revendedora não pode ter dois vínculos ativos com a mesma rede                                                                                   |
-| BR-NET-06 | `FACTORY_ADMIN` só vê/gere a própria rede                                                                                                            |
-| BR-NET-07 | Desativar (`status = DISABLED`) remove a revendedora do diretório e revoga acesso a ofertas/negociações da rede — dados próprios dela permanecem     |
-| BR-NET-08 | `RESELLER` enxerga apenas redes em que tem `network_members` ativo (RF-NET-008)                                                                      |
-| BR-NET-09 | Reconvite de revendedora desativada não duplica o vínculo: o convite é recusado e o admin reativa pelo switch da lista de membros                    |
-| BR-NET-10 | Não se convida um e-mail que já é membro ativo ou tem convite pendente (não expirado) na mesma rede; convites pendentes não contam como revendedoras |
+| ID        | Regra                                                                                                                                                                                                                                                                                                                      |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-NET-01 | Só `type = FACTORY` pode ser `factory_id` de uma rede                                                                                                                                                                                                                                                                      |
+| BR-NET-02 | Convite tem `invited_email` + `invite_token` único; expira em 14 dias                                                                                                                                                                                                                                                      |
+| BR-NET-03 | Aceite exige usuário autenticado cujo email confere com `invited_email` (ou fluxo de vínculo explícito)                                                                                                                                                                                                                    |
+| BR-NET-04 | Aceite cria/ativa `network_members` (`status = ACTIVE`, `joined_at = now()`) e o `organization_members` da revendedora                                                                                                                                                                                                     |
+| BR-NET-05 | Uma revendedora não pode ter dois vínculos ativos com a mesma rede                                                                                                                                                                                                                                                         |
+| BR-NET-06 | `FACTORY_ADMIN` só vê/gere a própria rede                                                                                                                                                                                                                                                                                  |
+| BR-NET-07 | Desativar (`status = DISABLED`) remove a revendedora do diretório e revoga acesso a ofertas/negociações da rede — dados próprios dela permanecem                                                                                                                                                                           |
+| BR-NET-08 | `RESELLER` enxerga apenas redes em que tem `network_members` ativo (RF-NET-008)                                                                                                                                                                                                                                            |
+| BR-NET-09 | Reconvite de revendedora desativada não duplica o vínculo: o convite é recusado e o admin reativa pelo switch da lista de membros                                                                                                                                                                                          |
+| BR-NET-11 | Perfil público (`/rede/revendedoras/[id]`, VES-65): só para revendedoras com vínculo ativo na mesma rede (ou a própria loja); mostra nome, cidade, avatar do responsável, ofertas ativas, negócios concluídos e "membro desde" — nunca estoque, clientes ou vendas. Fora da rede, fábrica, plataforma ou id inválido → 404 |
+| BR-NET-12 | A cidade da loja (`organizations.city`, até 80 caracteres) é editada por qualquer membro ativo em `/perfil` via `set_organization_city`; vazio remove                                                                                                                                                                      |
+| BR-NET-10 | Não se convida um e-mail que já é membro ativo ou tem convite pendente (não expirado) na mesma rede; convites pendentes não contam como revendedoras                                                                                                                                                                       |
 
 ## Fluxos
 
@@ -99,6 +102,10 @@ cria org RESELLER (se novo) + `organization_members` + ativa `network_members`.
 - `network_members`: fábrica dona (todos) + a própria revendedora (sua linha).
 - Diretório de peers: revendedora vê organizações `RESELLER` com vínculo ativo na
   **mesma** rede; **não** vê dados operacionais delas (SDD §8).
+- Perfil público: `get_reseller_profile` (SECURITY DEFINER, migration 0044) aplica a
+  mesma regra de `organizations_select_network` e devolve só a projeção pública
+  (o avatar vem de `profiles`, que segue legível apenas pelo dono). A vitrine reusa
+  `list_visible_offers`.
 - Token de convite: aleatório (uuid), consumido uma vez, não enumerável.
 
 ## Casos de Erro
@@ -120,6 +127,7 @@ Ver [`TESTS.md`](./TESTS.md).
 - [ ] Actions: `createNetwork`, `inviteReseller`, `acceptInvite`, `setMemberActive`, `reinvite`
 - [ ] Envio de email de convite (Supabase / provider)
 - [ ] Página `/convite/[token]`
-- [ ] Tela diretório da rede (revendedora) + perfil público da revendedora
+- [ ] Tela diretório da rede (revendedora)
+- [x] Perfil público da revendedora (VES-65): `/rede/revendedoras/[id]`, links na oferta, no feed e na negociação; cidade editável em `/perfil`
 - [ ] Tela de membros da rede (fábrica)
 - [ ] Testes de RLS (rede A × rede B) + expiração de token
