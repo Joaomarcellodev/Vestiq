@@ -787,6 +787,86 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_org_id: string
+          reporter_user_id: string | null
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_org_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_org_id: string
+          reporter_user_id?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_org_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason?: Database["public"]["Enums"]["report_reason"]
+          reporter_org_id?: string
+          reporter_user_id?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          target_org_id?: string
+          target_type?: Database["public"]["Enums"]["report_target"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_reporter_org_id_fkey"
+            columns: ["reporter_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reporter_user_id_fkey"
+            columns: ["reporter_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_target_org_id_fkey"
+            columns: ["target_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           comment: string | null
@@ -1664,6 +1744,7 @@ export type Database = {
       }
       invite_signup_user_id: { Args: { p_token: string }; Returns: string }
       is_org_member: { Args: { org: string }; Returns: boolean }
+      is_platform_admin: { Args: never; Returns: boolean }
       is_supplier_of: {
         Args: { p_reseller_id: string; p_supplier_id: string }
         Returns: boolean
@@ -2095,6 +2176,36 @@ export type Database = {
         Args: { org_a: string; org_b: string }
         Returns: boolean
       }
+      submit_report: {
+        Args: {
+          p_description?: string
+          p_reason: Database["public"]["Enums"]["report_reason"]
+          p_target_id: string
+          p_target_type: Database["public"]["Enums"]["report_target"]
+        }
+        Returns: {
+          created_at: string
+          description: string | null
+          id: string
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_org_id: string
+          reporter_user_id: string | null
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_org_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reports"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       submit_review: {
         Args: {
           p_comment?: string
@@ -2213,6 +2324,15 @@ export type Database = {
       organization_type: "FACTORY" | "RESELLER" | "PLATFORM"
       payment_method: "PIX" | "CARTAO" | "DINHEIRO"
       payment_status: "PENDING" | "PAID" | "FAILED" | "EXPIRED" | "REFUNDED"
+      report_reason:
+        | "SPAM"
+        | "FRAUDE"
+        | "PRODUTO_FALSIFICADO"
+        | "CONTEUDO_INADEQUADO"
+        | "ASSEDIO"
+        | "OUTRO"
+      report_status: "OPEN" | "DISMISSED" | "ACTIONED"
+      report_target: "OFFER" | "NEGOTIATION" | "ORGANIZATION"
       sale_status: "CONFIRMED" | "CANCELLED"
       supply_order_status:
         | "PENDING"
@@ -2407,6 +2527,16 @@ export const Constants = {
       organization_type: ["FACTORY", "RESELLER", "PLATFORM"],
       payment_method: ["PIX", "CARTAO", "DINHEIRO"],
       payment_status: ["PENDING", "PAID", "FAILED", "EXPIRED", "REFUNDED"],
+      report_reason: [
+        "SPAM",
+        "FRAUDE",
+        "PRODUTO_FALSIFICADO",
+        "CONTEUDO_INADEQUADO",
+        "ASSEDIO",
+        "OUTRO",
+      ],
+      report_status: ["OPEN", "DISMISSED", "ACTIONED"],
+      report_target: ["OFFER", "NEGOTIATION", "ORGANIZATION"],
       sale_status: ["CONFIRMED", "CANCELLED"],
       supply_order_status: [
         "PENDING",
