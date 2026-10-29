@@ -45,7 +45,12 @@ type IconName =
   | "warning"
   | "logout"
   | "sun"
-  | "moon";
+  | "moon"
+  | "location_on"
+  | "star"
+  | "flag"
+  | "shield"
+  | "block";
 
 const PATHS: Record<IconName, React.ReactNode> = {
   account_balance: <path d="M3 10h18M12 3l9 5H3l9-5ZM5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18" />,
@@ -231,6 +236,33 @@ const PATHS: Record<IconName, React.ReactNode> = {
     </>
   ),
   moon: <path d="M20 13.5A8 8 0 1 1 10.5 4a6.5 6.5 0 0 0 9.5 9.5Z" />,
+  location_on: (
+    <>
+      <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </>
+  ),
+  star: (
+    <path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9L12 3.5Z" />
+  ),
+  flag: (
+    <>
+      <path d="M5 21V4" />
+      <path d="M5 4h11l-2 4 2 4H5" />
+    </>
+  ),
+  shield: (
+    <>
+      <path d="M12 3 4.5 6v5.5c0 4.5 3.2 8.2 7.5 9.5 4.3-1.3 7.5-5 7.5-9.5V6L12 3Z" />
+      <path d="m9 12 2 2 4-4" />
+    </>
+  ),
+  block: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="m6 6 12 12" />
+    </>
+  ),
 };
 
 // Backward-compatible aliases for names used across the codebase.

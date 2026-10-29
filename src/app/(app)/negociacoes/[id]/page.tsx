@@ -16,7 +16,8 @@ import type {
 } from "@/features/negotiations/state-machine";
 import { PageHeader } from "@/components/molecules/page-header";
 import { ActionForm, SubmitButton } from "@/components/molecules/action-form";
-import { Badge } from "@/components/atoms";
+import Link from "next/link";
+import { Badge, Icon } from "@/components/atoms";
 import { formatBRL } from "@/lib/utils/currency";
 import { NEGOTIATION_STATUS } from "@/lib/i18n/labels";
 
@@ -46,6 +47,11 @@ export default async function NegotiationDetailPage({
   if (!result?.negotiation) notFound();
   const { negotiation: n, product, events, party } = result;
 
+  const counterparty =
+    party === "seller"
+      ? { id: n.buyer_org_id, name: n.buyer?.name }
+      : { id: n.seller_org_id, name: n.seller?.name };
+
   const available = ACTIONS.filter(
     (a) => !(transition(n.status as NegotiationStatus, a.action, party as Party) instanceof Error),
   );
@@ -62,6 +68,15 @@ export default async function NegotiationDetailPage({
           </Badge>
         }
       />
+
+      {/* VES-65 — who she is dealing with. */}
+      <Link
+        href={`/rede/revendedoras/${counterparty.id}`}
+        className="inline-flex items-center gap-1 font-body-md text-body-md font-semibold text-primary-container hover:underline"
+      >
+        <Icon name="person" size={16} />
+        Ver perfil de {counterparty.name ?? "outra parte"}
+      </Link>
 
       <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-lg shadow-surface">
         <NegotiationProductSummary product={product} size={64} />
@@ -123,7 +138,7 @@ export default async function NegotiationDetailPage({
       <NegotiationChat
         negotiationId={n.id}
         currentUserId={userId}
-        counterpartyName={(party === "seller" ? n.buyer?.name : n.seller?.name) ?? "Outra parte"}
+        counterpartyName={counterparty.name ?? "Outra parte"}
         initialEvents={events.map(toChatEvent)}
         open={!["REJECTED", "CANCELLED", "COMPLETED"].includes(n.status)}
       />

@@ -69,7 +69,17 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
           {formatBRL(offer.price)}
         </p>
         <p className="mt-2 font-body-md text-body-md text-on-surface-variant">
-          {offer.sellerName} · {offer.remaining} disponíve
+          {isMine ? (
+            offer.sellerName
+          ) : (
+            <Link
+              href={`/rede/revendedoras/${offer.sellerId}`}
+              className="font-semibold text-primary-container hover:underline"
+            >
+              {offer.sellerName}
+            </Link>
+          )}{" "}
+          · {offer.remaining} disponíve
           {offer.remaining === 1 ? "l" : "is"}
         </p>
         {offer.note && (
