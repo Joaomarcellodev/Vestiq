@@ -250,6 +250,68 @@ export type Database = {
           },
         ]
       }
+      moderation_actions: {
+        Row: {
+          action: Database["public"]["Enums"]["moderation_action"]
+          actor_id: string | null
+          created_at: string
+          id: string
+          offer_id: string | null
+          reason: string
+          report_id: string | null
+          target_org_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["moderation_action"]
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          offer_id?: string | null
+          reason: string
+          report_id?: string | null
+          target_org_id: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["moderation_action"]
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          offer_id?: string | null
+          reason?: string
+          report_id?: string | null
+          target_org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_actions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_actions_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_actions_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_actions_target_org_id_fkey"
+            columns: ["target_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       negotiation_events: {
         Row: {
           actor_id: string | null
@@ -614,6 +676,8 @@ export type Database = {
           id: string
           name: string
           status: Database["public"]["Enums"]["organization_status"]
+          suspended_at: string | null
+          suspension_reason: string | null
           type: Database["public"]["Enums"]["organization_type"]
           updated_at: string
         }
@@ -623,6 +687,8 @@ export type Database = {
           id?: string
           name: string
           status?: Database["public"]["Enums"]["organization_status"]
+          suspended_at?: string | null
+          suspension_reason?: string | null
           type: Database["public"]["Enums"]["organization_type"]
           updated_at?: string
         }
@@ -632,6 +698,8 @@ export type Database = {
           id?: string
           name?: string
           status?: Database["public"]["Enums"]["organization_status"]
+          suspended_at?: string | null
+          suspension_reason?: string | null
           type?: Database["public"]["Enums"]["organization_type"]
           updated_at?: string
         }
@@ -1696,6 +1764,14 @@ export type Database = {
         Returns: undefined
       }
       format_brl: { Args: { p_value: number }; Returns: string }
+      get_my_suspension: {
+        Args: never
+        Returns: {
+          organization_name: string
+          reason: string
+          suspended_at: string
+        }[]
+      }
       get_network_invite: {
         Args: { p_token: string }
         Returns: {
@@ -1770,6 +1846,31 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      list_moderation_reports: {
+        Args: {
+          p_report_id?: string
+          p_status?: Database["public"]["Enums"]["report_status"]
+        }
+        Returns: {
+          created_at: string
+          description: string
+          id: string
+          open_reports_on_org: number
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_org_name: string
+          resolution_note: string
+          resolved_at: string
+          status: Database["public"]["Enums"]["report_status"]
+          target_active: boolean
+          target_id: string
+          target_label: string
+          target_org_id: string
+          target_org_name: string
+          target_org_status: Database["public"]["Enums"]["organization_status"]
+          target_org_suspension_reason: string
+          target_type: Database["public"]["Enums"]["report_target"]
+        }[]
+      }
       list_negotiation_products: {
         Args: { p_negotiation_id?: string }
         Returns: {
@@ -1838,6 +1939,35 @@ export type Database = {
           status: Database["public"]["Enums"]["offer_status"]
           transfer_price: number
         }[]
+      }
+      moderate_report: {
+        Args: {
+          p_action: Database["public"]["Enums"]["moderation_action"]
+          p_reason: string
+          p_report_id: string
+        }
+        Returns: {
+          created_at: string
+          description: string | null
+          id: string
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_org_id: string
+          reporter_user_id: string | null
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_org_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reports"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       negotiation_transition: {
         Args: { p_action: string; p_message?: string; p_negotiation_id: string }
@@ -2172,6 +2302,10 @@ export type Database = {
         Args: { p_city: string; p_org_id: string }
         Returns: undefined
       }
+      set_organization_suspension: {
+        Args: { p_org_id: string; p_reason: string; p_suspended: boolean }
+        Returns: undefined
+      }
       shares_network: {
         Args: { org_a: string; org_b: string }
         Returns: boolean
@@ -2284,6 +2418,11 @@ export type Database = {
         | "TRANSFERENCIA_SAIDA"
       member_role: "PLATFORM_ADMIN" | "FACTORY_ADMIN" | "RESELLER"
       member_status: "ACTIVE" | "INVITED" | "DISABLED"
+      moderation_action:
+        | "DISMISS_REPORT"
+        | "REMOVE_OFFER"
+        | "SUSPEND_ORGANIZATION"
+        | "REACTIVATE_ORGANIZATION"
       negotiation_event_type:
         | "CREATED"
         | "MESSAGE"
@@ -2483,6 +2622,12 @@ export const Constants = {
       ],
       member_role: ["PLATFORM_ADMIN", "FACTORY_ADMIN", "RESELLER"],
       member_status: ["ACTIVE", "INVITED", "DISABLED"],
+      moderation_action: [
+        "DISMISS_REPORT",
+        "REMOVE_OFFER",
+        "SUSPEND_ORGANIZATION",
+        "REACTIVATE_ORGANIZATION",
+      ],
       negotiation_event_type: [
         "CREATED",
         "MESSAGE",
